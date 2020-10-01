@@ -43,6 +43,19 @@ std::vector<int> Sudoku::get_block(int b) //will get a block by number (left to 
     return get_block(r, c);
 }
 
+void Sudoku::initialize_options()
+{
+    for (int r = 0; r < 9; r++) //initialize options
+    {
+        std::unordered_set<int> defaultoptions = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        std::vector<std::unordered_set<int>> row;
+        for (int c = 0; c < 9; c++)
+        {
+            row.push_back(defaultoptions);
+        }
+        allOptions.push_back(row);
+    }
+}
 std::unordered_set<int> Sudoku::get_options(int r, int c)
 {
     if (puzzle[r][c] != 0)
@@ -270,6 +283,7 @@ void Sudoku::set_puzzle(std::vector<std::vector<int>> puzzle)
 void Sudoku::set_puzzle(std::string puzzleString)
 {
     solved = false; //because we don't know if the new puzzle is solved, set it to false.
+    std::vector<std::vector<int>> newPuzzle;
     for (int r = 0; r < 9; r++)
     {
         std::vector<int> row;
@@ -277,16 +291,19 @@ void Sudoku::set_puzzle(std::string puzzleString)
         {
             row.push_back((int)puzzleString[r * 9 + c] - '0'); //converts char to int and puts it in the row
         }
-        puzzle.push_back(row);
+        newPuzzle.push_back(row);
     }
+    puzzle = newPuzzle;
 }
 
 void Sudoku::print_puzzle()
 {
     for (int r = 0; r < 9; r++)
     {
+        if (r%3==0 and r != 0) std::cout << "---------------------" << std::endl;
         for (int c = 0; c < 9; c++)
         {
+            if (c%3==0 and c != 0) std::cout << "| ";
             std::cout << puzzle[r][c] << " ";
         }
         std::cout << std::endl;
@@ -337,27 +354,18 @@ void Sudoku::solve()
 
 Sudoku::Sudoku()
 {
-    for (int r = 0; r < 9; r++) //initialize options
-    {
-        std::unordered_set<int> defaultoptions = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        std::vector<std::unordered_set<int>> row;
-        for (int c = 0; c < 9; c++)
-        {
-            row.push_back(defaultoptions);
-        }
-        allOptions.push_back(row);
-    }
+    initialize_options();
 }
 
 Sudoku::Sudoku(std::vector<std::vector<int>> puzzle)
 {
-    Sudoku();
+    initialize_options();
     this->puzzle = puzzle;
 }
 
 Sudoku::Sudoku(std::string puzzleString)
 {
-    Sudoku();
+    initialize_options();
     set_puzzle(puzzleString);
 }
 

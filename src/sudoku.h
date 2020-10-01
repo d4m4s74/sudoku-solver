@@ -14,6 +14,7 @@ class Sudoku
     std::vector<int> get_col(int c);
     std::vector<int> get_block(int r, int c);
     std::vector<int> get_block(int b);   
+    void initialize_options();
     std::unordered_set<int> get_options(int r, int c);
     void update_options();
     void update_options(int r, int c);
