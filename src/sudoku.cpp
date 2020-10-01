@@ -169,7 +169,7 @@ bool Sudoku::bruteforce(int r, int c)
         }
         else
             c++;
-        if (r == 9)
+        if (r > 8)
             return true; //if you find the end of the puzzle before a zero, return true.
     }
     if (c == 8) //calculate the next piece
@@ -178,7 +178,10 @@ bool Sudoku::bruteforce(int r, int c)
         r2 = r + 1;
     }
     else
+    {
+        r2 = r;
         c2 = c + 1;
+    }
     std::unordered_set<int> options = get_options(r, c);
     if (options.size() == 0)
         return false; //if there are no options something must have gone wrong before. return false

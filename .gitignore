@@ -7,3 +7,5 @@
 .history/
 debug/*
 
+bin/main.o
+bin/sudoku.o
