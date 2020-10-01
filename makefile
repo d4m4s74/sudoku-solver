@@ -9,4 +9,4 @@ bin\sudoku.o: src\sudoku.cpp src\sudoku.h
 clean:
 	rm -f bin\*.o bin\sudoku
 debug: 
-	g++ -g src\main.cpp src\sudoku.cpp -o bin\sudoku
+	g++ -g src\main.cpp src\sudoku.cpp -o debug\sudoku
