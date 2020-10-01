@@ -9,4 +9,4 @@ bin\sudoku.o: src\sudoku.cpp src\sudoku.h
 clean:
 	del  bin\*.o bin\*.exe >nul 2>&1
 debug: 
-	g++ -g src\main.cpp src\sudoku.cpp -o bin\sudoku.exe
+	g++ -g src\main.cpp src\sudoku.cpp -o debug\sudoku.exe
