@@ -303,10 +303,12 @@ void Sudoku::print_puzzle()
 {
     for (int r = 0; r < 9; r++)
     {
-        if (r%3==0 and r != 0) std::cout << "---------------------" << std::endl;
+        if (r % 3 == 0 and r != 0)
+            std::cout << "---------------------" << std::endl;
         for (int c = 0; c < 9; c++)
         {
-            if (c%3==0 and c != 0) std::cout << "| ";
+            if (c % 3 == 0 and c != 0)
+                std::cout << "| ";
             std::cout << puzzle[r][c] << " ";
         }
         std::cout << std::endl;

@@ -95,7 +95,7 @@ std::string getFileName(const std::string &s)
 void helptext(char **argv)
 {
     std::string filename = getFileName(argv[0]);
-    std::cout<< "usage: " << std::endl;
+    std::cout << "usage: " << std::endl;
     std::cout << "\t" << filename << " [options] inputfile [outputfile]" << std::endl;
     std::cout << "\t" << filename << " [options] puzzle" << std::endl;
     std::cout << "options:" << std::endl;
