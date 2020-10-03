@@ -350,7 +350,7 @@ void Sudoku::solve()
 {
     if (solve_comparison())
         return;
-    std::cout << "Solve failed, brute forcing:" << toString() << std::endl;
+    //std::cout << "Solve failed, brute forcing:" << toString() << std::endl;
     backtrack();
 }
 
