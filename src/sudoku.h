@@ -24,7 +24,7 @@ class Sudoku
     std::vector<std::unordered_set<int>> get_options_col_except(int r, int c);
     std::vector<std::unordered_set<int>> get_options_block(int r, int c);
     std::vector<std::unordered_set<int>> get_options_block_except(int r, int c);
-    bool bruteforce(int r = 0, int c = 0);   
+    bool backtrack(int r = 0, int c = 0);   
     bool solve_comparison();
 
     public:

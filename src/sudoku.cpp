@@ -154,7 +154,7 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r, int
     return block;
 }
 
-bool Sudoku::bruteforce(int r, int c)
+bool Sudoku::backtrack(int r, int c)
 {
     if (r == 9)
         return true; //returns true if you've finished the last row
@@ -188,7 +188,7 @@ bool Sudoku::bruteforce(int r, int c)
     for (int o : options)
     {
         puzzle[r][c] = o; //set the square to one of the options
-        if (bruteforce(r2, c2) == true)
+        if (backtrack(r2, c2) == true)
             return true;
         puzzle[r][c] = 0; //return the square to 0;
     }
@@ -354,7 +354,7 @@ void Sudoku::solve()
     if (solve_comparison())
         return;
     //std::cout << "Solve failed, brute forcing" << std::endl;
-    bruteforce();
+    backtrack();
 }
 
 Sudoku::Sudoku()

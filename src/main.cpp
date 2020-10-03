@@ -17,7 +17,7 @@ int solve_file(std::string inputfile, std::string outputfile)
         input >> cases;
         Sudoku sudoku;
         for (int i = 0; i < cases; i++)
-        {
+        {   
             input >> sudoku;
             sudoku.solve();
             output << sudoku << std::endl;
