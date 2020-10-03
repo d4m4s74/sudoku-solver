@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "sudoku.h"
 
+//next to add: naked pairs/triples
 std::vector<int> Sudoku::get_row(int r)
 {
     return puzzle[r];
@@ -195,6 +196,27 @@ bool Sudoku::backtrack(int r, int c)
     return false;
 }
 
+std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int> left, std::unordered_set<int> right)
+{
+    for (auto item : right)
+        {
+            left.erase(item);
+        } 
+    return left;
+}
+
+std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int> left, std::vector<std::unordered_set<int>> right)
+{
+    for (auto set : right)
+    {
+        for (auto item : set)
+            {
+                left.erase(item);
+            }
+    }
+    return left;  
+}
+
 bool Sudoku::solve_comparison()
 {
     update_options();
@@ -216,15 +238,8 @@ bool Sudoku::solve_comparison()
                     changed = true;
                     continue;
                 }
-                std::unordered_set<int> uniqueOptions = options;
-                std::vector<std::unordered_set<int>> optionsRow = get_options_row_except(r, c);
-                for (auto os : optionsRow)
-                {
-                    for (auto o : os)
-                    {
-                        uniqueOptions.erase(o);
-                    }
-                }
+
+                std::unordered_set<int> uniqueOptions = unordered_set_difference(options,get_options_row_except(r, c));
                 if (uniqueOptions.size() == 1)
                 {
                     puzzle[r][c] = *begin(uniqueOptions);
@@ -232,16 +247,7 @@ bool Sudoku::solve_comparison()
                     changed = true;
                     continue;
                 }
-
-                uniqueOptions = options;
-                std::vector<std::unordered_set<int>> optionsCol = get_options_col_except(r, c);
-                for (auto os : optionsCol)
-                {
-                    for (auto o : os)
-                    {
-                        uniqueOptions.erase(o);
-                    }
-                }
+                uniqueOptions = unordered_set_difference(options,get_options_col_except(r, c));
                 if (uniqueOptions.size() == 1)
                 {
                     puzzle[r][c] = *begin(uniqueOptions);
@@ -249,16 +255,7 @@ bool Sudoku::solve_comparison()
                     changed = true;
                     continue;
                 }
-
-                uniqueOptions = options;
-                std::vector<std::unordered_set<int>> optionsBlock = get_options_block_except(r, c);
-                for (auto os : optionsBlock)
-                {
-                    for (auto o : os)
-                    {
-                        uniqueOptions.erase(o);
-                    }
-                }
+                uniqueOptions = unordered_set_difference(options,get_options_block_except(r, c));
                 if (uniqueOptions.size() == 1)
                 {
                     puzzle[r][c] = *begin(uniqueOptions);
@@ -353,7 +350,7 @@ void Sudoku::solve()
 {
     if (solve_comparison())
         return;
-    //std::cout << "Solve failed, brute forcing" << std::endl;
+    std::cout << "Solve failed, brute forcing:" << toString() << std::endl;
     backtrack();
 }
 
