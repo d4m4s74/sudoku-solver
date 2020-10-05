@@ -199,9 +199,9 @@ bool Sudoku::backtrack(int r, int c)
 std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int> left, std::unordered_set<int> right)
 {
     for (auto item : right)
-        {
-            left.erase(item);
-        } 
+    {
+        left.erase(item);
+    }
     return left;
 }
 
@@ -210,23 +210,26 @@ std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int>
     for (auto set : right)
     {
         for (auto item : set)
-            {
-                left.erase(item);
-            }
+        {
+            left.erase(item);
+        }
     }
-    return left;  
+    return left;
 }
 
-bool Sudoku::check_solved_cells(){
-    std::vector<std::vector<int>> puzzleCopy = puzzle; //make working copy
+bool Sudoku::check_solved_cells()
+{
+    std::vector<std::vector<int>> puzzleCopy = puzzle;                             //make working copy
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //make a working copy
     bool found = false;
-    for(int r = 0; r < 9; r++)
+    for (int r = 0; r < 9; r++)
     {
-        for(int c = 0; c < 9; c++)
+        for (int c = 0; c < 9; c++)
         {
-            if (puzzle[r][c] == 0){ //if the square is not yet solved
-                if (allOptions[r][c].size() ==  1){ //and thereś only one option
+            if (puzzle[r][c] == 0)
+            { //if the square is not yet solved
+                if (allOptions[r][c].size() == 1)
+                { //and there's only one option
                     found = true;
                     int n = *allOptions[r][c].begin(); //get that option
                     //std::cout << "solved cell " << r << "," << c << "=" << n << std::endl;
@@ -234,24 +237,24 @@ bool Sudoku::check_solved_cells(){
                     //remove it from the squares this square sees
                     for (int i = 0; i < 9; i++)
                     {
-                        if (i != c){ //remove n from every place in the row except te piece itself
+                        if (i != c)
+                        { //remove n from every place in the row except te piece itself
                             allOptionsCopy[r][i].erase(n);
                         }
-                        if (i != r){ //same for the column
+                        if (i != r)
+                        { //same for the column
                             allOptionsCopy[i][c].erase(n);
                         }
-                        
                     }
-                    int r0 = r/3*3; //find the top row of the block (abusing int truncation)
-                    int c0 = c/3*3; //find left column of the block
-                    for(int y = r0; y < r0+3; y++)
+                    int r0 = r / 3 * 3; //find the top row of the block (abusing int truncation)
+                    int c0 = c / 3 * 3; //find left column of the block
+                    for (int y = r0; y < r0 + 3; y++)
                     {
-                        for(int x = c0; x < c0+3; x++)
+                        for (int x = c0; x < c0 + 3; x++)
                         {
-                            if(!(r==y and c==x)) //if it isn't the square itself remove n
+                            if (!(r == y and c == x)) //if it isn't the square itself remove n
                             {
-                                    allOptionsCopy[y][x].erase(n);
-
+                                allOptionsCopy[y][x].erase(n);
                             }
                         }
                     }
@@ -268,30 +271,31 @@ bool Sudoku::hidden_singles()
 {
     bool found = false;
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //make a working copy
-    for(int r = 0; r < 9; r++)
+    for (int r = 0; r < 9; r++)
     {
-        for(int c = 0; c < 9; c++)
+        for (int c = 0; c < 9; c++)
         {
-            if (puzzle[r][c] == 0){ //if the square is not yet solved
-                std::unordered_set<int> options = allOptions[r][c]; //get the options
-                std::unordered_set<int> uniqueOptions = unordered_set_difference(options,get_options_row_except(r, c)); //find if thereś an unique option
-                if (uniqueOptions.size() == 1) //if so
+            if (puzzle[r][c] == 0)
+            {                                                                                                            //if the square is not yet solved
+                std::unordered_set<int> options = allOptions[r][c];                                                      //get the options
+                std::unordered_set<int> uniqueOptions = unordered_set_difference(options, get_options_row_except(r, c)); //find if there's an unique option
+                if (uniqueOptions.size() == 1)                                                                           //if so
                 {
                     found = true;
                     //std::cout << "found hidden single" << std::endl;
                     allOptionsCopy[r][c] = {*uniqueOptions.begin()}; //replace options with just the number;
                     continue;
                 }
-                uniqueOptions = unordered_set_difference(options,get_options_col_except(r, c)); //find if thereś an unique option
-                if (uniqueOptions.size() == 1) //if so
+                uniqueOptions = unordered_set_difference(options, get_options_col_except(r, c)); //find if there's an unique option
+                if (uniqueOptions.size() == 1)                                                   //if so
                 {
                     found = true;
                     //std::cout << "found hidden single" << std::endl;
                     allOptionsCopy[r][c] = {*uniqueOptions.begin()}; //replace options with just the number;
                     continue;
                 }
-                uniqueOptions = unordered_set_difference(options,get_options_block_except(r, c)); //find if thereś an unique option
-                if (uniqueOptions.size() == 1) //if so
+                uniqueOptions = unordered_set_difference(options, get_options_block_except(r, c)); //find if there's an unique option
+                if (uniqueOptions.size() == 1)                                                     //if so
                 {
                     found = true;
                     //std::cout << "found hidden single" << std::endl;
@@ -305,7 +309,6 @@ bool Sudoku::hidden_singles()
 
     return found;
 }
-
 
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
@@ -392,23 +395,24 @@ void Sudoku::solve()
     do
     {
         changed = false;
-        if (check_solved_cells()){
+        if (check_solved_cells())
+        {
             changed = true;
             //print_puzzle(); //copy of puzzle for debugging
             continue; //if anything is found, go back to the beginning to check again
         }
-        if (hidden_singles()){
+        if (hidden_singles())
+        {
             changed = true;
             continue;
         }
 
     } while (changed == true);
-    if(!is_solved())
+    if (!is_solved())
     {
         //std::cout << "not solved using implemented checks. Resorting to backtracking";
         backtrack();
     }
-    
 }
 
 Sudoku::Sudoku()
