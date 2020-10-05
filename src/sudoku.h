@@ -29,6 +29,7 @@ class Sudoku
     bool backtrack(int r = 0, int c = 0);   
     bool check_solved_cells();
     bool hidden_singles();
+    bool naked_pairs();
 
     public:
         std::vector<std::vector<int>> get_puzzle();

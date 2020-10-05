@@ -310,6 +310,58 @@ bool Sudoku::hidden_singles()
     return found;
 }
 
+bool Sudoku::naked_pairs()
+{
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy;
+    bool found = false;
+    for (int i = 0; 1 < 9; i++) //doing both rows and cols in one loop
+    {
+        std::vector<std::unordered_set<int>> optionsRow = get_options_row(i);
+        for (int j = 0; j < 8; j++) //only have to check up to the second to last
+        {
+            if (optionsRow[j].size() == 2){ //if there are two options exactly
+                if (std::find(optionsRow.begin()+j+1,optionsRow.end(),optionsRow[j]) != optionsRow.end()) //if you find a second set with the exact same options
+                {
+                    int first = j; //index of the first pair, to make it easier to read
+                    int second = std::find(optionsRow.begin()+j+1,optionsRow.end(),optionsRow[j]) - optionsRow.begin(); //index of the second
+                    int r = i; //to make things easier to read, r for the row of the pair.
+                    for(int c = 0; c < 9; c++)
+                    {
+                        if (c != first and c != second)
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
+                            if (!found and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
+                        }
+                    }
+                }
+            }
+        }
+        std::vector<std::unordered_set<int>> optionsCol = get_options_col(i);
+        for (int j = 0; j < 8; j++) //only have to check up to the second to last
+        {
+            if (optionsCol[j].size() == 2){ //if there are two options exactly
+                if (std::find(optionsCol.begin()+j+1,optionsCol.end(),optionsCol[j]) != optionsCol.end()) //if you find a second set with the exact same options
+                {
+                    int first = j; //index of the first pair, to make it easier to read
+                    int second = std::find(optionsCol.begin()+j+1,optionsCol.end(),optionsCol[j]) - optionsCol.begin(); //index of the second
+                    int c = i; //to make things easier to read, c for the column of the pair.
+                    for(int r = 0; r < 9; r++)
+                    {
+                        if (r != first and r != second)
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
+                            if (!found and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
+                        }
+                    }
+                }
+            }
+        }
+        //todo: the same thing with blocks
+    }
+    allOptions = allOptionsCopy; //apply changes
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
