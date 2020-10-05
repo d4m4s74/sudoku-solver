@@ -397,7 +397,6 @@ void Sudoku::solve()
             //print_puzzle(); //copy of puzzle for debugging
             continue; //if anything is found, go back to the beginning to check again
         }
-        update_options(); //temporary to figure out why the options are wrong
         if (hidden_singles()){
             changed = true;
             continue;
