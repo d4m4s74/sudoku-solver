@@ -27,7 +27,8 @@ class Sudoku
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::unordered_set<int> right);
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::vector<std::unordered_set<int>> right);
     bool backtrack(int r = 0, int c = 0);   
-    bool solve_comparison();
+    bool check_solved_cells();
+    bool hidden_singles();
 
     public:
         std::vector<std::vector<int>> get_puzzle();
