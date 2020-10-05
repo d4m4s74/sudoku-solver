@@ -147,6 +147,13 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_block(int r, int c)
     return block;
 }
 
+std::vector<std::unordered_set<int>> Sudoku::get_options_block(int b) //will get a block by number (left to right, top to bottom, starting with 0. )
+{
+    int r = b / 3 * 3; //see other get_block for explanation Simply said, block 0, 1 and 2 give 0, 3, 4 and 5 give 3, 6, 7 and 8 give 6
+    int c = b % 3 * 3; //0, 3, 6 repeating.
+    return get_options_block(r, c);
+}
+
 std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r, int c)
 {
     std::vector<std::unordered_set<int>> block = get_options_block(r, c);
