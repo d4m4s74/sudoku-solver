@@ -274,7 +274,7 @@ bool Sudoku::check_solved_cells()
     return found;
 }
 
-bool Sudoku::hidden_singles()
+bool Sudoku::hidden_singles() //currently causes segfault
 {
     bool found = false;
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //make a working copy
@@ -319,7 +319,7 @@ bool Sudoku::hidden_singles()
 
 bool Sudoku::naked_pairs()
 {
-    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
     bool found = false;
     for (int i = 0; 1 < 9; i++) //doing both rows and cols in one loop
     {
@@ -356,14 +356,41 @@ bool Sudoku::naked_pairs()
                     {
                         if (r != first and r != second)
                         {
-                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[first][c]); //delete numbers in the pair from the rest of the row
                             if (!found and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
                         }
                     }
                 }
             }
         }
-        //todo: the same thing with blocks
+        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i);
+        for (int j = 0; j < 8; j++) //only have to check up to the second to last
+        {
+            if (optionsBlock[j].size() == 2){ //if there are two options exactly
+                if (std::find(optionsBlock.begin()+j+1,optionsBlock.end(),optionsBlock[j]) != optionsBlock.end()) //if you find a second set with the exact same options
+                {
+                    int first = j; //index of the first pair, to make it easier to read
+                    int second = std::find(optionsBlock.begin()+j+1,optionsBlock.end(),optionsBlock[j]) - optionsBlock.begin(); //index of the second
+                    int r0 = i / 3 * 3; 
+                    int c0 = i % 3 * 3;
+                    int r1 = r0+first/3;
+                    int c1 = c0+first%3;
+                    int r2 = r0+second/3;
+                    int c2 = c0+second%3;
+                    for(int r = r0; r < r0+3; r++)
+                    {
+                        for (int c = c0; c < c0+3; c++)
+                        {
+                            if (!(r == r1 and c == c1) and !(r == r2 and c == c2))
+                            {
+                                allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
+                                if (!found and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     allOptions = allOptionsCopy; //apply changes
     return found;
@@ -465,11 +492,16 @@ void Sudoku::solve()
             changed = true;
             continue;
         }
+        //if (naked_pairs())
+        //{
+        //    changed = true;
+        //    continue;
+        //}
 
     } while (changed == true);
     if (!is_solved())
     {
-        //std::cout << "not solved using implemented checks. Resorting to backtracking";
+        std::cout << "not solved using implemented checks. Resorting to backtracking";
         backtrack();
     }
 }
