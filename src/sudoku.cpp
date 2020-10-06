@@ -321,7 +321,7 @@ bool Sudoku::naked_pairs()
 {
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
     bool found = false;
-    for (int i = 0; 1 < 9; i++) //doing both rows and cols in one loop
+    for (int i = 0; i < 9; i++) //doing both rows and cols in one loop
     {
         std::vector<std::unordered_set<int>> optionsRow = get_options_row(i);
         for (int j = 0; j < 8; j++) //only have to check up to the second to last
@@ -337,7 +337,12 @@ bool Sudoku::naked_pairs()
                         if (c != first and c != second)
                         {
                             allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
-                            if (!found and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
+                            if (found == false and allOptionsCopy[r][c] != allOptions[r][c])
+                            {
+                                found = true; //if this had any effect set found to true
+                                //std::cout << "found naked pair: r: " << i << ", c: " << first << " and " << second << std::endl;
+                            } 
+                            
                         }
                     }
                 }
@@ -357,7 +362,10 @@ bool Sudoku::naked_pairs()
                         if (r != first and r != second)
                         {
                             allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[first][c]); //delete numbers in the pair from the rest of the row
-                            if (!found and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
+                            if (found == false and allOptionsCopy[r][c] != allOptions[r][c]){
+                                 found = true; //if this had any effect set found to true
+                                //std::cout << "found naked pair: c: " << i << ", r: " << first << " and " << second <<  std::endl;
+                            }
                         }
                     }
                 }
@@ -384,7 +392,7 @@ bool Sudoku::naked_pairs()
                             if (!(r == r1 and c == c1) and !(r == r2 and c == c2))
                             {
                                 allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
-                                if (!found and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
+                                if (found == false and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
                             }
                         }
                     }
@@ -392,8 +400,14 @@ bool Sudoku::naked_pairs()
             }
         }
     }
-    allOptions = allOptionsCopy; //apply changes
-    return found;
+    
+    if (found){ //because there's somehow false positives an extra check
+        if (allOptions != allOptionsCopy){
+            allOptions = allOptionsCopy; //apply changes
+            return true;
+        }
+    }
+    return false;
 }
 
 std::vector<std::vector<int>> Sudoku::get_puzzle()
@@ -492,16 +506,18 @@ void Sudoku::solve()
             changed = true;
             continue;
         }
-        //if (naked_pairs())
-        //{
-        //    changed = true;
-        //    continue;
-        //}
+        if (naked_pairs())
+        {
+//            std::cout << "found naked pair" << std::endl;
+            changed = true;
+            continue;
+        }
 
     } while (changed == true);
     if (!is_solved())
     {
-        std::cout << "not solved using implemented checks. Resorting to backtracking";
+//        print_puzzle();
+        std::cout << "not solved using implemented checks. Resorting to backtracking" << std::endl;
         backtrack();
     }
 }
