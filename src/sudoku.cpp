@@ -212,6 +212,15 @@ std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int>
     return left;
 }
 
+std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int> left, std::vector<int> right)
+{
+    for (auto item : right)
+    {
+        left.erase(item);
+    }
+    return left;
+}
+
 std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int> left, std::vector<std::unordered_set<int>> right)
 {
     for (auto set : right)
@@ -223,6 +232,8 @@ std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int>
     }
     return left;
 }
+
+
 
 bool Sudoku::check_solved_cells()
 {
@@ -326,23 +337,23 @@ bool Sudoku::naked_pairs()
         std::vector<std::unordered_set<int>> optionsRow = get_options_row(i);
         for (int j = 0; j < 8; j++) //only have to check up to the second to last
         {
-            if (optionsRow[j].size() == 2){ //if there are two options exactly
-                if (std::find(optionsRow.begin()+j+1,optionsRow.end(),optionsRow[j]) != optionsRow.end()) //if you find a second set with the exact same options
+            if (optionsRow[j].size() == 2)
+            {                                                                                                   //if there are two options exactly
+                if (std::find(optionsRow.begin() + j + 1, optionsRow.end(), optionsRow[j]) != optionsRow.end()) //if you find a second set with the exact same options
                 {
-                    int first = j; //index of the first pair, to make it easier to read
-                    int second = std::find(optionsRow.begin()+j+1,optionsRow.end(),optionsRow[j]) - optionsRow.begin(); //index of the second
-                    int r = i; //to make things easier to read, r for the row of the pair.
-                    for(int c = 0; c < 9; c++)
+                    int first = j;                                                                                            //index of the first pair, to make it easier to read
+                    int second = std::find(optionsRow.begin() + j + 1, optionsRow.end(), optionsRow[j]) - optionsRow.begin(); //index of the second
+                    int r = i;                                                                                                //to make things easier to read, r for the row of the pair.
+                    for (int c = 0; c < 9; c++)
                     {
                         if (c != first and c != second)
                         {
-                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], allOptions[r][first]); //delete numbers in the pair from the rest of the row
                             if (found == false and allOptionsCopy[r][c] != allOptions[r][c])
                             {
                                 found = true; //if this had any effect set found to true
                                 //std::cout << "found naked pair: r: " << i << ", c: " << first << " and " << second << std::endl;
-                            } 
-                            
+                            }
                         }
                     }
                 }
@@ -351,19 +362,21 @@ bool Sudoku::naked_pairs()
         std::vector<std::unordered_set<int>> optionsCol = get_options_col(i);
         for (int j = 0; j < 8; j++) //only have to check up to the second to last
         {
-            if (optionsCol[j].size() == 2){ //if there are two options exactly
-                if (std::find(optionsCol.begin()+j+1,optionsCol.end(),optionsCol[j]) != optionsCol.end()) //if you find a second set with the exact same options
+            if (optionsCol[j].size() == 2)
+            {                                                                                                   //if there are two options exactly
+                if (std::find(optionsCol.begin() + j + 1, optionsCol.end(), optionsCol[j]) != optionsCol.end()) //if you find a second set with the exact same options
                 {
-                    int first = j; //index of the first pair, to make it easier to read
-                    int second = std::find(optionsCol.begin()+j+1,optionsCol.end(),optionsCol[j]) - optionsCol.begin(); //index of the second
-                    int c = i; //to make things easier to read, c for the column of the pair.
-                    for(int r = 0; r < 9; r++)
+                    int first = j;                                                                                            //index of the first pair, to make it easier to read
+                    int second = std::find(optionsCol.begin() + j + 1, optionsCol.end(), optionsCol[j]) - optionsCol.begin(); //index of the second
+                    int c = i;                                                                                                //to make things easier to read, c for the column of the pair.
+                    for (int r = 0; r < 9; r++)
                     {
                         if (r != first and r != second)
                         {
-                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[first][c]); //delete numbers in the pair from the rest of the row
-                            if (found == false and allOptionsCopy[r][c] != allOptions[r][c]){
-                                 found = true; //if this had any effect set found to true
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], allOptions[first][c]); //delete numbers in the pair from the rest of the row
+                            if (found == false and allOptionsCopy[r][c] != allOptions[r][c])
+                            {
+                                found = true; //if this had any effect set found to true
                                 //std::cout << "found naked pair: c: " << i << ", r: " << first << " and " << second <<  std::endl;
                             }
                         }
@@ -374,25 +387,27 @@ bool Sudoku::naked_pairs()
         std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i);
         for (int j = 0; j < 8; j++) //only have to check up to the second to last
         {
-            if (optionsBlock[j].size() == 2){ //if there are two options exactly
-                if (std::find(optionsBlock.begin()+j+1,optionsBlock.end(),optionsBlock[j]) != optionsBlock.end()) //if you find a second set with the exact same options
+            if (optionsBlock[j].size() == 2)
+            {                                                                                                           //if there are two options exactly
+                if (std::find(optionsBlock.begin() + j + 1, optionsBlock.end(), optionsBlock[j]) != optionsBlock.end()) //if you find a second set with the exact same options
                 {
-                    int first = j; //index of the first pair, to make it easier to read
-                    int second = std::find(optionsBlock.begin()+j+1,optionsBlock.end(),optionsBlock[j]) - optionsBlock.begin(); //index of the second
-                    int r0 = i / 3 * 3; 
+                    int first = j;                                                                                                    //index of the first pair, to make it easier to read
+                    int second = std::find(optionsBlock.begin() + j + 1, optionsBlock.end(), optionsBlock[j]) - optionsBlock.begin(); //index of the second
+                    int r0 = i / 3 * 3;
                     int c0 = i % 3 * 3;
-                    int r1 = r0+first/3;
-                    int c1 = c0+first%3;
-                    int r2 = r0+second/3;
-                    int c2 = c0+second%3;
-                    for(int r = r0; r < r0+3; r++)
+                    int r1 = r0 + first / 3;
+                    int c1 = c0 + first % 3;
+                    int r2 = r0 + second / 3;
+                    int c2 = c0 + second % 3;
+                    for (int r = r0; r < r0 + 3; r++)
                     {
-                        for (int c = c0; c < c0+3; c++)
+                        for (int c = c0; c < c0 + 3; c++)
                         {
                             if (!(r == r1 and c == c1) and !(r == r2 and c == c2))
                             {
-                                allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c],allOptions[r][first]); //delete numbers in the pair from the rest of the row
-                                if (found == false and allOptionsCopy[r][c] != allOptions[r][c]) found = true; //if this had any effect set found to true
+                                allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], allOptions[r1][c1]); //delete numbers in the pair from the rest of the row
+                                if (found == false and allOptionsCopy[r][c] != allOptions[r][c])
+                                    found = true; //if this had any effect set found to true
                             }
                         }
                     }
@@ -400,9 +415,378 @@ bool Sudoku::naked_pairs()
             }
         }
     }
-    
-    if (found){ //because there's somehow false positives an extra check
-        if (allOptions != allOptionsCopy){
+
+    if (found)
+    { //because there's somehow false positives an extra check
+        if (allOptions != allOptionsCopy)
+        {
+            allOptions = allOptionsCopy; //apply changes
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Sudoku::naked_triples()
+{
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
+    bool found = false;
+    for (int i = 0; i < 9; i++)
+    {
+        std::vector<std::unordered_set<int>> optionsRow = get_options_row(i);
+        std::vector<std::unordered_set<int>> optionsCol = get_options_col(i);
+        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i);
+        std::unordered_set<int> ignore;
+        for (int j = 0; j < 9; j++) //have to go to the last one this time
+        {
+            //start with rows
+            if (optionsRow[j].size() == 3 and ignore.count(j) == 0) //easiest case, if there's a triple
+            {
+                int count = 1;
+                std::vector<int> cs; //vector with the col numbers/x coordinates of the members of the triple;
+                cs.push_back(j);
+                std::vector<std::unordered_set<int>> subsets;
+                std::vector<int> base;
+                for (int n : optionsRow[j])
+                    base.push_back(n); //moving the set into a vector because it's easier to work with individual values
+                subsets.push_back(optionsRow[j]);
+                subsets.push_back({base[0], base[1]});
+                subsets.push_back({base[0], base[2]});
+                subsets.push_back({base[1], base[2]});
+                for (int k; k < 9; k++)
+                {
+                    if (k != j and ignore.count(k) == 0 and (std::find(subsets.begin(), subsets.end(), optionsRow[k]) != subsets.end()))
+                    {
+                        count++;
+                        cs.push_back(k);
+                    }
+                }
+                if (count == 3) //we found a naked triple!
+                {
+                    ignore.emplace(cs[0]); //we don't have to check these again this loop
+                    ignore.emplace(cs[1]);
+                    ignore.emplace(cs[2]);
+                    int r = i; //just to make things a bit more readable
+                    for (int c = 0; c < 9; c++)
+                    {
+                        if (std::find(cs.begin(), cs.end(), c) == cs.end()) //if the c coordinate is not in the cs vector
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], base);
+                            if (found == false and allOptionsCopy[r][c] != allOptions[r][c]) //if there is any change
+                            {
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (optionsRow[j].size() == 2 and ignore.count(j) == 0) //for the harder 2*2*2 case
+            {
+                std::vector<int> s1, s2, s3; //the three sets of options. Using vectors so I can get the values separately
+                int search1, search2;
+                for (int o : optionsRow[j])
+                    s1.push_back(o); //putting the first set in a vector
+                search1 = s1[0];
+                search2 = s1[1];
+                std::vector<int> cs; //vector with the col numbers/x coordinates of the members of the triple;
+                cs.push_back(j);
+                for (int k = 0; k < 9; k++)
+                {
+                    if (k != j and optionsRow[k].size() == 2)
+                    {
+                        if (optionsRow[k].count(search1) == 1)
+                        {
+                            cs.push_back(k);
+                            for (int o : optionsRow[k])
+                                s2.push_back(o);
+                            search1 = (search1 == s2[0]) ? s2[1] : s2[0]; //replace search1 with the unused value of this pair
+                        }
+                        else if (optionsRow[k].count(search2) == 1)
+                        {
+                            cs.push_back(k);
+                            for (int o : optionsRow[k])
+                                s2.push_back(o);
+                            search2 = (search2 == s2[0]) ? s2[1] : s2[0]; //replace search1 with the unused value of this pair
+                        }
+                        if (cs.size() == 2)
+                        {
+                            for (int l = 0; l < 9; l++)
+                            {
+                                if (l != cs[0] and l != cs[1] and optionsRow[l].size() == 2)
+                                {
+                                    if (optionsRow[l].count(search1) == 1 and optionsRow[l].count(search2) == 1)
+                                    {
+                                        cs.push_back(l);
+                                        for (int o : optionsRow[l])
+                                            s3.push_back(o);
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (cs.size() == 3) //We found a naked triple!
+                {
+                    std::unordered_set<int> base = {s1[0],s1[1],s2[0],s2[1],s3[0],s3[1]}; //make a base set with all 3 values
+                    ignore.emplace(cs[0]); //we don't have to check these again this loop
+                    ignore.emplace(cs[1]);
+                    ignore.emplace(cs[2]);
+                    int r = i; //just to make things a bit more readable
+                    for (int c = 0; c < 9; c++)
+                    {
+                        if (std::find(cs.begin(), cs.end(), c) == cs.end()) //if the c coordinate is not in the cs vector
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], base);
+                            if (found == false and allOptionsCopy[r][c] != allOptions[r][c]) //if there is any change
+                            {
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+            ignore.clear(); //empty ignore to check cols
+            //next up: cols
+            if (optionsCol[j].size() == 3 and ignore.count(j) == 0) //easiest case, if there's a triple
+            {
+                int count = 1;
+                std::vector<int> cs; //vector with the col numbers/x coordinates of the members of the triple;
+                cs.push_back(j);
+                std::vector<std::unordered_set<int>> subsets;
+                std::vector<int> base;
+                for (int n : optionsCol[j])
+                    base.push_back(n); //moving the set into a vector because it's easier to work with individual values
+                subsets.push_back(optionsCol[j]);
+                subsets.push_back({base[0], base[1]});
+                subsets.push_back({base[0], base[2]});
+                subsets.push_back({base[1], base[2]});
+                for (int k; k < 9; k++)
+                {
+                    if (k != j and ignore.count(k) == 0 and (std::find(subsets.begin(), subsets.end(), optionsCol[k]) != subsets.end()))
+                    {
+                        count++;
+                        cs.push_back(k);
+                    }
+                }
+                if (count == 3) //we found a naked triple!
+                {
+                    ignore.emplace(cs[0]); //we don't have to check these again this loop
+                    ignore.emplace(cs[1]);
+                    ignore.emplace(cs[2]);
+                    int c = i; //just to make things a bit more readable
+                    for (int r = 0; r < 9; r++)
+                    {
+                        if (std::find(cs.begin(), cs.end(), r) == cs.end()) //if the c coordinate is not in the cs vector
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], base);
+                            if (found == false and allOptionsCopy[r][c] != allOptions[r][c]) //if there is any change
+                            {
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (optionsCol[j].size() == 2 and ignore.count(j) == 0) //for the harder 2*2*2 case
+            {
+                std::vector<int> s1, s2, s3; //the three sets of options. Using vectors so I can get the values separately
+                int search1, search2;
+                for (int o : optionsCol[j])
+                    s1.push_back(o); //putting the first set in a vector
+                search1 = s1[0];
+                search2 = s1[1];
+                std::vector<int> cs; //vector with the col numbers/x coordinates of the members of the triple;
+                cs.push_back(j);
+                for (int k = 0; k < 9; k++)
+                {
+                    if (k != j and optionsCol[k].size() == 2)
+                    {
+                        if (optionsCol[k].count(search1) == 1)
+                        {
+                            cs.push_back(k);
+                            for (int o : optionsCol[k])
+                                s2.push_back(o);
+                            search1 = (search1 == s2[0]) ? s2[1] : s2[0]; //replace search1 with the unused value of this pair
+                        }
+                        else if (optionsCol[k].count(search2) == 1)
+                        {
+                            cs.push_back(k);
+                            for (int o : optionsCol[k])
+                                s2.push_back(o);
+                            search2 = (search2 == s2[0]) ? s2[1] : s2[0]; //replace search1 with the unused value of this pair
+                        }
+                        if (cs.size() == 2)
+                        {
+                            for (int l = 0; l < 9; l++)
+                            {
+                                if (l != cs[0] and l != cs[1] and optionsCol[l].size() == 2)
+                                {
+                                    if (optionsCol[l].count(search1) == 1 and optionsCol[l].count(search2) == 1)
+                                    {
+                                        cs.push_back(l);
+                                        for (int o : optionsCol[l])
+                                            s3.push_back(o);
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (cs.size() == 3) //We found a naked triple!
+                {
+                    std::unordered_set<int> base = {s1[0],s1[1],s2[0],s2[1],s3[0],s3[1]}; //make a base set with all 3 values
+                    ignore.emplace(cs[0]); //we don't have to check these again this loop
+                    ignore.emplace(cs[1]);
+                    ignore.emplace(cs[2]);
+                    int c = i; //just to make things a bit more readable
+                    for (int r = 0; r < 9; r++)
+                    {
+                        if (std::find(cs.begin(), cs.end(), r) == cs.end()) //if the c coordinate is not in the cs vector
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], base);
+                            if (allOptionsCopy[r][c] != allOptions[r][c]) //if there is any change
+                            {
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+            ignore.clear(); //empty ignore to check blocks
+            //next up: blocks
+            if (optionsBlock[j].size() == 3 and ignore.count(j) == 0) //easiest case, if there's a triple
+            {
+                int count = 1;
+                std::vector<int> cs; //vector with the col numbers/x coordinates of the members of the triple;
+                cs.push_back(j);
+                std::vector<std::unordered_set<int>> subsets;
+                std::vector<int> base;
+                for (int n : optionsBlock[j])
+                    base.push_back(n); //moving the set into a vector because it's easier to work with individual values
+                subsets.push_back(optionsBlock[j]);
+                subsets.push_back({base[0], base[1]});
+                subsets.push_back({base[0], base[2]});
+                subsets.push_back({base[1], base[2]});
+                for (int k; k < 9; k++)
+                {
+                    if (k != j and ignore.count(k) == 0 and (std::find(subsets.begin(), subsets.end(), optionsBlock[k]) != subsets.end()))
+                    {
+                        count++;
+                        cs.push_back(k);
+                    }
+                }
+                if (count == 3) //we found a naked triple!
+                {
+                    ignore.emplace(cs[0]); //we don't have to check these again this loop
+                    ignore.emplace(cs[1]);
+                    ignore.emplace(cs[2]);
+                    int r0 = i / 3 * 3;
+                    int c0 = i % 3 * 3;
+                    int r1 = r0 + cs[0] / 3;
+                    int c1 = c0 + cs[0] % 3;
+                    int r2 = r0 + cs[1] / 3;
+                    int c2 = c0 + cs[1] % 3;
+                    int r3 = r0 + cs[2] / 3;
+                    int c3 = c0 + cs[2] % 3;
+                    for (int r = r0; r < r0 + 3; r++)
+                    {
+                        for (int c = c0; c < c0 + 3; c++)
+                        {
+                            if (!(r == r1 and c == c1) and !(r == r2 and c == c2)and !(r == r3 and c == c3))
+                            {
+                                allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], base); //delete numbers in the pair from the rest of the row
+                                if (found == false and allOptionsCopy[r][c] != allOptions[r][c])
+                                    found = true; //if this had any effect set found to true
+                            }
+                        }
+                    }
+                }
+            }
+            else if (optionsBlock[j].size() == 2 and ignore.count(j) == 0) //for the harder 2*2*2 case
+            {
+                std::vector<int> s1, s2, s3; //the three sets of options. Using vectors so I can get the values separately
+                int search1, search2;
+                for (int o : optionsBlock[j])
+                    s1.push_back(o); //putting the first set in a vector
+                search1 = s1[0];
+                search2 = s1[1];
+                std::vector<int> cs; //vector with the col numbers/x coordinates of the members of the triple;
+                cs.push_back(j);
+                for (int k = 0; k < 9; k++)
+                {
+                    if (k != j and optionsBlock[k].size() == 2)
+                    {
+                        if (optionsBlock[k].count(search1) == 1)
+                        {
+                            cs.push_back(k);
+                            for (int o : optionsBlock[k])
+                                s2.push_back(o);
+                            search1 = (search1 == s2[0]) ? s2[1] : s2[0]; //replace search1 with the unused value of this pair
+                        }
+                        else if (optionsBlock[k].count(search2) == 1)
+                        {
+                            cs.push_back(k);
+                            for (int o : optionsBlock[k])
+                                s2.push_back(o);
+                            search2 = (search2 == s2[0]) ? s2[1] : s2[0]; //replace search1 with the unused value of this pair
+                        }
+                        if (cs.size() == 2)
+                        {
+                            for (int l = 0; l < 9; l++)
+                            {
+                                if (l != cs[0] and l != cs[1] and optionsBlock[l].size() == 2)
+                                {
+                                    if (optionsBlock[l].count(search1) == 1 and optionsBlock[l].count(search2) == 1)
+                                    {
+                                        cs.push_back(l);
+                                        for (int o : optionsBlock[l])
+                                            s3.push_back(o);
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (cs.size() == 3) //We found a naked triple!
+                {
+                    std::unordered_set<int> base = {s1[0],s1[1],s2[0],s2[1],s3[0],s3[1]}; //make a base set with all 3 values
+                    ignore.emplace(cs[0]); //we don't have to check these again this loop
+                    ignore.emplace(cs[1]);
+                    ignore.emplace(cs[2]);
+                    int r0 = i / 3 * 3;
+                    int c0 = i % 3 * 3;
+                    int r1 = r0 + cs[0] / 3;
+                    int c1 = c0 + cs[0] % 3;
+                    int r2 = r0 + cs[1] / 3;
+                    int c2 = c0 + cs[1] % 3;
+                    int r3 = r0 + cs[2] / 3;
+                    int c3 = c0 + cs[2] % 3;
+                    for (int r = r0; r < r0 + 3; r++)
+                    {
+                        for (int c = c0; c < c0 + 3; c++)
+                        {
+                            if (!(r == r1 and c == c1) and !(r == r2 and c == c2)and !(r == r3 and c == c3))
+                            {
+                                allOptionsCopy[r][c] = unordered_set_difference(allOptions[r][c], base); //delete numbers in the pair from the rest of the row
+                                if (found == false and allOptionsCopy[r][c] != allOptions[r][c])
+                                    found = true; //if this had any effect set found to true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (found)
+    { //because there's somehow false positives an extra check
+        if (allOptions != allOptionsCopy)
+        {
             allOptions = allOptionsCopy; //apply changes
             return true;
         }
@@ -508,7 +892,13 @@ void Sudoku::solve()
         }
         if (naked_pairs())
         {
-//            std::cout << "found naked pair" << std::endl;
+            //            std::cout << "found naked pair" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (naked_triples())
+        {
+            //std::cout << "found naked triple" << std::endl;
             changed = true;
             continue;
         }
@@ -516,8 +906,9 @@ void Sudoku::solve()
     } while (changed == true);
     if (!is_solved())
     {
-//        print_puzzle();
-        std::cout << "not solved using implemented checks. Resorting to backtracking" << std::endl;
+        //std::cout << std::endl;
+        //print_puzzle();
+        //std::cout << "not solved using implemented checks. Resorting to backtracking" << std::endl;
         backtrack();
     }
 }
