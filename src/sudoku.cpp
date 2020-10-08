@@ -273,9 +273,9 @@ bool Sudoku::backtrack()
     int r = 10; //default values the loop can never reach
     int c = 10; //default values the loop can never reach
     int minsize = 10;
-    for (int y = 0; y < 9; y++)
+    for (int y = 0; y < 9 and minsize > 1; y++)
     {
-        for (int x = 0; x < 9; x++)
+        for (int x = 0; x < 9 and minsize > 1; x++)
         {
             if (puzzle[y][x] != 0)
                 continue;
