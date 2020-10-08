@@ -128,6 +128,28 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_row_except(int r, int c
     return row;
 }
 
+std::vector<std::unordered_set<int>> Sudoku::get_options_row_except(int r, int c1, int c2, int c3)
+{
+    if (c2 > c1)
+    {
+        c2--;
+    }
+    if (c3 > c1)
+    {
+        c3--;
+    }
+    if (c3 > c2)
+    {
+        c3--;
+    }
+
+    std::vector<std::unordered_set<int>> row = Sudoku::get_options_row(r);
+    row.erase(row.begin() + c1);
+    row.erase(row.begin() + c2);
+    row.erase(row.begin() + c3);
+    return row;
+}
+
 std::vector<std::unordered_set<int>> Sudoku::get_options_col(int c)
 {
     std::vector<std::unordered_set<int>> col;
@@ -154,6 +176,27 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_col_except(int r1, int 
     std::vector<std::unordered_set<int>> col = get_options_col(c);
     col.erase(col.begin() + r1);
     col.erase(col.begin() + r2);
+    return col;
+}
+
+std::vector<std::unordered_set<int>> Sudoku::get_options_col_except(int r1, int r2, int r3, int c)
+{
+    if (r2 > r1)
+    {
+        r2--;
+    }
+    if (r3 > r1)
+    {
+        r3--;
+    }
+    if (r3 > r2)
+    {
+        r3--;
+    }
+    std::vector<std::unordered_set<int>> col = get_options_col(c);
+    col.erase(col.begin() + r1);
+    col.erase(col.begin() + r2);
+    col.erase(col.begin() + r3);
     return col;
 }
 
@@ -198,6 +241,30 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r1, in
     }
     block.erase(block.begin() + i1);
     block.erase(block.begin() + i2);
+    return block;
+}
+
+std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r1, int c1, int r2, int c2, int r3, int c3)
+{
+    std::vector<std::unordered_set<int>> block = get_options_block(r1, c1);
+    int i1 = r1 % 3 * 3 + c1 % 3;
+    int i2 = r2 % 3 * 3 + c2 % 3;
+    int i3 = r3 % 3 * 3 + c3 % 3;
+    if (i2 > i1)
+    {
+        i2--;
+    }
+    if (i3 > i1)
+    {
+        i3--;
+    }
+    if (i3 > i2)
+    {
+        i3--;
+    }
+    block.erase(block.begin() + i1);
+    block.erase(block.begin() + i2);
+    block.erase(block.begin() + i3);
     return block;
 }
 
@@ -639,7 +706,7 @@ bool Sudoku::naked_triples()
                 subsets.push_back({base[0], base[1]});
                 subsets.push_back({base[0], base[2]});
                 subsets.push_back({base[1], base[2]});
-                for (int k; k < 9; k++)
+                for (int k = 0; k < 9; k++)
                 {
                     if (k != j and ignore.count(k) == 0 and (std::find(subsets.begin(), subsets.end(), optionsCol[k]) != subsets.end()))
                     {
@@ -748,7 +815,7 @@ bool Sudoku::naked_triples()
                 subsets.push_back({base[0], base[1]});
                 subsets.push_back({base[0], base[2]});
                 subsets.push_back({base[1], base[2]});
-                for (int k; k < 9; k++)
+                for (int k = 0; k < 9; k++)
                 {
                     if (k != j and ignore.count(k) == 0 and (std::find(subsets.begin(), subsets.end(), optionsBlock[k]) != subsets.end()))
                     {
@@ -968,6 +1035,144 @@ bool Sudoku::hidden_pairs()
     return found;
 }
 
+bool Sudoku::hidden_triples()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+
+    for (int i = 0; i < 9; i++) //iterate(i) from 0 to 9 (all rows/cols/blocks)
+    {
+        std::vector<std::unordered_set<int>> optionsRow = get_options_row(i); //get the row
+        for (int j = 0; j < 7; j++)                                           //iterate(j) from 0 to 7 (8 and 9 will always be part of earlier triples)
+        {
+            if (optionsRow[j].size() >= 2) //if the square has at least two options
+            {
+                for (int k = j + 1; k < 8; k++) //iterate(k) from the last square(j) up to 8
+                {
+                    bool breakout = false;
+                    if (optionsRow[k].size() >= 2 and unordered_set_intersection(optionsRow[j], optionsRow[k]).size() >= 1) //if the square has at least two options, and the intersection of the two contains at least one number
+                    {
+                        for (int l = k + 1; l < 9; l++) //iterate(l) from the last square(k) up to 9
+                        {
+                            if (optionsRow[l].size() >= 2 and unordered_set_intersection(optionsRow[j], optionsRow[l]).size() >= 1 and unordered_set_intersection(optionsRow[k], optionsRow[l]).size()) //if the square has at least two options, and the intersection of square j and l contains at least one number, and the intersection of k and l contains at least one number
+                            {
+                                std::unordered_set<int> intersection = unordered_set_3_way_intersection(optionsRow[j], optionsRow[k], optionsRow[l]); //get the 3 way intersection of square j, k and l
+                                std::unordered_set<int> difference = unordered_set_difference(intersection, get_options_row_except(i, j, k, l));      //get the difference between above intersection, and the row except for j, k and l //note, make another get row except
+                                if (difference.size() == 3)                                                                                           //if the difference has exactly 3 options
+                                {
+                                    if (unordered_set_intersection(optionsRow[j], difference).size() >= 2 and unordered_set_intersection(optionsRow[k], difference).size() >= 2 and unordered_set_intersection(optionsRow[l], difference).size() >= 2) //if the intersection between the difference and each square has at least 2 options
+                                    {
+                                        //we've got triples or hidden triples
+                                        allOptionsCopy[i][j] = unordered_set_intersection(allOptions[i][j], difference); //replace each square with the intersection of the square and the above difference
+                                        allOptionsCopy[i][k] = unordered_set_intersection(allOptions[i][k], difference);
+                                        allOptionsCopy[i][l] = unordered_set_intersection(allOptions[i][l], difference);
+                                        if (allOptionsCopy[i][j] != allOptions[i][j] or allOptionsCopy[i][k] != allOptions[i][k] or allOptionsCopy[i][l] != allOptions[i][l]) //if at least one of the squares changed
+                                            found = true;
+                                        breakout = true; //tell the above loop to break
+                                        break;           //break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (breakout)
+                        break; //if triples are found in the l loop, break
+                }
+            }
+        }
+        //repeat for cols
+        std::vector<std::unordered_set<int>> optionsCol = get_options_col(i); //get the col
+        for (int j = 0; j < 7; j++)                                           //iterate(j) from 0 to 7 (8 and 9 will always be part of earlier triples)
+        {
+            if (optionsCol[j].size() >= 2) //if the square has at least two options
+            {
+                for (int k = j + 1; k < 8; k++) //iterate(k) from the last square(j) up to 8
+                {
+                    bool breakout = false;
+                    if (optionsCol[k].size() >= 2 and unordered_set_intersection(optionsCol[j], optionsCol[k]).size() >= 1) //if the square has at least two options, and the intersection of the two contains at least one number
+                    {
+                        for (int l = k + 1; l < 9; l++) //iterate(l) from the last square(k) up to 9
+                        {
+                            if (optionsCol[l].size() >= 2 and unordered_set_intersection(optionsCol[j], optionsCol[l]).size() >= 1 and unordered_set_intersection(optionsCol[k], optionsCol[l]).size()) //if the square has at least two options, and the intersection of square j and l contains at least one number, and the intersection of k and l contains at least one number
+                            {
+                                std::unordered_set<int> intersection = unordered_set_3_way_intersection(optionsCol[j], optionsCol[k], optionsCol[l]); //get the 3 way intersection of square j, k and l
+                                std::unordered_set<int> difference = unordered_set_difference(intersection, get_options_col_except(j, k, l, i));      //get the difference between above intersection, and the col except for j, k and l
+                                if (difference.size() == 3)                                                                                           //if the difference has exactly 3 options
+                                {
+                                    if (unordered_set_intersection(optionsCol[j], difference).size() >= 2 and unordered_set_intersection(optionsCol[k], difference).size() >= 2 and unordered_set_intersection(optionsCol[l], difference).size() >= 2) //if the intersection between the difference and each square has at least 2 options
+                                    {
+                                        //we've got triples or hidden triples
+                                        allOptionsCopy[j][i] = unordered_set_intersection(allOptions[j][i], difference); //replace each square with the intersection of the square and the above difference
+                                        allOptionsCopy[k][i] = unordered_set_intersection(allOptions[k][i], difference);
+                                        allOptionsCopy[l][i] = unordered_set_intersection(allOptions[l][i], difference);
+                                        if (allOptionsCopy[j][i] != allOptions[j][i] or allOptionsCopy[k][i] != allOptions[k][i] or allOptionsCopy[l][i] != allOptions[l][i]) //if at least one of the squares changed
+                                            found = true;
+                                        breakout = true; //tell the above loop to break
+                                        break;           //break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (breakout)
+                        break; //if triples are found in the l loop, break
+                }
+            }
+        }
+        //repeat for blocks
+        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i); //get the col
+        for (int j = 0; j < 7; j++)                                               //iterate(j) from 0 to 7 (8 and 9 will always be part of earlier triples)
+        {
+            if (optionsBlock[j].size() >= 2) //if the square has at least two options
+            {
+                for (int k = j + 1; k < 8; k++) //iterate(k) from the last square(j) up to 8
+                {
+                    bool breakout = false;
+                    if (optionsBlock[k].size() >= 2 and unordered_set_intersection(optionsBlock[j], optionsBlock[k]).size() >= 1) //if the square has at least two options, and the intersection of the two contains at least one number
+                    {
+                        for (int l = k + 1; l < 9; l++) //iterate(l) from the last square(k) up to 9
+                        {
+                            if (optionsBlock[l].size() >= 2 and unordered_set_intersection(optionsBlock[j], optionsBlock[l]).size() >= 1 and unordered_set_intersection(optionsBlock[k], optionsBlock[l]).size()) //if the square has at least two options, and the intersection of square j and l contains at least one number, and the intersection of k and l contains at least one number
+                            {
+                                int r0 = i / 3 * 3;
+                                int c0 = i % 3 * 3;
+                                int r1 = r0 + j / 3;
+                                int c1 = c0 + j % 3;
+                                int r2 = r0 + k / 3;
+                                int c2 = c0 + k % 3;
+                                int r3 = r0 + l / 3;
+                                int c3 = c0 + l % 3;
+                                std::unordered_set<int> intersection = unordered_set_3_way_intersection(optionsBlock[j], optionsBlock[k], optionsBlock[l]); //get the 3 way intersection of square j, k and l
+                                std::unordered_set<int> difference = unordered_set_difference(intersection, get_options_block_except(r1, c1, r2, c2,r3,c3));          //get the difference between above intersection, and the block except for j, k and l
+                                if (difference.size() == 3)                                                                                                 //if the difference has exactly 3 options
+                                {
+                                    if (unordered_set_intersection(optionsBlock[j], difference).size() >= 2 and unordered_set_intersection(optionsBlock[k], difference).size() >= 2 and unordered_set_intersection(optionsBlock[l], difference).size() >= 2) //if the intersection between the difference and each square has at least 2 options
+                                    {
+                                        //we've got triples or hidden triples
+                                        allOptionsCopy[r1][c1] = unordered_set_intersection(allOptions[r1][c1], difference); //replace each square with the intersection of the square and the above difference
+                                        allOptionsCopy[r2][c2] = unordered_set_intersection(allOptions[r2][c2], difference);
+                                        allOptionsCopy[r3][c3] = unordered_set_intersection(allOptions[r3][c3], difference);
+                                        if (allOptionsCopy[r1][c1] != allOptions[r1][c1] or allOptionsCopy[r2][c2] != allOptions[r2][c2] or allOptionsCopy[r3][c3] != allOptions[r3][c3]) //if at least one of the squares changed
+                                            found = true;
+                                        breakout = true; //tell the above loop to break
+                                        break;           //break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (breakout)
+                        break; //if triples are found in the l loop, break
+                }
+            }
+        }
+    }
+
+    if (found)
+        allOptions = allOptionsCopy;
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -1079,6 +1284,12 @@ void Sudoku::solve()
         if (hidden_pairs())
         {
             //std::cout << "found hidden pair" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (hidden_triples())
+        {
+            //std::cout << "found hidden triple" << std::endl;
             changed = true;
             continue;
         }

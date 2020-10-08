@@ -22,13 +22,17 @@ class Sudoku
     std::vector<std::unordered_set<int>> get_options_row(int r);
     std::vector<std::unordered_set<int>> get_options_row_except(int r, int c);
     std::vector<std::unordered_set<int>> get_options_row_except(int r, int c1, int c2);
+    std::vector<std::unordered_set<int>> get_options_row_except(int r, int c1, int c2, int c3);
     std::vector<std::unordered_set<int>> get_options_col(int c);
     std::vector<std::unordered_set<int>> get_options_col_except(int r, int c);
     std::vector<std::unordered_set<int>> get_options_col_except(int r1, int r2, int c);
+    std::vector<std::unordered_set<int>> get_options_col_except(int r1, int r2, int r3, int c);
     std::vector<std::unordered_set<int>> get_options_block(int r, int c);
     std::vector<std::unordered_set<int>> get_options_block(int b);
     std::vector<std::unordered_set<int>> get_options_block_except(int r, int c);
     std::vector<std::unordered_set<int>> get_options_block_except(int r1, int c1, int r2, int c2);
+    std::vector<std::unordered_set<int>> get_options_block_except(int r1, int c1, int r2, int c2, int r3, int c3);
+    
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::unordered_set<int> right);
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::vector<int> right);
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::vector<std::unordered_set<int>> right);
@@ -40,6 +44,7 @@ class Sudoku
     bool naked_pairs();
     bool naked_triples();
     bool hidden_pairs();
+    bool hidden_triples();
 
     public:
         std::vector<std::vector<int>> get_puzzle();
