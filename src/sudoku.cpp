@@ -268,49 +268,43 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r1, in
     return block;
 }
 
-bool Sudoku::backtrack()
+bool Sudoku::backtrack(int r, int c)
 {
-    int r = 10; //default values the loop can never reach
-    int c = 10; //default values the loop can never reach
-    int minsize = 10;
-    for (int y = 0; y < 9 and minsize > 1; y++)
+    if (r == 9)
+        return true; //returns true if you've finished the last row
+    int r2, c2;
+
+    while (puzzle[r][c] != 0) //if the square is already set, try next ones until you find a 0
     {
-        for (int x = 0; x < 9 and minsize > 1; x++)
+        if (c == 8) //calculate the next piece
         {
-            if (puzzle[y][x] != 0)
-                continue;
-            int size = allOptions[y][x].size();
-            if (size == 0)
-                return false;
-            else if (size == 1)
-            {
-                minsize = 1;
-                r = y;
-                c = x;
-            }
-            else if (size < minsize)
-            {
-                minsize = size;
-                r = y;
-                c = x;
-            }
+            c = 0;
+            r++;
         }
+        else
+            c++;
+        if (r > 8)
+            return true; //if you find the end of the puzzle before a zero, return true.
     }
-    if (r == 10)
+    if (c == 8) //calculate the next piece
     {
-        return is_solved();
+        c2 = 0;
+        r2 = r + 1;
     }
-    std::unordered_set<int> options = allOptions[r][c];
+    else
+    {
+        r2 = r;
+        c2 = c + 1;
+    }
+    std::unordered_set<int> options = get_options(r, c);
+    if (options.size() == 0)
+        return false; //if there are no options something must have gone wrong before. return false
     for (int o : options)
     {
-        puzzle[r][c] = o;
-        update_options(r, c);
-        if (backtrack() == true)
-        {
+        puzzle[r][c] = o; //set the square to one of the options
+        if (backtrack(r2, c2) == true)
             return true;
-        }
-        puzzle[r][c] = 0;
-        update_options(r, c);
+        puzzle[r][c] = 0; //return the square to 0;
     }
     return false;
 }
