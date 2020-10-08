@@ -12,3 +12,4 @@ bin/sudoku.o
 testcases/output.txt
 testcases/hard_sudokus_solved.txt
 testcases/1000_sudokus_solved.txt
+src/generator.cpp

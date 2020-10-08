@@ -115,6 +115,19 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_row_except(int r, int c
     return row;
 }
 
+std::vector<std::unordered_set<int>> Sudoku::get_options_row_except(int r, int c1, int c2)
+{
+    if (c2 > c1)
+    {
+        c2--;
+    }
+    
+    std::vector<std::unordered_set<int>> row = Sudoku::get_options_row(r);
+    row.erase(row.begin() + c1);
+    row.erase(row.begin() + c2);
+    return row;
+}
+
 std::vector<std::unordered_set<int>> Sudoku::get_options_col(int c)
 {
     std::vector<std::unordered_set<int>> col;
@@ -127,8 +140,20 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_col(int c)
 
 std::vector<std::unordered_set<int>> Sudoku::get_options_col_except(int r, int c)
 {
+    std::vector<std::unordered_set<int>> row = Sudoku::get_options_col(c);
+    row.erase(row.begin() + r);
+    return row;
+}
+
+std::vector<std::unordered_set<int>> Sudoku::get_options_col_except(int r1, int r2, int c)
+{
+    if (r2 > r1)
+    {
+        r2--;
+    }
     std::vector<std::unordered_set<int>> col = get_options_col(c);
-    col.erase(col.begin() + r);
+    col.erase(col.begin() + r1);
+    col.erase(col.begin() + r2);
     return col;
 }
 
@@ -159,6 +184,20 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r, int
     std::vector<std::unordered_set<int>> block = get_options_block(r, c);
     int i = r % 3 * 3 + c % 3;
     block.erase(block.begin() + i);
+    return block;
+}
+
+std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r1, int c1, int r2, int c2)
+{
+    std::vector<std::unordered_set<int>> block = get_options_block(r1, c1);
+    int i1 = r1 % 3 * 3 + c1 % 3;
+    int i2 = r2 % 3 * 3 + c2 % 3;
+    if (i2 > i1)
+    {
+        i2--;
+    }
+    block.erase(block.begin() + i1);
+    block.erase(block.begin() + i2);
     return block;
 }
 
@@ -233,6 +272,18 @@ std::unordered_set<int> Sudoku::unordered_set_difference(std::unordered_set<int>
     return left;
 }
 
+std::unordered_set<int> Sudoku::unordered_set_intersection(std::unordered_set<int> left, std::unordered_set<int> right)
+{
+    std::unordered_set<int> result;
+    for (auto item : left)
+    {
+        if (right.count(item) == 1)
+        {
+            result.emplace(item);
+        }
+    }
+    return result;
+}
 
 
 bool Sudoku::check_solved_cells()
@@ -794,6 +845,102 @@ bool Sudoku::naked_triples()
     return false;
 }
 
+bool Sudoku::hidden_pairs()
+{
+    bool found = false;
+    //trying a new programming method: the code explains the comments to the computer.
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+    for (int i = 0; i < 9; i++)//iterate (i) over the numbers 0 to 9 (every row, collumn and block)
+    {
+        std::vector<std::unordered_set<int>> optionsRow = get_options_row(i);//get the row
+        for (int j = 0; j < 8; j++)//iterate (j) over the numbers 0 to 8 (if the last square is part of a pair it will be found earlier)
+        {
+            if (optionsRow[j].size() >= 2)//if the square has at least two options
+            {
+                for (int k = j+1; k < 9; k++)//iterate (k) from the last iterator (j) up to 9
+                {
+                    if (optionsRow[j].size() > 2 or optionsRow[k].size() > 2)//if the first or second square has more than 2 options (otherwise it's a naked pair)
+                    {
+                        std::unordered_set<int> intersection = unordered_set_intersection(optionsRow[j], optionsRow[k]);//intersect the set from the square found in the last loop with the set from this loop
+                        if (intersection.size() >= 2)//if the intersection has at least 2 options
+                        {
+                            std::unordered_set<int> difference = unordered_set_difference(intersection,get_options_row_except(i,j,k));//get the difference between the intersection of the two squares, and all options except for the two squares
+                            if (difference.size() == 2)//if the result of the difference is exactly 2
+                            {
+                               allOptionsCopy[i][j] = difference;//replace the two sets of options with the result
+                               allOptionsCopy[i][k] = difference;
+                               found = true; //and set found to true
+                               break; //no need to iterate over k because we already found the pair for j
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //now do the same thing for col
+        std::vector<std::unordered_set<int>> optionsCol = get_options_col(i);//get the col
+        for (int j = 0; j < 8; j++)//iterate (j) over the numbers 0 to 8 (if the last square is part of a pair it will be found earlier)
+        {
+            if (optionsCol[j].size() >= 2)//if the square has at least two options
+            {
+                for (int k = j+1; k < 9; k++)//iterate (k) from the last iterator (j) up to 9
+                {
+                    if (optionsCol[j].size() > 2 or optionsCol[k].size() > 2)//if the first or second square has more than 2 options (otherwise it's a naked pair)
+                    {
+                        std::unordered_set<int> intersection = unordered_set_intersection(optionsCol[j], optionsCol[k]);//intersect the set from the square found in the last loop with the set from this loop
+                        if (intersection.size() >= 2)//if the intersection has at least 2 options
+                        {
+                            std::unordered_set<int> difference = unordered_set_difference(intersection,get_options_col_except(j,k,i));//get the difference between the intersection of the two squares, and all options except for the two squares
+                            if (difference.size() == 2)//if the result of the difference is exactly 2
+                            {
+                               allOptionsCopy[j][i] = difference;//replace the two sets of options with the result
+                               allOptionsCopy[k][i] = difference;
+                               found = true; //and set found to true
+                               break; //no need to iterate over k because we already found the pair for j
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //now do the same thing for block
+        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i);//get the col
+        for (int j = 0; j < 8; j++)//iterate (j) over the numbers 0 to 8 (if the last square is part of a pair it will be found earlier)
+        {
+            if (optionsBlock[j].size() >= 2)//if the square has at least two options
+            {
+                for (int k = j+1; k < 9; k++)//iterate (k) from the last iterator (j) up to 9
+                {
+                    if (optionsBlock[j].size() > 2 or optionsBlock[k].size() > 2)//if the first or second square has more than 2 options (otherwise it's a naked pair)
+                    {
+                        std::unordered_set<int> intersection = unordered_set_intersection(optionsBlock[j], optionsBlock[k]);//intersect the set from the square found in the last loop with the set from this loop
+                        if (intersection.size() >= 2)//if the intersection has at least 2 options
+                        {
+                            //this is different, get the coordinates of the squares
+                            int r0 = i / 3 * 3; //first get the coords of the top left square of the block
+                            int c0 = i % 3 * 3;
+                            int r1 = r0 + j / 3; //get the row of the first square
+                            int c1 = c0 + j % 3; //get the col of the first square
+                            int r2 = r0 + k / 3; //get the row of the second square
+                            int c2 = c0 + k % 3; //get the col of the second square
+                            std::unordered_set<int> difference = unordered_set_difference(intersection,get_options_block_except(r0,c0,r1,c1));//get the difference between the intersection of the two squares, and all options except for the two squares
+                            if (difference.size() == 2)//if the result of the difference is exactly 2
+                            {
+                               allOptionsCopy[r1][c1] = difference;//replace the two sets of options with the result
+                               allOptionsCopy[r2][c2] = difference;
+                               found = true; //and set found to true
+                               break; //no need to iterate over k because we already found the pair for j
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (found) allOptions = allOptionsCopy;
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -902,6 +1049,12 @@ void Sudoku::solve()
             changed = true;
             continue;
         }
+        if (hidden_pairs())
+        {
+            //std::cout << "found hidden pair" << std::endl;
+            changed = true;
+            continue;
+        }
 
     } while (changed == true);
     if (!is_solved())
@@ -911,6 +1064,7 @@ void Sudoku::solve()
         //std::cout << "not solved using implemented checks. Resorting to backtracking" << std::endl;
         backtrack();
     }
+    
 }
 
 Sudoku::Sudoku()
