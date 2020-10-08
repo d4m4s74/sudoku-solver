@@ -268,43 +268,49 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r1, in
     return block;
 }
 
-bool Sudoku::backtrack(int r, int c)
+bool Sudoku::backtrack()
 {
-    if (r == 9)
-        return true; //returns true if you've finished the last row
-    int r2, c2;
-
-    while (puzzle[r][c] != 0) //if the square is already set, try next ones until you find a 0
+    int r = 10; //default values the loop can never reach
+    int c = 10; //default values the loop can never reach
+    int minsize = 10;
+    for (int y = 0; y < 9; y++)
     {
-        if (c == 8) //calculate the next piece
+        for (int x = 0; x < 9; x++)
         {
-            c = 0;
-            r++;
+            if (puzzle[y][x] != 0)
+                continue;
+            int size = allOptions[y][x].size();
+            if (size == 0)
+                return false;
+            else if (size == 1)
+            {
+                minsize = 1;
+                r = y;
+                c = x;
+            }
+            else if (size < minsize)
+            {
+                minsize = size;
+                r = y;
+                c = x;
+            }
         }
-        else
-            c++;
-        if (r > 8)
-            return true; //if you find the end of the puzzle before a zero, return true.
     }
-    if (c == 8) //calculate the next piece
+    if (r == 10)
     {
-        c2 = 0;
-        r2 = r + 1;
+        return is_solved();
     }
-    else
-    {
-        r2 = r;
-        c2 = c + 1;
-    }
-    std::unordered_set<int> options = get_options(r, c);
-    if (options.size() == 0)
-        return false; //if there are no options something must have gone wrong before. return false
+    std::unordered_set<int> options = allOptions[r][c];
     for (int o : options)
     {
-        puzzle[r][c] = o; //set the square to one of the options
-        if (backtrack(r2, c2) == true)
+        puzzle[r][c] = o;
+        update_options(r, c);
+        if (backtrack() == true)
+        {
             return true;
-        puzzle[r][c] = 0; //return the square to 0;
+        }
+        puzzle[r][c] = 0;
+        update_options(r, c);
     }
     return false;
 }
@@ -1142,9 +1148,9 @@ bool Sudoku::hidden_triples()
                                 int c2 = c0 + k % 3;
                                 int r3 = r0 + l / 3;
                                 int c3 = c0 + l % 3;
-                                std::unordered_set<int> intersection = unordered_set_3_way_intersection(optionsBlock[j], optionsBlock[k], optionsBlock[l]); //get the 3 way intersection of square j, k and l
-                                std::unordered_set<int> difference = unordered_set_difference(intersection, get_options_block_except(r1, c1, r2, c2,r3,c3));          //get the difference between above intersection, and the block except for j, k and l
-                                if (difference.size() == 3)                                                                                                 //if the difference has exactly 3 options
+                                std::unordered_set<int> intersection = unordered_set_3_way_intersection(optionsBlock[j], optionsBlock[k], optionsBlock[l]);    //get the 3 way intersection of square j, k and l
+                                std::unordered_set<int> difference = unordered_set_difference(intersection, get_options_block_except(r1, c1, r2, c2, r3, c3)); //get the difference between above intersection, and the block except for j, k and l
+                                if (difference.size() == 3)                                                                                                    //if the difference has exactly 3 options
                                 {
                                     if (unordered_set_intersection(optionsBlock[j], difference).size() >= 2 and unordered_set_intersection(optionsBlock[k], difference).size() >= 2 and unordered_set_intersection(optionsBlock[l], difference).size() >= 2) //if the intersection between the difference and each square has at least 2 options
                                     {

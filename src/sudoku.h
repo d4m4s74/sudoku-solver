@@ -38,7 +38,7 @@ class Sudoku
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::vector<std::unordered_set<int>> right);
     std::unordered_set<int> unordered_set_intersection(std::unordered_set<int> left, std::unordered_set<int> right);
     std::unordered_set<int> unordered_set_3_way_intersection(std::unordered_set<int> left, std::unordered_set<int> middle, std::unordered_set<int> right);
-    bool backtrack(int r = 0, int c = 0);   
+    bool backtrack();   
     bool check_solved_cells();
     bool hidden_singles();
     bool naked_pairs();
