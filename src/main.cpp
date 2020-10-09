@@ -5,8 +5,9 @@
 #include <regex>
 #include "sudoku.h"
 
-int solve_file(std::string inputfile, std::string outputfile)
+int solve_file(std::string inputfile, std::string outputfile, bool verbose = false)
 {
+    std::ios::sync_with_stdio(false); 
     std::ifstream input(inputfile);
     std::ofstream output(outputfile);
     int cases = 0;
@@ -20,8 +21,12 @@ int solve_file(std::string inputfile, std::string outputfile)
         {   
             input >> sudoku;
             sudoku.solve();
-            output << sudoku << std::endl;
-            std::cout << i + 1 << "/" << cases << "\r";
+            output << sudoku << "\n";
+            if (verbose or i % 100 == 99 or i+1 == cases)
+            {
+                std::cout << i + 1 << "/" << cases << "\r";
+                std::cout.flush();
+            }
         }
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
