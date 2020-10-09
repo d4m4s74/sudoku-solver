@@ -1037,7 +1037,10 @@ bool Sudoku::hidden_pairs()
         }
     }
     if (found)
+    {
+        found = (allOptions != allOptionsCopy);
         allOptions = allOptionsCopy;
+    }
     return found;
 }
 
@@ -1175,7 +1178,10 @@ bool Sudoku::hidden_triples()
     }
 
     if (found)
+    {
+        found = (allOptions != allOptionsCopy);
         allOptions = allOptionsCopy;
+    }
     return found;
 }
 
