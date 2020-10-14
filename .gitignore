@@ -17,3 +17,4 @@ a.out
 **/.venv
 .venv/*
 scripts/gui.py
+scripts/pygame_textinput.py
