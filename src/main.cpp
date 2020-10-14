@@ -4,10 +4,11 @@
 #include <fstream>
 #include <regex>
 #include "sudoku.h"
+#include <unistd.h>
 
 int solve_file(std::string inputfile, std::string outputfile, bool verbose = false)
 {
-    std::ios::sync_with_stdio(false); 
+    std::ios::sync_with_stdio(false);
     std::ifstream input(inputfile);
     std::ofstream output(outputfile);
     int cases = 0;
@@ -18,11 +19,11 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
         input >> cases;
         Sudoku sudoku;
         for (int i = 0; i < cases; i++)
-        {   
+        {
             input >> sudoku;
             sudoku.solve();
             output << sudoku << "\n";
-            if (verbose or i % 100 == 99 or i+1 == cases)
+            if (verbose or i % 100 == 99 or i + 1 == cases)
             {
                 std::cout << i + 1 << "/" << cases << "\r";
                 std::cout.flush();
@@ -68,15 +69,22 @@ int solve_file(std::string inputfile)
     return cases;
 }
 
-void solve_string(std::string puzzleString)
+void solve_string(std::string puzzleString, bool showPuzzle = true)
 {
     Sudoku sudoku(puzzleString);
-    sudoku.print_puzzle();
-    std::cout << std::endl;
-    sudoku.solve();
-    std::cout << "solved:" << std::endl
-              << std::endl;
-    sudoku.print_puzzle();
+    if (showPuzzle)
+    {
+        sudoku.print_puzzle();
+        std::cout << std::endl;
+        sudoku.solve();
+        std::cout << "solved:" << std::endl
+                 << std::endl;
+        sudoku.print_puzzle();
+    } else {
+        sudoku.solve();
+        std::cout << sudoku << std::endl;
+    }
+    
 }
 
 std::string getFileName(const std::string &s)
@@ -105,6 +113,7 @@ void helptext(char **argv)
     std::cout << "\t" << filename << " [options] puzzle" << std::endl;
     std::cout << "options:" << std::endl;
     std::cout << "\t-h,--help\t Display this information" << std::endl;
+    std::cout << "\t-s\t in case of puzzle string, only returns solved string" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -121,12 +130,48 @@ int main(int argc, char **argv)
         }
         else
         {
-            solve_file(argv[1]);
+            if (access(argv[argc - 1], R_OK) == 0) //if the last argument is a readable file
+            {
+                solve_file(argv[argc - 1]); //treat it as a the input file
+            }
+            else
+                std::cout << "Unable to open file " << argv[argc - 1] << std::endl;
         }
     }
-    else if (argc == 3)
+    else if (argc >= 3)
     {
-        solve_file(argv[1], argv[2]);
+        bool verbose = false;
+        bool showPuzzle = true;
+        for (int i = 1; i < argc; i++)
+        {
+            if (std::string(argv[i]) == "-h" or std::string(argv[i]) == "--help")
+            {
+                helptext(argv);
+                return 0; //exit out of the program
+            }
+            else if (std::string(argv[i]) == "-v" or std::string(argv[i]) == "--verbose")
+            {
+                verbose = true;
+            }
+            else if (std::string(argv[i]) == "-s")
+            {
+                showPuzzle = false;
+            }
+        }
+        if (access(argv[argc - 2], R_OK) == 0) //if the second to last argument is a readable file
+        {
+            solve_file(argv[argc - 2], argv[argc - 1], verbose); //treat it as the input file, and the last argument as the output
+        }
+        else if (access(argv[argc - 1], R_OK) == 0) //if the last argument is a readable file
+        {
+            solve_file(argv[argc - 1]); //treat it as a the input file
+        }
+        else if (std::regex_match(argv[argc - 1], std::regex("([0-9]{81})")))
+        {
+            solve_string(argv[argc - 1], showPuzzle);
+        }
+        else
+            std::cout << argv[argc - 1] << " is not a valid file or puzzle string" << std::endl;
     }
     else
         helptext(argv);

@@ -14,3 +14,6 @@ testcases/hard_sudokus_solved.txt
 testcases/1000_sudokus_solved.txt
 a.exe
 a.out
+**/.venv
+.venv/*
+scripts/gui.py
