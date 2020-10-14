@@ -45,6 +45,7 @@ class Sudoku
     bool naked_triples();
     bool hidden_pairs();
     bool hidden_triples();
+    bool pointing_pairs();
 
     public:
         std::vector<std::vector<int>> get_puzzle();

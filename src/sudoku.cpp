@@ -1129,7 +1129,7 @@ bool Sudoku::hidden_triples()
             }
         }
         //repeat for blocks
-        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i); //get the col
+        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i); //get the block
         for (int j = 0; j < 7; j++)                                               //iterate(j) from 0 to 7 (8 and 9 will always be part of earlier triples)
         {
             if (optionsBlock[j].size() >= 2) //if the square has at least two options
@@ -1177,6 +1177,83 @@ bool Sudoku::hidden_triples()
         }
     }
 
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
+bool Sudoku::pointing_pairs()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+    for (int i = 0; i < 9; i++) //iterate(i) from 0 to 9 (all blocks)
+    {
+        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i); //get the block
+        for (int j = 0; j < 8; j++)//iterate(j) from 0 to 8 (No need to check the last square because it will always be tested with an earlier square)
+            {
+            int r0 = i / 3 * 3;//calculate r and c for the square.
+            int c0 = i % 3 * 3;
+            int r = r0 + j / 3;
+            int c = c0 + j % 3;
+            if (puzzle[r][c] == 0)//if it isn't solved
+            {
+                for (int o:optionsBlock[j])//iterate through every option
+                {
+                    //if the option exist in at least one other square in the same row within the block (No need to check the last square in the row, going to use some maths magic)
+                    if (j%3 != 2 and (optionsBlock[j+1].count(o) == 1 or optionsBlock[j/3*3+2].count(o) == 1)) //say you are testing square 4. 4%3 = 1, 4+1 == 5, 4/3 = 1, 1*3 = 3, 3+2 = 5
+                    {
+                        bool ispair = true;//create bool ispair to remember if the option has been found. default true
+                        for (int k = 0; k < 9; k++)//iterate(k) through every square within the block
+                        {
+                            if (k/3 != j/3 and optionsBlock[k].count(o) == 1)//if the square is not in the same row as square j and it contains the number we're checking
+                            {
+                                ispair = false;//set bool to false
+                                break;//no more need to test further.
+                            }
+                        }
+                        if (ispair)//if bool ispair is still true
+                        {
+                            for (int k = 0; k < 9; k++)//iterate(k) through every square in the row
+                            {
+                                if (k/3 != c/3)//if it's not in the same block as the square
+                                {
+                                    if (allOptionsCopy[r][k].erase(o) == 1)//remove the number and check if there are actual changes
+                                        found = true;//if so, found = true;
+                                }
+                            }
+                        }
+                    }
+                    //if the option exist in at least one other square in the same col within the block (No need to check the last square in the col, going to use some maths magic)
+                    if (j/3 != 2 and (optionsBlock[j+3].count(o) == 1 or optionsBlock[j%3+6].count(o) == 1)) //say you are testing square 4. 4/3 = 1, 4+3 == 7, 4%3 = 1, 1+6=7
+                    {
+                        bool ispair = true;//create bool ispair to remember if the option has been found. default true
+                        for (int k = 0; k < 9; k++)//iterate(k) through every square within the block
+                        {
+                            if (k%3 != j%3 and optionsBlock[k].count(o) == 1)//if the square is not in the same col as square j and it contains the number we're checking
+                            {
+                                ispair = false;//set bool to false
+                                break;//no more need to test further.
+                            }
+                        }
+                        if (ispair)//if bool ispair is still true
+                        {
+                            for (int k = 0; k < 9; k++)//iterate(k) through every square in the col
+                            {
+                                if (k/3 != r/3)//if it's not in the same block as the square
+                                {
+                                    if (allOptionsCopy[k][c].erase(o) == 1)//remove the number and check if there are actual changes
+                                        found = true;//if so, found = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     if (found)
     {
         found = (allOptions != allOptionsCopy);
@@ -1300,6 +1377,12 @@ void Sudoku::solve()
             continue;
         }
         if (hidden_triples())
+        {
+            //std::cout << "found hidden triple" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (pointing_pairs())
         {
             //std::cout << "found hidden triple" << std::endl;
             changed = true;
