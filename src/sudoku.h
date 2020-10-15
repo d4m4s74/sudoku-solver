@@ -55,7 +55,7 @@ class Sudoku
         void print_puzzle();
         std::string toString();
         bool is_solved();
-        void solve();
+        bool solve();
         Sudoku();
         Sudoku(std::vector<std::vector<int>> puzzle);
         Sudoku(std::string puzzleString);

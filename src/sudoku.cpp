@@ -1415,7 +1415,7 @@ bool Sudoku::is_solved()
     return solved;
 }
 
-void Sudoku::solve()
+bool Sudoku::solve()
 {
     //first get all possibilities for each cell. This only happens once
     update_options();
@@ -1479,7 +1479,9 @@ void Sudoku::solve()
         //std::cout << toString() << std::endl;
         //std::cout << "not solved using implemented checks. Resorting to backtracking" << std::endl;
         backtrack();
-    }
+        return false;
+    } 
+    return true;
 }
 
 Sudoku::Sudoku()

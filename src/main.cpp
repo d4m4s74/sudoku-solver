@@ -16,13 +16,13 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
     {
         auto begin = std::chrono::high_resolution_clock::now();
         auto last = std::chrono::high_resolution_clock::now();
-
         input >> cases;
+        int solved;
         Sudoku sudoku;
         for (int i = 0; i < cases; i++)
         {
             input >> sudoku;
-            sudoku.solve();
+            solved += sudoku.solve();
             output << sudoku << "\n";
             if (verbose and timed)
             {
@@ -47,6 +47,7 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
         std::cout << std::endl
                   << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
+        std::cout << cases-solved << " cases required backtracking" << std::endl;
     }
     else
     {
@@ -64,17 +65,19 @@ int solve_file(std::string inputfile)
         auto begin = std::chrono::high_resolution_clock::now();
 
         input >> cases;
+        int solved;
         Sudoku sudoku;
         for (int i = 0; i < cases; i++)
         {
             input >> sudoku;
-            sudoku.solve();
+            solved += sudoku.solve();
             std::cout << sudoku << std::endl;
         }
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
         std::cout << std::endl
                   << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
+        std::cout << cases-solved << " cases required backtracking" << std::endl;
     }
     else
     {
