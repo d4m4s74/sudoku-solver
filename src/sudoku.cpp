@@ -1262,6 +1262,85 @@ bool Sudoku::pointing_pairs()
     return found;
 }
 
+bool Sudoku::box_line_reduction()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+
+    for (int i = 0; i < 9; i++) //iterate(i) from 0 to 9 (all rows and columns)
+    {
+        //first rows
+        std::vector<std::unordered_set<int>> optionsRow = get_options_row(i); //get the row
+        for (int j = 0; j < 9; j++)//iterate(j) from 0 to 9 (all squares)
+        {
+            if (puzzle[i][j] == 0)//if the square is not solved
+            {
+                std::unordered_set<int> options = optionsRow[j];//copy the options into a seperate variable
+                for (int k = 0; k < 9; k++)//iterate(k) from 0 to 9 (all squares)
+                {
+                    if (k < j/3*3 or k >= j/3*3+3)//if the square is not in the same block as square j
+                    {
+                        options = unordered_set_difference(options,optionsRow[k]);//get the difference between the options variable and k, and save it in the same variable
+                        if (options.size() == 0) break;//if the options variable is empty, break
+                    }
+                }
+                if (options.size() == 0) continue;//if the options variable is empty, go to next iteration
+                int r0 = i/3*3; //get the row and column of the top left square in the block
+                int c0 = j/3*3;
+                for (int r = r0; r < r0+3; r++)//iterate (r) through all rows in the block
+                {
+                    if (r != i)//if the row is not row i
+                    {
+                        for (int c = c0; c < c0+3; c++)//iterate (c) though all cows in the block
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptionsCopy[r][c],options);//get the difference between the square, and the remaining options. And save it back into the square
+                            if (allOptionsCopy[r][c] != allOptions[r][c]) found = true;//if anything changed, set found to true
+                        }
+                    }
+                }
+            }
+        }
+        //next up: cols
+        std::vector<std::unordered_set<int>> optionsCol = get_options_col(i); //get the col
+        for (int j = 0; j < 9; j++)//iterate(j) from 0 to 9 (all squares)
+        {
+            if (puzzle[j][i] == 0)//if the square is not solved
+            {
+                std::unordered_set<int> options = optionsCol[j];//copy the options into a seperate variable
+                for (int k = 0; k < 9; k++)//iterate(k) from 0 to 9 (all squares)
+                {
+                    if (k < j/3*3 or k >= j/3*3+3)//if the square is not in the same block as square j
+                    {
+                        options = unordered_set_difference(options,optionsCol[k]);//get the difference between the options variable and k, and save it in the same variable
+                        if (options.size() == 0) break;//if the options variable is empty, break
+                    }
+                }
+                if (options.size() == 0) continue;//if the options variable is empty, go to next iteration
+                int r0 = j/3*3; //get the row and column of the top left square in the block
+                int c0 = i/3*3;
+                for (int c = c0; c < c0+3; c++)//iterate (r) through all cols in the block
+                {
+                    if (c != i)//if the row is not row i
+                    {
+                        for (int r = r0; r < r0+3; r++)//iterate (c) though all cows in the block
+                        {
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptionsCopy[r][c],options);//get the difference between the square, and the remaining options. And save it back into the square
+                            if (allOptionsCopy[r][c] != allOptions[r][c]) found = true;//if anything changed, set found to true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -1384,7 +1463,13 @@ void Sudoku::solve()
         }
         if (pointing_pairs())
         {
-            //std::cout << "found hidden triple" << std::endl;
+            //std::cout << "found pointing pairs" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (box_line_reduction())
+        {
+            //std::cout << "found box line reduction" << std::endl;
             changed = true;
             continue;
         }
