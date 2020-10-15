@@ -6,7 +6,7 @@
 #include "sudoku.h"
 #include <unistd.h>
 
-int solve_file(std::string inputfile, std::string outputfile, bool verbose = false)
+int solve_file(std::string inputfile, std::string outputfile, bool verbose = false, bool timed = false)
 {
     std::ios::sync_with_stdio(false);
     std::ifstream input(inputfile);
@@ -15,6 +15,7 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
     if (input.is_open() and output.is_open())
     {
         auto begin = std::chrono::high_resolution_clock::now();
+        auto last = std::chrono::high_resolution_clock::now();
 
         input >> cases;
         Sudoku sudoku;
@@ -23,9 +24,22 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
             input >> sudoku;
             sudoku.solve();
             output << sudoku << "\n";
-            if (verbose or i % 100 == 99 or i + 1 == cases)
+            if (verbose and timed)
             {
-                std::cout << i + 1 << "/" << cases << "\r";
+                std::cout << "Solved case " << i + 1 << "/" << cases<< " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
+                last = std::chrono::high_resolution_clock::now();
+                std::cout.flush();
+            }
+            else if (timed and (i % 100 == 99 or i + 1 == cases))
+            {
+                std::cout << "Solved cases " << i - 99 << "-" << i+1 << "/" << cases << " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
+                last = std::chrono::high_resolution_clock::now();
+                std::cout.flush();
+            }
+            else if (verbose or i % 100 == 99 or i + 1 == cases)
+            {
+                std::cout << i + 1 << "/" << cases << '\r';
+                last = std::chrono::high_resolution_clock::now();
                 std::cout.flush();
             }
         }
@@ -113,7 +127,9 @@ void helptext(char **argv)
     std::cout << "\t" << filename << " [options] puzzle" << std::endl;
     std::cout << "options:" << std::endl;
     std::cout << "\t-h,--help\t Display this information" << std::endl;
-    std::cout << "\t-s\t in case of puzzle string, only returns solved string" << std::endl;
+    std::cout << "\t-v,--verbose\t In case of file, show counter for every puzzle instead of every 100" << std::endl;
+    std::cout << "\t-t,--timed\t In case of file,times individual puzzles, or sets of 100 depending on if -v is set" << std::endl;
+    std::cout << "\t-s\t\t In case of puzzle string, only returns solved string" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -142,6 +158,7 @@ int main(int argc, char **argv)
     {
         bool verbose = false;
         bool showPuzzle = true;
+        bool timed = false;
         for (int i = 1; i < argc; i++)
         {
             if (std::string(argv[i]) == "-h" or std::string(argv[i]) == "--help")
@@ -153,6 +170,10 @@ int main(int argc, char **argv)
             {
                 verbose = true;
             }
+            else if (std::string(argv[i]) == "-t" or std::string(argv[i]) == "--timed")
+            {
+                timed = true;
+            }
             else if (std::string(argv[i]) == "-s")
             {
                 showPuzzle = false;
@@ -160,7 +181,7 @@ int main(int argc, char **argv)
         }
         if (access(argv[argc - 2], R_OK) == 0) //if the second to last argument is a readable file
         {
-            solve_file(argv[argc - 2], argv[argc - 1], verbose); //treat it as the input file, and the last argument as the output
+            solve_file(argv[argc - 2], argv[argc - 1], verbose,timed); //treat it as the input file, and the last argument as the output
         }
         else if (access(argv[argc - 1], R_OK) == 0) //if the last argument is a readable file
         {
