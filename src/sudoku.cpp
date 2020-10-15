@@ -1355,17 +1355,14 @@ void Sudoku::set_puzzle(std::vector<std::vector<int>> puzzle)
 void Sudoku::set_puzzle(std::string puzzleString)
 {
     solved = false; //because we don't know if the new puzzle is solved, set it to false.
-    std::vector<std::vector<int>> newPuzzle;
     for (int r = 0; r < 9; r++)
     {
         std::vector<int> row;
         for (int c = 0; c < 9; c++)
         {
-            row.push_back((int)puzzleString[r * 9 + c] - '0'); //converts char to int and puts it in the row
+            puzzle[r][c] = puzzleString[r * 9 + c] - '0'; //converts char to int and puts it in the row
         }
-        newPuzzle.push_back(row);
     }
-    puzzle = newPuzzle;
 }
 
 void Sudoku::print_puzzle()
@@ -1479,6 +1476,7 @@ void Sudoku::solve()
     {
         //std::cout << std::endl;
         //print_puzzle();
+        //std::cout << toString() << std::endl;
         //std::cout << "not solved using implemented checks. Resorting to backtracking" << std::endl;
         backtrack();
     }

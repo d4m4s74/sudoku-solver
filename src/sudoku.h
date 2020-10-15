@@ -7,7 +7,7 @@
 class Sudoku
 {
     friend class Sudoku_generator;
-    std::vector<std::vector<int>> puzzle;
+    std::vector<std::vector<int>> puzzle = {{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0}};
     std::vector<std::vector<std::unordered_set<int>>> allOptions;
     bool solved = false;
 
