@@ -83,8 +83,9 @@ int solve_file(std::string inputfile)
     return cases;
 }
 
-void solve_string(std::string puzzleString, bool showPuzzle = true)
+void solve_string(std::string puzzleString, bool showPuzzle = true, bool timed = false)
 {
+    auto begin = std::chrono::high_resolution_clock::now();
     Sudoku sudoku(puzzleString);
     if (showPuzzle)
     {
@@ -98,7 +99,9 @@ void solve_string(std::string puzzleString, bool showPuzzle = true)
         sudoku.solve();
         std::cout << sudoku << std::endl;
     }
-    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    if (timed) std::cout << "Solved puzzle in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
 }
 
 std::string getFileName(const std::string &s)
@@ -128,7 +131,7 @@ void helptext(char **argv)
     std::cout << "options:" << std::endl;
     std::cout << "\t-h,--help\t Display this information" << std::endl;
     std::cout << "\t-v,--verbose\t In case of file, show counter for every puzzle instead of every 100" << std::endl;
-    std::cout << "\t-t,--timed\t In case of file,times individual puzzles, or sets of 100 depending on if -v is set" << std::endl;
+    std::cout << "\t-t,--timed\t Times individual puzzles, or sets of 100 depending on option -v" << std::endl;
     std::cout << "\t-s\t\t In case of puzzle string, only returns solved string" << std::endl;
 }
 
@@ -189,7 +192,7 @@ int main(int argc, char **argv)
         }
         else if (std::regex_match(argv[argc - 1], std::regex("([0-9]{81})")))
         {
-            solve_string(argv[argc - 1], showPuzzle);
+            solve_string(argv[argc - 1], showPuzzle, timed);
         }
         else
             std::cout << argv[argc - 1] << " is not a valid file or puzzle string" << std::endl;
