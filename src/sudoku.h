@@ -40,7 +40,7 @@ class Sudoku
     std::unordered_set<int> unordered_set_intersection(std::unordered_set<int> left, std::unordered_set<int> right);
     std::unordered_set<int> unordered_set_3_way_intersection(std::unordered_set<int> left, std::unordered_set<int> middle, std::unordered_set<int> right);
     template<typename t>
-    void flip_matrix(std::vector<std::vector<t>> &input);
+    void transpose_matrix(std::vector<std::vector<t>> &input);
     bool backtrack();   
     bool check_solved_cells();
     bool hidden_singles();

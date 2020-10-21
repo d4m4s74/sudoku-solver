@@ -400,8 +400,8 @@ std::unordered_set<int> Sudoku::unordered_set_3_way_intersection(std::unordered_
     return result;
 }
 
-template<typename t>
-void Sudoku::flip_matrix(std::vector<std::vector<t>> &input) //a simple function to switch X and Y in a 2d vector, 
+template <typename t>
+void Sudoku::transpose_matrix(std::vector<std::vector<t>> &input) //a simple function to switch X and Y in a 2d vector,
 {
     std::vector<std::vector<t>> output;
     int maxr = input.size();
@@ -1222,63 +1222,63 @@ bool Sudoku::pointing_pairs()
 {
     bool found = false;
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
-    for (int i = 0; i < 9; i++) //iterate(i) from 0 to 9 (all blocks)
+    for (int i = 0; i < 9; i++)                                                    //iterate(i) from 0 to 9 (all blocks)
     {
         std::vector<std::unordered_set<int>> optionsBlock = get_options_block(i); //get the block
-        for (int j = 0; j < 8; j++)//iterate(j) from 0 to 8 (No need to check the last square because it will always be tested with an earlier square)
-            {
-            int r0 = i / 3 * 3;//calculate r and c for the square.
+        for (int j = 0; j < 8; j++)                                               //iterate(j) from 0 to 8 (No need to check the last square because it will always be tested with an earlier square)
+        {
+            int r0 = i / 3 * 3; //calculate r and c for the square.
             int c0 = i % 3 * 3;
             int r = r0 + j / 3;
             int c = c0 + j % 3;
-            if (puzzle[r][c] == 0)//if it isn't solved
+            if (puzzle[r][c] == 0) //if it isn't solved
             {
-                for (int o:optionsBlock[j])//iterate through every option
+                for (int o : optionsBlock[j]) //iterate through every option
                 {
                     //if the option exist in at least one other square in the same row within the block (No need to check the last square in the row, going to use some maths magic)
-                    if (j%3 != 2 and (optionsBlock[j+1].count(o) == 1 or optionsBlock[j/3*3+2].count(o) == 1)) //say you are testing square 4. 4%3 = 1, 4+1 == 5, 4/3 = 1, 1*3 = 3, 3+2 = 5
+                    if (j % 3 != 2 and (optionsBlock[j + 1].count(o) == 1 or optionsBlock[j / 3 * 3 + 2].count(o) == 1)) //say you are testing square 4. 4%3 = 1, 4+1 == 5, 4/3 = 1, 1*3 = 3, 3+2 = 5
                     {
-                        bool ispair = true;//create bool ispair to remember if the option has been found. default true
-                        for (int k = 0; k < 9; k++)//iterate(k) through every square within the block
+                        bool ispair = true;         //create bool ispair to remember if the option has been found. default true
+                        for (int k = 0; k < 9; k++) //iterate(k) through every square within the block
                         {
-                            if (k/3 != j/3 and optionsBlock[k].count(o) == 1)//if the square is not in the same row as square j and it contains the number we're checking
+                            if (k / 3 != j / 3 and optionsBlock[k].count(o) == 1) //if the square is not in the same row as square j and it contains the number we're checking
                             {
-                                ispair = false;//set bool to false
-                                break;//no more need to test further.
+                                ispair = false; //set bool to false
+                                break;          //no more need to test further.
                             }
                         }
-                        if (ispair)//if bool ispair is still true
+                        if (ispair) //if bool ispair is still true
                         {
-                            for (int k = 0; k < 9; k++)//iterate(k) through every square in the row
+                            for (int k = 0; k < 9; k++) //iterate(k) through every square in the row
                             {
-                                if (k/3 != c/3)//if it's not in the same block as the square
+                                if (k / 3 != c / 3) //if it's not in the same block as the square
                                 {
-                                    if (allOptionsCopy[r][k].erase(o) == 1)//remove the number and check if there are actual changes
-                                        found = true;//if so, found = true;
+                                    if (allOptionsCopy[r][k].erase(o) == 1) //remove the number and check if there are actual changes
+                                        found = true;                       //if so, found = true;
                                 }
                             }
                         }
                     }
                     //if the option exist in at least one other square in the same col within the block (No need to check the last square in the col, going to use some maths magic)
-                    if (j/3 != 2 and (optionsBlock[j+3].count(o) == 1 or optionsBlock[j%3+6].count(o) == 1)) //say you are testing square 4. 4/3 = 1, 4+3 == 7, 4%3 = 1, 1+6=7
+                    if (j / 3 != 2 and (optionsBlock[j + 3].count(o) == 1 or optionsBlock[j % 3 + 6].count(o) == 1)) //say you are testing square 4. 4/3 = 1, 4+3 == 7, 4%3 = 1, 1+6=7
                     {
-                        bool ispair = true;//create bool ispair to remember if the option has been found. default true
-                        for (int k = 0; k < 9; k++)//iterate(k) through every square within the block
+                        bool ispair = true;         //create bool ispair to remember if the option has been found. default true
+                        for (int k = 0; k < 9; k++) //iterate(k) through every square within the block
                         {
-                            if (k%3 != j%3 and optionsBlock[k].count(o) == 1)//if the square is not in the same col as square j and it contains the number we're checking
+                            if (k % 3 != j % 3 and optionsBlock[k].count(o) == 1) //if the square is not in the same col as square j and it contains the number we're checking
                             {
-                                ispair = false;//set bool to false
-                                break;//no more need to test further.
+                                ispair = false; //set bool to false
+                                break;          //no more need to test further.
                             }
                         }
-                        if (ispair)//if bool ispair is still true
+                        if (ispair) //if bool ispair is still true
                         {
-                            for (int k = 0; k < 9; k++)//iterate(k) through every square in the col
+                            for (int k = 0; k < 9; k++) //iterate(k) through every square in the col
                             {
-                                if (k/3 != r/3)//if it's not in the same block as the square
+                                if (k / 3 != r / 3) //if it's not in the same block as the square
                                 {
-                                    if (allOptionsCopy[k][c].erase(o) == 1)//remove the number and check if there are actual changes
-                                        found = true;//if so, found = true;
+                                    if (allOptionsCopy[k][c].erase(o) == 1) //remove the number and check if there are actual changes
+                                        found = true;                       //if so, found = true;
                                 }
                             }
                         }
@@ -1304,30 +1304,33 @@ bool Sudoku::box_line_reduction()
     {
         //first rows
         std::vector<std::unordered_set<int>> optionsRow = get_options_row(i); //get the row
-        for (int j = 0; j < 9; j++)//iterate(j) from 0 to 9 (all squares)
+        for (int j = 0; j < 9; j++)                                           //iterate(j) from 0 to 9 (all squares)
         {
-            if (puzzle[i][j] == 0)//if the square is not solved
+            if (puzzle[i][j] == 0) //if the square is not solved
             {
-                std::unordered_set<int> options = optionsRow[j];//copy the options into a seperate variable
-                for (int k = 0; k < 9; k++)//iterate(k) from 0 to 9 (all squares)
+                std::unordered_set<int> options = optionsRow[j]; //copy the options into a seperate variable
+                for (int k = 0; k < 9; k++)                      //iterate(k) from 0 to 9 (all squares)
                 {
-                    if (k < j/3*3 or k >= j/3*3+3)//if the square is not in the same block as square j
+                    if (k < j / 3 * 3 or k >= j / 3 * 3 + 3) //if the square is not in the same block as square j
                     {
-                        options = unordered_set_difference(options,optionsRow[k]);//get the difference between the options variable and k, and save it in the same variable
-                        if (options.size() == 0) break;//if the options variable is empty, break
+                        options = unordered_set_difference(options, optionsRow[k]); //get the difference between the options variable and k, and save it in the same variable
+                        if (options.size() == 0)
+                            break; //if the options variable is empty, break
                     }
                 }
-                if (options.size() == 0) continue;//if the options variable is empty, go to next iteration
-                int r0 = i/3*3; //get the row and column of the top left square in the block
-                int c0 = j/3*3;
-                for (int r = r0; r < r0+3; r++)//iterate (r) through all rows in the block
+                if (options.size() == 0)
+                    continue;       //if the options variable is empty, go to next iteration
+                int r0 = i / 3 * 3; //get the row and column of the top left square in the block
+                int c0 = j / 3 * 3;
+                for (int r = r0; r < r0 + 3; r++) //iterate (r) through all rows in the block
                 {
-                    if (r != i)//if the row is not row i
+                    if (r != i) //if the row is not row i
                     {
-                        for (int c = c0; c < c0+3; c++)//iterate (c) though all cows in the block
+                        for (int c = c0; c < c0 + 3; c++) //iterate (c) though all cows in the block
                         {
-                            allOptionsCopy[r][c] = unordered_set_difference(allOptionsCopy[r][c],options);//get the difference between the square, and the remaining options. And save it back into the square
-                            if (allOptionsCopy[r][c] != allOptions[r][c]) found = true;//if anything changed, set found to true
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptionsCopy[r][c], options); //get the difference between the square, and the remaining options. And save it back into the square
+                            if (allOptionsCopy[r][c] != allOptions[r][c])
+                                found = true; //if anything changed, set found to true
                         }
                     }
                 }
@@ -1335,30 +1338,33 @@ bool Sudoku::box_line_reduction()
         }
         //next up: cols
         std::vector<std::unordered_set<int>> optionsCol = get_options_col(i); //get the col
-        for (int j = 0; j < 9; j++)//iterate(j) from 0 to 9 (all squares)
+        for (int j = 0; j < 9; j++)                                           //iterate(j) from 0 to 9 (all squares)
         {
-            if (puzzle[j][i] == 0)//if the square is not solved
+            if (puzzle[j][i] == 0) //if the square is not solved
             {
-                std::unordered_set<int> options = optionsCol[j];//copy the options into a seperate variable
-                for (int k = 0; k < 9; k++)//iterate(k) from 0 to 9 (all squares)
+                std::unordered_set<int> options = optionsCol[j]; //copy the options into a seperate variable
+                for (int k = 0; k < 9; k++)                      //iterate(k) from 0 to 9 (all squares)
                 {
-                    if (k < j/3*3 or k >= j/3*3+3)//if the square is not in the same block as square j
+                    if (k < j / 3 * 3 or k >= j / 3 * 3 + 3) //if the square is not in the same block as square j
                     {
-                        options = unordered_set_difference(options,optionsCol[k]);//get the difference between the options variable and k, and save it in the same variable
-                        if (options.size() == 0) break;//if the options variable is empty, break
+                        options = unordered_set_difference(options, optionsCol[k]); //get the difference between the options variable and k, and save it in the same variable
+                        if (options.size() == 0)
+                            break; //if the options variable is empty, break
                     }
                 }
-                if (options.size() == 0) continue;//if the options variable is empty, go to next iteration
-                int r0 = j/3*3; //get the row and column of the top left square in the block
-                int c0 = i/3*3;
-                for (int c = c0; c < c0+3; c++)//iterate (r) through all cols in the block
+                if (options.size() == 0)
+                    continue;       //if the options variable is empty, go to next iteration
+                int r0 = j / 3 * 3; //get the row and column of the top left square in the block
+                int c0 = i / 3 * 3;
+                for (int c = c0; c < c0 + 3; c++) //iterate (r) through all cols in the block
                 {
-                    if (c != i)//if the row is not row i
+                    if (c != i) //if the row is not row i
                     {
-                        for (int r = r0; r < r0+3; r++)//iterate (c) though all cows in the block
+                        for (int r = r0; r < r0 + 3; r++) //iterate (c) though all cows in the block
                         {
-                            allOptionsCopy[r][c] = unordered_set_difference(allOptionsCopy[r][c],options);//get the difference between the square, and the remaining options. And save it back into the square
-                            if (allOptionsCopy[r][c] != allOptions[r][c]) found = true;//if anything changed, set found to true
+                            allOptionsCopy[r][c] = unordered_set_difference(allOptionsCopy[r][c], options); //get the difference between the square, and the remaining options. And save it back into the square
+                            if (allOptionsCopy[r][c] != allOptions[r][c])
+                                found = true; //if anything changed, set found to true
                         }
                     }
                 }
@@ -1378,20 +1384,20 @@ bool Sudoku::x_wing()
 {
     bool found = false;
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
-    for (int n = 1; n < 10; n++) //going from 1 through 9, because we're looking for numbers, not rows or cols
+    for (int n = 1; n < 10; n++)                                                   //going from 1 through 9, because we're looking for numbers, not rows or cols
     {
         std::vector<std::vector<bool>> locationRows = get_possible_locations(n); //get the list of possible locations for number i
-        std::vector<std::vector<bool>> locationCols = locationRows; //copy it into a seperate value and flip it to easily check cols
-        flip_matrix(locationCols);
-        
+        std::vector<std::vector<bool>> locationCols = locationRows;              //copy it into a seperate value and flip it to easily check cols
+        transpose_matrix(locationCols);
+
         for (int j = 0; j < 8; j++) //iterate 0 to 8, 9 is unnecessary because it will be tested in earlier iterations
         {
             //first check rows
-            if (std::count(locationRows[j].begin(),locationRows[j].end(),true) == 2)
+            if (std::count(locationRows[j].begin(), locationRows[j].end(), true) == 2)
             {
-                int c1 = std::find(locationRows[j].begin(),locationRows[j].end(),true) - locationRows[j].begin(); //find index of first true
-                int c2 = std::find(locationRows[j].begin()+c1+1,locationRows[j].end(),true) - locationRows[j].begin(); //find index of second true
-                for (int k = j+1; k < 9; k++)
+                int c1 = std::find(locationRows[j].begin(), locationRows[j].end(), true) - locationRows[j].begin();          //find index of first true
+                int c2 = std::find(locationRows[j].begin() + c1 + 1, locationRows[j].end(), true) - locationRows[j].begin(); //find index of second true
+                for (int k = j + 1; k < 9; k++)
                 {
                     if (locationRows[k] == locationRows[j]) //this is enough to check if there are open spots at the exact same cols
                     {
@@ -1399,20 +1405,20 @@ bool Sudoku::x_wing()
                         {
                             if (r != j and r != k)
                             {
-                                if (allOptionsCopy[r][c1].erase(n) == 1 or allOptionsCopy[r][c2].erase(n) == 1) found = true;
+                                if (allOptionsCopy[r][c1].erase(n) == 1 or allOptionsCopy[r][c2].erase(n) == 1)
+                                    found = true;
                             }
-
                         }
                         break;
                     }
                 }
             }
             //next up, cols
-            if (std::count(locationCols[j].begin(),locationCols[j].end(),true) == 2)
+            if (std::count(locationCols[j].begin(), locationCols[j].end(), true) == 2)
             {
-                int r1 = std::find(locationCols[j].begin(),locationCols[j].end(),true) - locationCols[j].begin(); //find index of first true
-                int r2 = std::find(locationCols[j].begin()+r1+1,locationCols[j].end(),true) - locationCols[j].begin(); //find index of second true
-                for (int k = j+1; k < 9; k++)
+                int r1 = std::find(locationCols[j].begin(), locationCols[j].end(), true) - locationCols[j].begin();          //find index of first true
+                int r2 = std::find(locationCols[j].begin() + r1 + 1, locationCols[j].end(), true) - locationCols[j].begin(); //find index of second true
+                for (int k = j + 1; k < 9; k++)
                 {
                     if (locationCols[k] == locationCols[j]) //this is enough to check if there are open spots at the exact same cols
                     {
@@ -1420,9 +1426,9 @@ bool Sudoku::x_wing()
                         {
                             if (c != j and c != k)
                             {
-                                if (allOptionsCopy[r1][c].erase(n) == 1 or allOptionsCopy[r2][c].erase(n) == 1) found = true;
+                                if (allOptionsCopy[r1][c].erase(n) == 1 or allOptionsCopy[r2][c].erase(n) == 1)
+                                    found = true;
                             }
-
                         }
                         break;
                     }
@@ -1583,7 +1589,7 @@ bool Sudoku::solve()
         //std::cout << "not solved using implemented checks. Resorting to backtracking" << std::endl;
         backtrack();
         return false;
-    } 
+    }
     return true;
 }
 
