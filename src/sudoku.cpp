@@ -268,6 +268,21 @@ std::vector<std::unordered_set<int>> Sudoku::get_options_block_except(int r1, in
     return block;
 }
 
+std::vector<std::vector<bool>> Sudoku::get_possible_locations(int n)
+{
+    std::vector<std::vector<bool>> output;
+    for (int r = 0; r < 9; r++)
+    {
+        std::vector<bool> row;
+        for (int c = 0; c < 9; c++)
+        {
+            row.push_back((puzzle[r][c] == 0 and allOptions[r][c].count(n) == 1));
+        }
+        output.push_back(row);
+    }
+    return output;
+}
+
 bool Sudoku::backtrack()
 {
     int r = 10; //default values the loop can never reach
@@ -383,6 +398,24 @@ std::unordered_set<int> Sudoku::unordered_set_3_way_intersection(std::unordered_
         }
     }
     return result;
+}
+
+template<typename t>
+void Sudoku::flip_matrix(std::vector<std::vector<t>> &input) //a simple function to switch X and Y in a 2d vector, 
+{
+    std::vector<std::vector<t>> output;
+    int maxr = input.size();
+    int maxc = input[0].size();
+    for (int r = 0; r < maxr; r++)
+    {
+        std::vector<t> row;
+        for (int c = 0; c < maxc; c++)
+        {
+            row.push_back(input[c][r]);
+        }
+        output.push_back(row);
+    }
+    input = output;
 }
 
 bool Sudoku::check_solved_cells()
@@ -1341,6 +1374,70 @@ bool Sudoku::box_line_reduction()
     return found;
 }
 
+bool Sudoku::x_wing()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+    for (int n = 1; n < 10; n++) //going from 1 through 9, because we're looking for numbers, not rows or cols
+    {
+        std::vector<std::vector<bool>> locationRows = get_possible_locations(n); //get the list of possible locations for number i
+        std::vector<std::vector<bool>> locationCols = locationRows; //copy it into a seperate value and flip it to easily check cols
+        flip_matrix(locationCols);
+        
+        for (int j = 0; j < 8; j++) //iterate 0 to 8, 9 is unnecessary because it will be tested in earlier iterations
+        {
+            //first check rows
+            if (std::count(locationRows[j].begin(),locationRows[j].end(),true) == 2)
+            {
+                int c1 = std::find(locationRows[j].begin(),locationRows[j].end(),true) - locationRows[j].begin(); //find index of first true
+                int c2 = std::find(locationRows[j].begin()+c1+1,locationRows[j].end(),true) - locationRows[j].begin(); //find index of second true
+                for (int k = j+1; k < 9; k++)
+                {
+                    if (locationRows[k] == locationRows[j]) //this is enough to check if there are open spots at the exact same cols
+                    {
+                        for (int r = 0; r < 9; r++)
+                        {
+                            if (r != j and r != k)
+                            {
+                                if (allOptionsCopy[r][c1].erase(n) == 1 or allOptionsCopy[r][c2].erase(n) == 1) found = true;
+                            }
+
+                        }
+                        break;
+                    }
+                }
+            }
+            //next up, cols
+            if (std::count(locationCols[j].begin(),locationCols[j].end(),true) == 2)
+            {
+                int r1 = std::find(locationCols[j].begin(),locationCols[j].end(),true) - locationCols[j].begin(); //find index of first true
+                int r2 = std::find(locationCols[j].begin()+r1+1,locationCols[j].end(),true) - locationCols[j].begin(); //find index of second true
+                for (int k = j+1; k < 9; k++)
+                {
+                    if (locationCols[k] == locationCols[j]) //this is enough to check if there are open spots at the exact same cols
+                    {
+                        for (int c = 0; c < 9; c++)
+                        {
+                            if (c != j and c != k)
+                            {
+                                if (allOptionsCopy[r1][c].erase(n) == 1 or allOptionsCopy[r2][c].erase(n) == 1) found = true;
+                            }
+
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -1467,6 +1564,12 @@ bool Sudoku::solve()
         if (box_line_reduction())
         {
             //std::cout << "found box line reduction" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (x_wing())
+        {
+            //std::cout << "found X-Wing" << std::endl;
             changed = true;
             continue;
         }

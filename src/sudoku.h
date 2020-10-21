@@ -32,12 +32,15 @@ class Sudoku
     std::vector<std::unordered_set<int>> get_options_block_except(int r, int c);
     std::vector<std::unordered_set<int>> get_options_block_except(int r1, int c1, int r2, int c2);
     std::vector<std::unordered_set<int>> get_options_block_except(int r1, int c1, int r2, int c2, int r3, int c3);
-    
+    std::vector<std::vector<bool>> get_possible_locations(int n);
+
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::unordered_set<int> right);
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::vector<int> right);
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::vector<std::unordered_set<int>> right);
     std::unordered_set<int> unordered_set_intersection(std::unordered_set<int> left, std::unordered_set<int> right);
     std::unordered_set<int> unordered_set_3_way_intersection(std::unordered_set<int> left, std::unordered_set<int> middle, std::unordered_set<int> right);
+    template<typename t>
+    void flip_matrix(std::vector<std::vector<t>> &input);
     bool backtrack();   
     bool check_solved_cells();
     bool hidden_singles();
@@ -47,6 +50,7 @@ class Sudoku
     bool hidden_triples();
     bool pointing_pairs();
     bool box_line_reduction();
+    bool x_wing();
 
     public:
         std::vector<std::vector<int>> get_puzzle();
