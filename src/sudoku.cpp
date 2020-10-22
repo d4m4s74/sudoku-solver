@@ -1484,12 +1484,12 @@ bool Sudoku::simple_colouring()
 {
     bool found = false;
     //std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //because there is no comparison, no copy is necessary
-    for (int n = 1; n < 10; n++)                                                   //going from 1 through 9, because we're looking for numbers, not rows or cols
+    for (int n = 1; n < 10; n++) //going from 1 through 9, because we're looking for numbers, not rows or cols
     {
         std::vector<std::vector<bool>> locations = get_possible_locations(n); //get the list of possible locations for number i
         std::vector<std::vector<bool>> locationCols = locations;              //transposed version to save some calculations later on.
         transpose_matrix(locationCols);
-        std::vector<std::vector<int>> chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+        std::vector<std::vector<int>> chain;
         int chainLength = 0;
         std::function<void(int, int, int)> find_chain;
         find_chain = [&](int r, int c, int colour) { //I don't want to make a function I only use once, but I need recursion so I'm making a lambda
@@ -1554,8 +1554,9 @@ bool Sudoku::simple_colouring()
                     int c = i % 3 * 3 + bi % 3;
                 }
             }
-            if (r != -1 and chain[r][c] == 0)
+            if (r != -1 and (chain.size() == 0 or chain[r][c] == 0))
             {
+                bool changed = false;
                 chainLength = 0;
                 chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
                 find_chain(r, c, 1);
@@ -1575,7 +1576,7 @@ bool Sudoku::simple_colouring()
                                 if ((find(chainRow.begin(), chainRow.end(), 1) != chainRow.end() or find(chainCol.begin(), chainCol.end(), 1) != chainCol.end() or find(chainBlock.begin(), chainBlock.end(), 1) != chainBlock.end()) and (find(chainRow.begin(), chainRow.end(), 2) != chainRow.end() or find(chainCol.begin(), chainCol.end(), 2) != chainCol.end() or find(chainBlock.begin(), chainBlock.end(), 2) != chainBlock.end())) //if the square sees both a 1 and a 2
                                 {
                                     allOptions[j][k].erase(n);
-                                    found = true;
+                                    found = changed = true;
                                 }
                             }
                         }
@@ -1602,14 +1603,17 @@ bool Sudoku::simple_colouring()
                                         allOptions[l][m].erase(n);
                                 }
                             }
-                            found = true;
+                            found = changed = true;
 
                             break;
                         }
                     }
-                    locations = get_possible_locations(n); //refresh locations and chain
-                    locationCols = locations;
-                    transpose_matrix(locationCols);
+                    if (changed)
+                    {
+                        locations = get_possible_locations(n); //refresh locations
+                        locationCols = locations;
+                        transpose_matrix(locationCols);
+                    }
                 }
             }
         }
