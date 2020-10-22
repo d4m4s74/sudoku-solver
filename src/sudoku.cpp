@@ -1483,7 +1483,7 @@ bool Sudoku::x_wing()
 bool Sudoku::simple_colouring()
 {
     bool found = false;
-    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+    //std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //because there is no comparison, no copy is necessary
     for (int n = 1; n < 10; n++)                                                   //going from 1 through 9, because we're looking for numbers, not rows or cols
     {
         std::vector<std::vector<bool>> locations = get_possible_locations(n); //get the list of possible locations for number i
@@ -1574,7 +1574,7 @@ bool Sudoku::simple_colouring()
                                 std::vector<int> chainBlock = get_block(chain, j, k);
                                 if ((find(chainRow.begin(), chainRow.end(), 1) != chainRow.end() or find(chainCol.begin(), chainCol.end(), 1) != chainCol.end() or find(chainBlock.begin(), chainBlock.end(), 1) != chainBlock.end()) and (find(chainRow.begin(), chainRow.end(), 2) != chainRow.end() or find(chainCol.begin(), chainCol.end(), 2) != chainCol.end() or find(chainBlock.begin(), chainBlock.end(), 2) != chainBlock.end())) //if the square sees both a 1 and a 2
                                 {
-                                    allOptionsCopy[j][k].erase(n);
+                                    allOptions[j][k].erase(n);
                                     found = true;
                                 }
                             }
@@ -1599,7 +1599,7 @@ bool Sudoku::simple_colouring()
                                 for (int m = 0; m < 9; m++)
                                 {
                                     if (chain[l][m] == remove)
-                                        allOptionsCopy[l][m].erase(n);
+                                        allOptions[l][m].erase(n);
                                 }
                             }
                             found = true;
@@ -1614,7 +1614,7 @@ bool Sudoku::simple_colouring()
             }
         }
     }
-    allOptions = allOptionsCopy;
+    //allOptions = allOptionsCopy;
 
     return found;
 }
