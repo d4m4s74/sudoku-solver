@@ -18,3 +18,4 @@ a.out
 .venv/*
 scripts/gui.py
 scripts/pygame_textinput.py
+testcases/all_17_clue_sudokus_solved.txt

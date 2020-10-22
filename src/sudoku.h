@@ -13,6 +13,7 @@ class Sudoku
 
     std::vector<int> get_row(int r);
     std::vector<int> get_col(int c);
+
     std::vector<int> get_block(int r, int c);
     std::vector<int> get_block(int b);   
     void initialize_options();
@@ -41,6 +42,12 @@ class Sudoku
     std::unordered_set<int> unordered_set_3_way_intersection(std::unordered_set<int> left, std::unordered_set<int> middle, std::unordered_set<int> right);
     template<typename t>
     void transpose_matrix(std::vector<std::vector<t>> &input);
+    template <typename t>
+    std::vector<t> get_col(const std::vector<std::vector<t>> &input, int c);
+    template <typename t>
+    std::vector<t> get_block(const std::vector<std::vector<t>> &input, int r, int c);
+        template <typename t>
+    std::vector<t> get_block(const std::vector<std::vector<t>> &input, int b);
     bool backtrack();   
     bool check_solved_cells();
     bool hidden_singles();
@@ -51,6 +58,7 @@ class Sudoku
     bool pointing_pairs();
     bool box_line_reduction();
     bool x_wing();
+    bool simple_colouring();
 
     public:
         std::vector<std::vector<int>> get_puzzle();

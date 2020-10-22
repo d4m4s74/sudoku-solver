@@ -5,6 +5,7 @@
 #include <numeric>
 #include <algorithm>
 #include "sudoku.h"
+#include <functional>
 
 //next to add: naked pairs/triples
 std::vector<int> Sudoku::get_row(int r)
@@ -401,7 +402,7 @@ std::unordered_set<int> Sudoku::unordered_set_3_way_intersection(std::unordered_
 }
 
 template <typename t>
-void Sudoku::transpose_matrix(std::vector<std::vector<t>> &input) //a simple function to switch X and Y in a 2d vector,
+void Sudoku::transpose_matrix(std::vector<std::vector<t>> &input) //a simple function to switch X and Y in a 2d vector
 {
     std::vector<std::vector<t>> output;
     int maxr = input.size();
@@ -416,6 +417,41 @@ void Sudoku::transpose_matrix(std::vector<std::vector<t>> &input) //a simple fun
         output.push_back(row);
     }
     input = output;
+}
+
+template <typename t>
+std::vector<t> Sudoku::get_col(const std::vector<std::vector<t>> &input, int c) //a generic version of get_col
+{
+    std::vector<t> col;
+    for (int r = 0; r < input.size(); r++)
+    {
+        col.push_back(input[r][c]);
+    }
+    return col;
+}
+
+template <typename t>
+std::vector<t> Sudoku::get_block(const std::vector<std::vector<t>> &input, int r, int c) //a sort-of generic version of get_block (it is specific for 9*9 grids)
+{
+    std::vector<t> block;
+    r = r / 3 * 3; //this gives the top row for the block of the given r. by abusing that int floors numbers ex 5/3 = 1 *3 = 3;
+    c = c / 3 * 3;
+    for (int y = r; y < r + 3; y++)
+    {
+        for (int x = c; x < c + 3; x++)
+        {
+            block.push_back(input[y][x]);
+        }
+    }
+    return block;
+}
+
+template <typename t>
+std::vector<t> Sudoku::get_block(const std::vector<std::vector<t>> &input, int b) //a sort-of generic version of get_block (it is specific for 9*9 grids)
+{
+    int r = b / 3 * 3; //see other get_block for explanation Simply said, block 0, 1 and 2 give 0, 3, 4 and 5 give 3, 6, 7 and 8 give 6
+    int c = b % 3 * 3; //0, 3, 6 repeating.
+    return get_block(input, r, c);
 }
 
 bool Sudoku::check_solved_cells()
@@ -1444,6 +1480,145 @@ bool Sudoku::x_wing()
     return found;
 }
 
+bool Sudoku::simple_colouring()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+    for (int n = 1; n < 10; n++)                                                   //going from 1 through 9, because we're looking for numbers, not rows or cols
+    {
+        std::vector<std::vector<bool>> locations = get_possible_locations(n); //get the list of possible locations for number i
+        std::vector<std::vector<bool>> locationCols = locations;              //transposed version to save some calculations later on.
+        transpose_matrix(locationCols);
+        std::vector<std::vector<int>> chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+        int chainLength = 0;
+        std::function<void(int, int, int)> find_chain;
+        find_chain = [&](int r, int c, int colour) { //I don't want to make a function I only use once, but I need recursion so I'm making a lambda
+            chain[r][c] = colour;
+            chainLength++;
+            std::vector<bool> locationRow = locations[r];
+            std::vector<bool> locationCol = locationCols[c];
+            std::vector<bool> locationBlock = get_block(locations, r, c);
+            if (count(locationRow.begin(), locationRow.end(), true) == 2)
+            {
+                int c2 = find(locationRow.begin(), locationRow.end(), true) - locationRow.begin();
+                if (c2 == c)
+                    c2 = find(locationRow.begin() + c + 1, locationRow.end(), true) - locationRow.begin();
+                if (chain[r][c2] == 0)
+                    find_chain(r, c2, (colour == 1) ? 2 : 1);
+            }
+            if (count(locationCol.begin(), locationCol.end(), true) == 2)
+            {
+                int r2 = find(locationCol.begin(), locationCol.end(), true) - locationCol.begin();
+                if (r2 == r)
+                    r2 = find(locationCol.begin() + r + 1, locationCol.end(), true) - locationCol.begin();
+                if (chain[r2][c] == 0)
+                    find_chain(r2, c, (colour == 1) ? 2 : 1);
+            }
+            if (count(locationBlock.begin(), locationBlock.end(), true) == 2)
+            {
+                int r0 = r / 3 * 3; //get the row and column of the top left square in the block
+                int c0 = c / 3 * 3;
+                int b = (r - r0) * 3 + c - c0; //get the index of the current square;
+                int b2 = find(locationBlock.begin(), locationBlock.end(), true) - locationBlock.begin();
+                if (b2 == b)
+                    b2 = find(locationBlock.begin() + b + 1, locationBlock.end(), true) - locationBlock.begin();
+                int r2 = r0 + b2 / 3; //get the row and column of the second square
+                int c2 = c0 + b2 % 3;
+                if (chain[r2][c2] == 0)
+                    find_chain(r2, c2, (colour == 1) ? 2 : 1);
+            }
+        };
+        for (int i = 0; i < 9; i++)
+        {
+            int r = -1;
+            int c = -1;
+            std::vector<bool> locationRow = locations[i];
+            std::vector<bool> locationCol = locationCols[i];
+            if (count(locationRow.begin(), locationRow.end(), true) == 2)
+            {
+                r = i;
+                c = find(locationRow.begin(), locationRow.end(), true) - locationRow.begin();
+            }
+            else if (count(locationCol.begin(), locationCol.end(), true) == 2)
+            {
+                c = i;
+                r = find(locationCol.begin(), locationCol.end(), true) - locationCol.begin();
+            }
+            else
+            {
+                std::vector<bool> locationBlock = get_block(locations, i);
+                if (count(locationBlock.begin(), locationBlock.end(), true) == 2)
+                {
+                    int bi = find(locationBlock.begin(), locationBlock.end(), true) - locationBlock.begin();
+                    int r = i / 3 * 3 + bi / 3;
+                    int c = i % 3 * 3 + bi % 3;
+                }
+            }
+            if (r != -1 and chain[r][c] == 0)
+            {
+                chainLength = 0;
+                chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                find_chain(r, c, 1);
+                if (chainLength > 2)
+                {
+                    std::vector<std::vector<int>> chainCols = chain;
+                    transpose_matrix(chainCols);
+                    for (int j = 0; j < 9; j++)
+                    {
+                        for (int k = 0; k < 9; k++) //first test rule 4
+                        {
+                            if (locations[j][k] == true and chain[j][k] == 0)
+                            {
+                                std::vector<int> chainRow = chain[j];
+                                std::vector<int> chainCol = chainCols[k];
+                                std::vector<int> chainBlock = get_block(chain, j, k);
+                                if ((find(chainRow.begin(), chainRow.end(), 1) != chainRow.end() or find(chainCol.begin(), chainCol.end(), 1) != chainCol.end() or find(chainBlock.begin(), chainBlock.end(), 1) != chainBlock.end()) and (find(chainRow.begin(), chainRow.end(), 2) != chainRow.end() or find(chainCol.begin(), chainCol.end(), 2) != chainCol.end() or find(chainBlock.begin(), chainBlock.end(), 2) != chainBlock.end())) //if the square sees both a 1 and a 2
+                                {
+                                    allOptionsCopy[j][k].erase(n);
+                                    found = true;
+                                }
+                            }
+                        }
+                        //then test rule 2
+                        int remove = -1;
+                        std::vector<int> chainRow = chain[j];
+                        std::vector<int> chainCol = chainCols[j];
+                        std::vector<int> chainBlock = get_block(chain, j);
+                        if (count(chainRow.begin(), chainRow.end(), 1) >= 2 or count(chainCol.begin(), chainCol.end(), 1) >= 2 or count(chainBlock.begin(), chainBlock.end(), 1) >= 2) //two of the same colours see each other
+                        {
+                            remove = 1;
+                        }
+                        else if (count(chainRow.begin(), chainRow.end(), 2) >= 2 or count(chainCol.begin(), chainCol.end(), 2) >= 2 or count(chainBlock.begin(), chainBlock.end(), 2) >= 2) //two of the same colours see each other
+                        {
+                            remove = 2;
+                        }
+                        if (remove != -1)
+                        {
+                            for (int l = 0; l < 9; l++)
+                            {
+                                for (int m = 0; m < 9; m++)
+                                {
+                                    if (chain[l][m] == remove)
+                                        allOptionsCopy[l][m].erase(n);
+                                }
+                            }
+                            found = true;
+
+                            break;
+                        }
+                    }
+                    locations = get_possible_locations(n); //refresh locations and chain
+                    locationCols = locations;
+                    transpose_matrix(locationCols);
+                }
+            }
+        }
+    }
+    allOptions = allOptionsCopy;
+
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -1528,18 +1703,19 @@ bool Sudoku::solve()
         changed = false;
         if (check_solved_cells())
         {
+            //std::cout << "found solved cells" << std::endl;
             changed = true;
-            //print_puzzle(); //copy of puzzle for debugging
             continue; //if anything is found, go back to the beginning to check again
         }
         if (hidden_singles())
         {
+            //std::cout << "found hidden singles" << std::endl;
             changed = true;
             continue;
         }
         if (naked_pairs())
         {
-            //            std::cout << "found naked pair" << std::endl;
+            //std::cout << "found naked pair" << std::endl;
             changed = true;
             continue;
         }
@@ -1576,6 +1752,12 @@ bool Sudoku::solve()
         if (x_wing())
         {
             //std::cout << "found X-Wing" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (simple_colouring())
+        {
+            //std::cout << "found Simple Colouring" << std::endl;
             changed = true;
             continue;
         }
