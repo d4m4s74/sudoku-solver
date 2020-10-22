@@ -14,6 +14,7 @@ std::string solve_puzzle(std::string puzzleString)
     Sudoku sudoku(puzzleString);
     sudoku.solve();
     solved++;
+    if (solved%100 == 0)
     std::cout << solved << "/" << cases << "                              \r";
     return puzzleString + "," + sudoku.toString();
 }
