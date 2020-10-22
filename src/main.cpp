@@ -19,9 +19,13 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
         input >> cases;
         int solved;
         Sudoku sudoku;
+        std::string puzzleString;
+        output << cases << "\n";
         for (int i = 0; i < cases; i++)
         {
-            input >> sudoku;
+            input >> puzzleString;
+            output << puzzleString << ",";
+            sudoku.set_puzzle(puzzleString);
             solved += sudoku.solve();
             output << sudoku << "\n";
             if (verbose and timed)
@@ -70,6 +74,7 @@ int solve_file(std::string inputfile)
         for (int i = 0; i < cases; i++)
         {
             input >> sudoku;
+            std::cout << sudoku << ",";
             solved += sudoku.solve();
             std::cout << sudoku << std::endl;
         }
