@@ -5,6 +5,53 @@
 #include <regex>
 #include "sudoku.h"
 #include <unistd.h>
+#include <future>
+
+int solved = 0;
+int cases;
+std::string solve_puzzle(std::string puzzleString)
+{
+    Sudoku sudoku(puzzleString);
+    sudoku.solve();
+    solved++;
+    std::cout << solved << "/" << cases << "                              \r";
+    return puzzleString + "," + sudoku.toString();
+}
+
+int solve_file_parallel(std::string inputfile, std::string outputfile)
+{
+    std::ifstream input(inputfile);
+    std::ofstream output(outputfile);
+    if (input.is_open() and output.is_open())
+    {
+        auto begin = std::chrono::high_resolution_clock::now();
+        auto last = std::chrono::high_resolution_clock::now();
+        input >> cases;
+        int solved;
+        Sudoku sudoku;
+        std::string puzzleString;
+        output << cases << "\n";
+        std::vector<std::future<std::string>> futures;
+        for (int i = 0; i < cases; i++)
+        {
+            input >> puzzleString;
+            futures.push_back(std::async(solve_puzzle,puzzleString));
+        }
+        for (int i = 0; i < cases; i++)
+        {
+            output << futures[i].get() << "\n";
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+        std::cout << std::endl
+                  << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
+    }
+    else
+    {
+        return -1;
+    }
+    return cases;
+}
 
 int solve_file(std::string inputfile, std::string outputfile, bool verbose = false, bool timed = false)
 {
@@ -21,6 +68,7 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
         Sudoku sudoku;
         std::string puzzleString;
         output << cases << "\n";
+        
         for (int i = 0; i < cases; i++)
         {
             input >> puzzleString;
@@ -43,7 +91,7 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
             else if (verbose or i % 100 == 99 or i + 1 == cases)
             {
                 std::cout << i + 1 << "/" << cases << '\r';
-                last = std::chrono::high_resolution_clock::now();
+                //last = std::chrono::high_resolution_clock::now();
                 std::cout.flush();
             }
         }
@@ -141,6 +189,7 @@ void helptext(char **argv)
     std::cout << "\t-v,--verbose\t In case of file, show counter for every puzzle instead of every 100" << std::endl;
     std::cout << "\t-t,--timed\t Times individual puzzles, or sets of 100 depending on option -v" << std::endl;
     std::cout << "\t-s\t\t In case of puzzle string, only returns solved string" << std::endl;
+    std::cout << "\t-p\t\t Solve puzzles in parallel" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -170,6 +219,7 @@ int main(int argc, char **argv)
         bool verbose = false;
         bool showPuzzle = true;
         bool timed = false;
+        bool parallel = false;
         for (int i = 1; i < argc; i++)
         {
             if (std::string(argv[i]) == "-h" or std::string(argv[i]) == "--help")
@@ -189,10 +239,15 @@ int main(int argc, char **argv)
             {
                 showPuzzle = false;
             }
+            else if (std::string(argv[i]) == "-p")
+            {
+                parallel = true;
+            }
         }
         if (access(argv[argc - 2], R_OK) == 0) //if the second to last argument is a readable file
         {
-            solve_file(argv[argc - 2], argv[argc - 1], verbose,timed); //treat it as the input file, and the last argument as the output
+            if (!parallel) solve_file(argv[argc - 2], argv[argc - 1], verbose,timed); //treat it as the input file, and the last argument as the output
+            else solve_file_parallel(argv[argc - 2], argv[argc - 1]);
         }
         else if (access(argv[argc - 1], R_OK) == 0) //if the last argument is a readable file
         {
