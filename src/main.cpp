@@ -6,20 +6,40 @@
 #include "sudoku.h"
 #include <unistd.h>
 #include <future>
+#include <mutex>
 
-int solved = 0;
 int cases;
-std::string solve_puzzle(std::string puzzleString)
+int cur = 0;
+std::vector<std::string> puzzles;
+std::vector<std::string> solutions;
+std::mutex current;
+std::mutex cout;
+int solve_puzzles(int t)
 {
-    Sudoku sudoku(puzzleString);
-    sudoku.solve();
-    solved++;
-    if (solved%100 == 0)
-    std::cout << solved << "/" << cases << "                              \r";
-    return puzzleString + "," + sudoku.toString();
+    int solved = 0;
+    int solving;
+    Sudoku sudoku;
+    std::string puzzle;
+    while (true)
+    {
+        current.lock();
+        solving = cur++;
+        current.unlock();
+        puzzle = puzzles[solving];
+        if (solving >= cases)
+            return solved;
+        sudoku.set_puzzle(puzzle);
+        solved += sudoku.solve();
+        solutions[solving] = puzzle + "," + sudoku.toString();
+        if (cout.try_lock())
+        {
+            std::cout << std::min(cases, cur) << "/" << cases << "\r";
+            cout.unlock();
+        }
+    }
 }
 
-int solve_file_parallel(std::string inputfile, std::string outputfile)
+int solve_file_parallel(std::string inputfile, std::string outputfile, int threads)
 {
     std::ifstream input(inputfile);
     std::ofstream output(outputfile);
@@ -28,24 +48,42 @@ int solve_file_parallel(std::string inputfile, std::string outputfile)
         auto begin = std::chrono::high_resolution_clock::now();
         auto last = std::chrono::high_resolution_clock::now();
         input >> cases;
-        int solved;
+        int solved = 0;
         Sudoku sudoku;
         std::string puzzleString;
         output << cases << "\n";
-        std::vector<std::future<std::string>> futures;
+        std::vector<std::future<int>> futures;
+
         for (int i = 0; i < cases; i++)
         {
             input >> puzzleString;
-            futures.push_back(std::async(solve_puzzle,puzzleString));
+            puzzles.push_back(puzzleString);
+            solutions.push_back("");
         }
-        for (int i = 0; i < cases; i++)
+        for (int i = 0; i < threads; i++)
         {
-            output << futures[i].get() << "\n";
+            futures.push_back(std::async(solve_puzzles, i + 1));
+            std::cout << "started thread " << i + 1 << std::endl;
+        }
+        while (solved < cases)
+        {
+            if (solutions[solved] != "" and solutions[solved].length() == 163)
+            {
+                output << solutions[solved] << std::endl;
+                solved++;
+            }
+            else
+                usleep(20000);
+        }
+        for (int i = 0; i < threads; i++)
+        {
+            solved -= futures[i].get();
         }
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
         std::cout << std::endl
                   << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
+        std::cout << solved << " cases required backtracking" << std::endl;
     }
     else
     {
@@ -69,7 +107,7 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
         Sudoku sudoku;
         std::string puzzleString;
         output << cases << "\n";
-        
+
         for (int i = 0; i < cases; i++)
         {
             input >> puzzleString;
@@ -79,13 +117,13 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
             output << sudoku << "\n";
             if (verbose and timed)
             {
-                std::cout << "Solved case " << i + 1 << "/" << cases<< " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
+                std::cout << "Solved case " << i + 1 << "/" << cases << " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
                 last = std::chrono::high_resolution_clock::now();
                 std::cout.flush();
             }
             else if (timed and (i % 100 == 99 or i + 1 == cases))
             {
-                std::cout << "Solved cases " << i - 99 << "-" << i+1 << "/" << cases << " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
+                std::cout << "Solved cases " << i - 99 << "-" << i + 1 << "/" << cases << " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
                 last = std::chrono::high_resolution_clock::now();
                 std::cout.flush();
             }
@@ -100,7 +138,7 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
         std::cout << std::endl
                   << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
-        std::cout << cases-solved << " cases required backtracking" << std::endl;
+        std::cout << cases - solved << " cases required backtracking" << std::endl;
     }
     else
     {
@@ -131,7 +169,7 @@ int solve_file(std::string inputfile)
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
         std::cout << std::endl
                   << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
-        std::cout << cases-solved << " cases required backtracking" << std::endl;
+        std::cout << cases - solved << " cases required backtracking" << std::endl;
     }
     else
     {
@@ -150,15 +188,18 @@ void solve_string(std::string puzzleString, bool showPuzzle = true, bool timed =
         std::cout << std::endl;
         sudoku.solve();
         std::cout << "solved:" << std::endl
-                 << std::endl;
+                  << std::endl;
         sudoku.print_puzzle();
-    } else {
+    }
+    else
+    {
         sudoku.solve();
         std::cout << sudoku << std::endl;
     }
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    if (timed) std::cout << "Solved puzzle in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
+    if (timed)
+        std::cout << "Solved puzzle in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
 }
 
 std::string getFileName(const std::string &s)
@@ -190,7 +231,7 @@ void helptext(char **argv)
     std::cout << "\t-v,--verbose\t In case of file, show counter for every puzzle instead of every 100" << std::endl;
     std::cout << "\t-t,--timed\t Times individual puzzles, or sets of 100 depending on option -v" << std::endl;
     std::cout << "\t-s\t\t In case of puzzle string, only returns solved string" << std::endl;
-    std::cout << "\t-p\t\t Solve puzzles in parallel" << std::endl;
+    std::cout << "\t-p <threads>t\t Solve puzzles in parallel" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -221,6 +262,7 @@ int main(int argc, char **argv)
         bool showPuzzle = true;
         bool timed = false;
         bool parallel = false;
+        int threads = 0;
         for (int i = 1; i < argc; i++)
         {
             if (std::string(argv[i]) == "-h" or std::string(argv[i]) == "--help")
@@ -243,12 +285,15 @@ int main(int argc, char **argv)
             else if (std::string(argv[i]) == "-p")
             {
                 parallel = true;
+                threads = std::stoi(argv[i + 1]);
             }
         }
         if (access(argv[argc - 2], R_OK) == 0) //if the second to last argument is a readable file
         {
-            if (!parallel) solve_file(argv[argc - 2], argv[argc - 1], verbose,timed); //treat it as the input file, and the last argument as the output
-            else solve_file_parallel(argv[argc - 2], argv[argc - 1]);
+            if (!parallel)
+                solve_file(argv[argc - 2], argv[argc - 1], verbose, timed); //treat it as the input file, and the last argument as the output
+            else
+                solve_file_parallel(argv[argc - 2], argv[argc - 1], threads);
         }
         else if (access(argv[argc - 1], R_OK) == 0) //if the last argument is a readable file
         {
