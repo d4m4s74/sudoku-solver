@@ -178,6 +178,30 @@ int solve_file(std::string inputfile)
     return cases;
 }
 
+int solve_cin()
+{
+
+    int cases = 0;
+
+    Sudoku sudoku;
+    std::string puzzleString;
+    while (std::cin >> puzzleString)
+    {
+        if (puzzleString.length() == 81)
+        {
+            sudoku.set_puzzle(puzzleString);
+            std::cout << sudoku << ",";
+            std::cout << sudoku << std::endl;
+            cases++;
+        }
+        else if (puzzleString.find_first_not_of("0123456789") == std::string::npos)
+            std::cout << puzzleString << std::endl;
+        else return -1;
+    }
+
+    return cases;
+}
+
 void solve_string(std::string puzzleString, bool showPuzzle = true, bool timed = false)
 {
     auto begin = std::chrono::high_resolution_clock::now();
@@ -236,6 +260,10 @@ void helptext(char **argv)
 
 int main(int argc, char **argv)
 {
+    bool cin = false;
+    int size = std::cin.rdbuf()->in_avail();
+    if (!isatty(STDIN_FILENO))
+        cin = true;
     if (argc == 2)
     {
         if (std::string(argv[1]) == "-h" or std::string(argv[1]) == "--help")
@@ -256,7 +284,7 @@ int main(int argc, char **argv)
                 std::cout << "Unable to open file " << argv[argc - 1] << std::endl;
         }
     }
-    else if (argc >= 3)
+    else if (argc >= 3 or cin)
     {
         bool verbose = false;
         bool showPuzzle = true;
@@ -288,7 +316,11 @@ int main(int argc, char **argv)
                 threads = std::stoi(argv[i + 1]);
             }
         }
-        if (access(argv[argc - 2], R_OK) == 0) //if the second to last argument is a readable file
+        if (cin)
+        {
+            solve_cin();
+        }
+        else if (access(argv[argc - 2], R_OK) == 0) //if the second to last argument is a readable file
         {
             if (!parallel)
                 solve_file(argv[argc - 2], argv[argc - 1], verbose, timed); //treat it as the input file, and the last argument as the output
