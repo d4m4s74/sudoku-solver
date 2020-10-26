@@ -14,4 +14,5 @@ options:
         -v,--verbose    In case of file, show counter for every puzzle instead of every 100  
         -t,--timed      In case of file,times individual puzzles, or sets of 100 depending on if -v is set  
         -s              In case of puzzle string, only returns solved string  
+        -p <threads>    Solve puzzles in parallel
 ```

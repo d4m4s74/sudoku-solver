@@ -60,11 +60,13 @@ int solve_file_parallel(std::string inputfile, std::string outputfile, int threa
             puzzles.push_back(puzzleString);
             solutions.push_back("");
         }
+        cout.lock();
         for (int i = 0; i < threads; i++)
         {
             futures.push_back(std::async(solve_puzzles, i + 1));
             std::cout << "started thread " << i + 1 << std::endl;
         }
+        cout.unlock();
         while (solved < cases)
         {
             if (solutions[solved] != "" and solutions[solved].length() == 163)
@@ -190,8 +192,8 @@ int solve_cin()
         if (puzzleString.length() == 81)
         {
             sudoku.set_puzzle(puzzleString);
-            std::cout << sudoku << ",";
-            std::cout << sudoku << std::endl;
+            sudoku.solve();
+            std::cout << puzzleString << "," <<sudoku << std::endl;
             cases++;
         }
         else if (puzzleString.find_first_not_of("0123456789") == std::string::npos)
@@ -255,7 +257,7 @@ void helptext(char **argv)
     std::cout << "\t-v,--verbose\t In case of file, show counter for every puzzle instead of every 100" << std::endl;
     std::cout << "\t-t,--timed\t Times individual puzzles, or sets of 100 depending on option -v" << std::endl;
     std::cout << "\t-s\t\t In case of puzzle string, only returns solved string" << std::endl;
-    std::cout << "\t-p <threads>t\t Solve puzzles in parallel" << std::endl;
+    std::cout << "\t-p <threads>\t Solve puzzles in parallel" << std::endl;
 }
 
 int main(int argc, char **argv)
