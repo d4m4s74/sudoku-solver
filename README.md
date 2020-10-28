@@ -1,6 +1,6 @@
 # sudoku-solver
 A c++ sudoku solver, trying to avoid backtracking  
-Currently implemented: hidden singles, naked pairs, naked triples, hidden pairs, hidden triples, pointing pairs, box/line reduction, x-wing and simple colouring (and backtracking)  
+Currently implemented: hidden singles, naked pairs, naked triples, hidden pairs, hidden triples, pointing pairs, box/line reduction, X-wing, simple colouring and Y-wing (and backtracking)  
   
 Script currently accepts single strings representing the puzzle (ex: 800010000020600050037008400000007260070030009000805300010950000000000103406000000)  
 Script also accepts files containing multiple puzzles. (see testcases folder for examples)
