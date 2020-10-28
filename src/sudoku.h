@@ -59,6 +59,7 @@ class Sudoku
     bool box_line_reduction();
     bool x_wing();
     bool simple_colouring();
+    bool y_wing();
 
     public:
         std::vector<std::vector<int>> get_puzzle();

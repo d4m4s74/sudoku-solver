@@ -1623,6 +1623,221 @@ bool Sudoku::simple_colouring()
     return found;
 }
 
+bool Sudoku::y_wing()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+
+    for (int r = 0; r < 9; r++)
+    {
+        for (int c = 0; c < 9; c++)
+        {
+            if (allOptions[r][c].size() == 2)
+            {
+                std::vector<int> options;
+                options.insert(options.end(), allOptions[r][c].begin(), allOptions[r][c].end()); //casting set to vector so i can access both individually
+                int n1 = options[0];
+                int n2 = options[1];
+                int n3 = 0;  //initialize to meaningless value
+                int r2 = 10; //initialize to impossible value
+                int c2 = 10; //initialize to impossible value
+                int r3 = 10; //initialize to impossible value
+                int c3 = 10; //initialize to impossible value
+                int r4 = 10;
+                int c4 = 10;
+                std::unordered_set<int> remove;
+                // first check square y wings (rows and colums)
+                for (c2 = 0; c2 < 9; c2++)
+                {
+                    if (c2 != c and allOptions[r][c2].size() == 2)
+                    {
+                        if (allOptions[r][c2].count(n1) == 1 and allOptions[r][c2].count(n2) == 0)
+                        {
+                            r2 = r;
+                            options.clear();
+                            options.insert(options.end(), allOptions[r][c2].begin(), allOptions[r][c2].end());
+                            if (options[0] == n1)
+                            {
+                                n3 = options[1];
+                            }
+                            else
+                            {
+                                n3 = options[0];
+                            }
+
+                            break; //since r2 and c2 were already initialized they were saved.
+                        }
+                        else if (allOptions[r][c2].count(n2) == 1 and allOptions[r][c2].count(n1) == 0)
+                        {
+                            r2 = r;
+                            std::swap(n1, n2);
+                            options.clear();
+                            options.insert(options.end(), allOptions[r][c2].begin(), allOptions[r][c2].end());
+                            if (options[0] == n1)
+                            {
+                                n3 = options[1];
+                            }
+                            else
+                            {
+                                n3 = options[0];
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (r2 != 10) //we found a candidate in the same row
+                {
+                    std::unordered_set<int> needle = {n2, n3}; //we know exactly what we're looking for
+                    std::vector<std::unordered_set<int>> col1 = get_options_col(c);
+                    std::vector<std::unordered_set<int>> col2 = get_options_col(c2);
+                    if (std::find(col1.begin(), col1.end(), needle) != col1.end())
+                    {
+                        c3 = c;
+                        c4 = c2;
+                        r4 = r3 = std::find(col1.begin(), col1.end(), needle) - col1.begin();
+                        remove = unordered_set_intersection(needle, col2[r2]);
+                    }
+                    else if (std::find(col2.begin(), col2.end(), needle) != col2.end())
+                    {
+                        c3 = c2;
+                        c4 = c;
+                        r4 = r3 = std::find(col2.begin(), col2.end(), needle) - col2.begin();
+                        remove = unordered_set_intersection(needle, col1[r]);
+                    }
+                    if (r4 != 10) // we found an y wing
+                    {
+                        if (allOptionsCopy[r4][c4].erase(*remove.begin()) == 1)
+                            found = true;
+                    }
+                }
+                //next check with blocks
+                n3 = 0;  //reset to meaningless value
+                r2 = 10; //reset to impossible value
+                c2 = 10; //reset to impossible value
+                r3 = 10; //reset to impossible value
+                c3 = 10; //reset to impossible value
+                r4 = 10;
+                c4 = 10;
+
+                std::vector<std::unordered_set<int>> optionsBlock = get_options_block(r, c);
+                int b1 = r % 3 * 3 + c % 3;
+                int b2 = 10; //initialize value to impossible option
+                for (int b = 0; b < 9; b++)
+                {
+                    if (b != b1 and optionsBlock[b].size() == 2)
+                    {
+                        if (optionsBlock[b].count(n1) == 1 and optionsBlock[b].count(n2) == 0)
+                        {
+                            b2 = b;
+                            options.clear();
+                            options.insert(options.end(), optionsBlock[b].begin(), optionsBlock[b].end());
+                            if (options[0] == n1)
+                            {
+                                n3 = options[1];
+                            }
+                            else
+                            {
+                                n3 = options[0];
+                            }
+
+                            break;
+                        }
+                        else if (optionsBlock[b].count(n2) == 1 and optionsBlock[b].count(n1) == 0)
+                        {
+                            b2 = b;
+                            std::swap(n1, n2);
+                            options.clear();
+                            options.insert(options.end(), optionsBlock[b].begin(), optionsBlock[b].end());
+                            if (options[0] == n1)
+                            {
+                                n3 = options[1];
+                            }
+                            else
+                            {
+                                n3 = options[0];
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (b2 != 10)
+                {
+                    c3 = c4 = r3 = r4 = 10; //resetting
+                    int r0 = r / 3 * 3;
+                    int c0 = c / 3 * 3;
+                    r2 = r0 + b2 / 3;
+                    c2 = c0 + b2 % 3;
+                    std::unordered_set<int> needle = {n2, n3}; //we know exactly what we're looking for
+                    //check row in relation to block
+                    if (r != r2)
+                    {
+                        std::vector<std::unordered_set<int>> row1 = get_options_row(r);
+                        std::vector<std::unordered_set<int>> row2 = get_options_row(r2);
+                        if (std::find(row1.begin(), row1.end(), needle) != row1.end())
+                        {
+                            r3 = r;
+                            r4 = r2;
+                            c3 = std::find(row1.begin(), row1.end(), needle) - row1.begin();
+                            remove = unordered_set_intersection(needle, row2[c2]);
+                        }
+                        else if (std::find(row2.begin(), row2.end(), needle) != row2.end())
+                        {
+                            r3 = r2;
+                            r4 = r;
+                            c3 = std::find(row2.begin(), row2.end(), needle) - row2.begin();
+                            remove = unordered_set_intersection(needle, row1[c]);
+                        }
+                        if (r4 != 10 and !(r/3 == r2/3 and r2/3 == r3/3 and c/3 == c2/3 and c2/3 == c3/3))
+                        {
+                            for (c4 = c3 / 3 * 3; c4 < c3 / 3 * 3 + 3; c4++)
+                            {
+                                if (allOptionsCopy[r4][c4].erase(*remove.begin()) == 1)
+                                    found = true;
+                            }
+                        }
+                    }
+                    //check col in relation to block
+                    c3 = c4 = r3 = r4 = 10; //resetting in case we've also found a y wing in the row
+                    if (c != c2)
+                    {
+                        std::vector<std::unordered_set<int>> col1 = get_options_col(c);
+                        std::vector<std::unordered_set<int>> col2 = get_options_col(c2);
+                        if (std::find(col1.begin(), col1.end(), needle) != col1.end())
+                        {
+                            c3 = c;
+                            c4 = c2;
+                            r3 = std::find(col1.begin(), col1.end(), needle) - col1.begin();
+                            remove = unordered_set_intersection(needle, col2[r2]);
+                        }
+                        else if (std::find(col2.begin(), col2.end(), needle) != col2.end())
+                        {
+                            c3 = c2;
+                            c4 = c;
+                            r3 = std::find(col2.begin(), col2.end(), needle) - col2.begin();
+                            remove = unordered_set_intersection(needle, col1[r]);
+                        }
+                        if (c4 != 10 and !(r/3 == r2/3 and r2/3 == r3/3 and c/3 == c2/3 and c2/3 == c3/3)) //if they're all int the same block also do nothing
+                        {
+                            for (r4 = r3 / 3 * 3; r4 < r3 / 3 * 3 + 3; r4++)
+                            {
+                                if (allOptionsCopy[r4][c4].erase(*remove.begin()) == 1)
+                                    found = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -1762,6 +1977,12 @@ bool Sudoku::solve()
         if (simple_colouring())
         {
             //std::cout << "found Simple Colouring" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (y_wing())
+        {
+            //std::cout << "found Y-wing" << std::endl;
             changed = true;
             continue;
         }
