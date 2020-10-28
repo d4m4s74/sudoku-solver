@@ -30,7 +30,8 @@ int solve_puzzles(int t)
             return solved;
         sudoku.set_puzzle(puzzle);
         solved += sudoku.solve();
-        solutions[solving] = puzzle + "," + sudoku.toString();
+        if (sudoku.is_solved()) solutions[solving] = puzzle + "," + sudoku.toString();
+        else solutions[solving] = puzzle + ",error                                                                            ";
         if (cout.try_lock())
         {
             std::cout << std::min(cases, cur) << "/" << cases << "\r";
@@ -116,7 +117,8 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
             output << puzzleString << ",";
             sudoku.set_puzzle(puzzleString);
             solved += sudoku.solve();
-            output << sudoku << "\n";
+            if (sudoku.is_solved()) output << sudoku << "\n";
+            else output << "error" << "\n";
             if (verbose and timed)
             {
                 std::cout << "Solved case " << i + 1 << "/" << cases << " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
@@ -165,7 +167,8 @@ int solve_file(std::string inputfile)
             input >> sudoku;
             std::cout << sudoku << ",";
             solved += sudoku.solve();
-            std::cout << sudoku << std::endl;
+            if (sudoku.is_solved()) std::cout << sudoku << std::endl;
+            else std::cout << "error" << std::endl;
         }
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
@@ -193,12 +196,17 @@ int solve_cin()
         {
             sudoku.set_puzzle(puzzleString);
             sudoku.solve();
-            std::cout << puzzleString << "," <<sudoku << std::endl;
+            std::cout << puzzleString << ",";
+            if (sudoku.is_solved()) std::cout << sudoku << std::endl;
+            else std::cout << "error" << std::endl;
             cases++;
         }
         else if (puzzleString.find_first_not_of("0123456789") == std::string::npos)
             std::cout << puzzleString << std::endl;
-        else return -1;
+        else 
+        {
+            return -1;
+        }
     }
 
     return cases;
