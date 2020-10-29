@@ -8,6 +8,17 @@
 #include <functional>
 
 //next to add: naked pairs/triples
+
+int Sudoku::block_number(int r, int c)
+{
+    return r/3*3+c/3;
+}
+
+bool Sudoku::seen_by(int r1, int c1, int r2, int c2)
+{
+    return (r1 == r2 or c1 == c2 or block_number(r1,c1) == block_number(r2,c2));
+}
+
 std::vector<int> Sudoku::get_row(int r)
 {
     return puzzle[r];
@@ -1863,7 +1874,7 @@ bool Sudoku::swordfish()
                     c3 = std::find(locations[i].begin() + c2 + 1, locations[i].end(), true) - locations[i].begin();
                 else
                     c3 = 10; //just in case c3 was already set by a different case.
-                for (int j = i+1; j < 8 and !foundCase; j++)
+                for (int j = i + 1; j < 8 and !foundCase; j++)
                 {
                     bool foundSecond = false;
                     if (count(locations[j].begin(), locations[j].end(), true) == 2)
@@ -1882,9 +1893,9 @@ bool Sudoku::swordfish()
                                 foundSecond = true;
                                 c3 = std::find(locations[j].begin(), locations[j].end(), true) - locations[j].begin();
                                 while (c3 == c1 or c3 == c2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
-                                    c3 = std::find(locations[j].begin()+c3+1, locations[j].end(), true) - locations[j].begin();
+                                    c3 = std::find(locations[j].begin() + c3 + 1, locations[j].end(), true) - locations[j].begin();
                             }
-                        } 
+                        }
                     }
                     else if (count(locations[j].begin(), locations[j].end(), true) == 3)
                     {
@@ -1895,16 +1906,16 @@ bool Sudoku::swordfish()
                             {
                                 c3 = std::find(locations[j].begin(), locations[j].end(), true) - locations[j].begin();
                                 while (c3 == c1 or c3 == c2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
-                                    c3 = std::find(locations[j].begin()+c3+1, locations[j].end(), true) - locations[j].begin();
+                                    c3 = std::find(locations[j].begin() + c3 + 1, locations[j].end(), true) - locations[j].begin();
                             }
                         }
                     }
                     if (foundSecond)
                     {
                         r2 = j;
-                        for (int k = j+1; k < 9 and !foundCase; k++)
+                        for (int k = j + 1; k < 9 and !foundCase; k++)
                         {
-                            if (count(locations[k].begin(),locations[k].end(),true) == 2)
+                            if (count(locations[k].begin(), locations[k].end(), true) == 2)
                             {
                                 if ((locations[k][c1] and locations[k][c2]) or (locations[k][c1] and locations[k][c3]) or (locations[k][c2] and locations[k][c3]))
                                 {
@@ -1912,7 +1923,7 @@ bool Sudoku::swordfish()
                                     r3 = k;
                                 }
                             }
-                            else if (count(locations[k].begin(),locations[k].end(),true) == 3)
+                            else if (count(locations[k].begin(), locations[k].end(), true) == 3)
                             {
                                 if (locations[k][c1] and locations[k][c2] and locations[k][c3])
                                 {
@@ -1940,7 +1951,7 @@ bool Sudoku::swordfish()
             continue; //no need to check cols for this number
         }
         //time to check cols
-        std::vector<std::vector<bool>> locationCols = locations;              //transposed version to save some calculations later on.
+        std::vector<std::vector<bool>> locationCols = locations; //transposed version to save some calculations later on.
         transpose_matrix(locationCols);
         r1 = r2 = r3 = 10;
         c1 = c2 = c3 = 10;
@@ -1955,7 +1966,7 @@ bool Sudoku::swordfish()
                     r3 = std::find(locationCols[i].begin() + r2 + 1, locationCols[i].end(), true) - locationCols[i].begin();
                 else
                     r3 = 10; //just in case r3 was already set by a different case.
-                for (int j = i+1; j < 8 and !foundCase; j++)
+                for (int j = i + 1; j < 8 and !foundCase; j++)
                 {
                     bool foundSecond = false;
                     if (count(locationCols[j].begin(), locationCols[j].end(), true) == 2)
@@ -1974,9 +1985,9 @@ bool Sudoku::swordfish()
                                 foundSecond = true;
                                 r3 = std::find(locationCols[j].begin(), locationCols[j].end(), true) - locationCols[j].begin();
                                 while (r3 == r1 or r3 == r2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
-                                    r3 = std::find(locationCols[j].begin()+r3+1, locationCols[j].end(), true) - locationCols[j].begin();
+                                    r3 = std::find(locationCols[j].begin() + r3 + 1, locationCols[j].end(), true) - locationCols[j].begin();
                             }
-                        } 
+                        }
                     }
                     else if (count(locationCols[j].begin(), locationCols[j].end(), true) == 3)
                     {
@@ -1987,16 +1998,16 @@ bool Sudoku::swordfish()
                             {
                                 r3 = std::find(locationCols[j].begin(), locationCols[j].end(), true) - locationCols[j].begin();
                                 while (r3 == r1 or r3 == r2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
-                                    r3 = std::find(locationCols[j].begin()+r3+1, locationCols[j].end(), true) - locationCols[j].begin();
+                                    r3 = std::find(locationCols[j].begin() + r3 + 1, locationCols[j].end(), true) - locationCols[j].begin();
                             }
                         }
                     }
                     if (foundSecond)
                     {
                         c2 = j;
-                        for (int k = j+1; k < 9 and !foundCase; k++)
+                        for (int k = j + 1; k < 9 and !foundCase; k++)
                         {
-                            if (count(locationCols[k].begin(),locationCols[k].end(),true) == 2)
+                            if (count(locationCols[k].begin(), locationCols[k].end(), true) == 2)
                             {
                                 if ((locationCols[k][r1] and locationCols[k][r2]) or (locationCols[k][r1] and locationCols[k][r3]) or (locationCols[k][r2] and locationCols[k][r3]))
                                 {
@@ -2004,7 +2015,7 @@ bool Sudoku::swordfish()
                                     c3 = k;
                                 }
                             }
-                            else if (count(locationCols[k].begin(),locationCols[k].end(),true) == 3)
+                            else if (count(locationCols[k].begin(), locationCols[k].end(), true) == 3)
                             {
                                 if (locationCols[k][r1] and locationCols[k][r2] and locationCols[k][r3])
                                 {
@@ -2029,11 +2040,238 @@ bool Sudoku::swordfish()
                 }
             }
         }
-
     }
 
     if (found)
         allOptions = allOptionsCopy;
+    return found;
+}
+
+bool Sudoku::xyz_wing()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+
+    for (int r = 0; r < 9; r++)
+    {
+        for (int c = 0; c < 9; c++)
+        {
+            if (allOptions[r][c].size() == 3)
+            {
+                int r1 = r;
+                int c1 = c;
+                int r0 = r1/3*3;
+                int c0 = c/3*3;
+                int r2, r3, c2, c3;
+                r2 = r3 = c2 = c3 = 10;
+                int s2, s3;
+                s2 = s3 = 10;
+                std::vector<int> xyz;
+                xyz.insert(xyz.end(), allOptions[r][c].begin(), allOptions[r][c].end()); //casting options to vector for ease of use
+                std::unordered_set<int> xy = {xyz[0], xyz[1]};
+                std::unordered_set<int> xz = {xyz[0], xyz[2]};
+                std::unordered_set<int> yz = {xyz[1], xyz[2]};
+                std::vector<std::unordered_set<int>> subsets = {xy, xz, yz};
+                std::vector<std::unordered_set<int>> optionsRow = get_options_row(r1);
+                std::vector<std::unordered_set<int>> optionsCol = get_options_col(c1);
+                std::vector<std::unordered_set<int>> optionsBlock = get_options_block(r1, c1);
+                for (int s = 0; s < 3; s++)
+                {
+                    if (find(optionsRow.begin(), optionsRow.end(), subsets[s]) != optionsRow.end())
+                    {
+                        if (s2 == 10)
+                        {
+                            s2 = s;
+                            r2 = r;
+                            c2 = find(optionsRow.begin(), optionsRow.end(), subsets[s]) - optionsRow.begin();
+                        }
+                        else
+                        {
+                            s3 = s;
+                            r3 = r;
+                            c3 = find(optionsRow.begin(), optionsRow.end(), subsets[s]) - optionsRow.begin();
+                        }
+                        break;
+                    }
+                }
+                for (int s = 0; s < 3; s++)
+                {
+                    if (find(optionsCol.begin(), optionsCol.end(), subsets[s]) != optionsCol.end())
+                    {
+                        if (s2 == 10)
+                        {
+                            s2 = s;
+                            c2 = c;
+                            r2 = find(optionsCol.begin(), optionsCol.end(), subsets[s]) - optionsCol.begin();
+                            break;
+                        }
+                        else if (s2 != s)
+                        {
+                            s3 = s;
+                            c3 = c;
+                            r3 = find(optionsCol.begin(), optionsCol.end(), subsets[s]) - optionsCol.begin();
+                            break;
+                        }
+                        
+                    }
+                }
+                for (int s = 0; s < 3; s++)
+                {
+                    if (find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) != optionsBlock.end())
+                    {
+                        if (s2 == 10)
+                        {
+                            s2 = s;
+                            int b2 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
+                            r2 = r0 + b2/3;
+                            c3 = c0 + b2%3;
+                            break;
+                        }
+                        else if (s2 != s)
+                        {
+                            s3 = s;
+                            int b3 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
+                            r3 = r0 + b3/3;
+                            c3 = c0 + b3%3;
+                            break;
+                        }
+                        
+                    }
+                }
+                if (s3 != 10 and s2 != s3)
+                {
+                    std::unordered_set<int> intersection = unordered_set_intersection(subsets[s2],subsets[s3]);
+                    int n = *intersection.begin();
+                    for (int i = 0; i < 9; i++)
+                    {
+                        if (i != c1 and i != c2 and i != c3 and seen_by(r1,i,r2,c2) and seen_by(r1,i,r3,c3))
+                        {
+                            if (allOptionsCopy[r1][i].erase(n) == 1)
+                                found = true;
+                        }
+                        if (i != r1 and i != r2 and i != r3 and seen_by(i,c1,r2,c2) and seen_by(i,c1,r3,c3))
+                        {
+                            if (allOptionsCopy[i][c1].erase(n) == 1)
+                                found = true;
+                        }
+                    }
+                    for (int i = r0; i < r0+3; i++)
+                    {
+                        for (int j = c0; j < c0+3; j++)
+                        {
+                            if (!(i == r1 and j == c1) and !(i == r2 and j == c2) and !(i == r3 and j == c3) and seen_by(i,j,r2,c2) and seen_by(i,j,r3,c3))
+                            {
+                                if (allOptionsCopy[i][j].erase(n) == 1)
+                                found = true;
+                            }
+                        }
+                    }
+                }
+                //we're doing the same thing again with colums first because sometimes two xyz wings are possible with the same pivot
+                r2 = c2 = r3 = c3 = s2 = s3 = 10;
+                for (int s = 0; s < 3; s++)
+                {
+                    if (find(optionsCol.begin(), optionsCol.end(), subsets[s]) != optionsCol.end())
+                    {
+                        if (s2 == 10)
+                        {
+                            s2 = s;
+                            c2 = c;
+                            r2 = find(optionsCol.begin(), optionsCol.end(), subsets[s]) - optionsCol.begin();
+                            break;
+                        }
+                        else 
+                        {
+                            s3 = s;
+                            c3 = c;
+                            r3 = find(optionsCol.begin(), optionsCol.end(), subsets[s]) - optionsCol.begin();
+                            break;
+                        }
+                        
+                    }
+                }
+                for (int s = 0; s < 3; s++)
+                {
+                    if (find(optionsRow.begin(), optionsRow.end(), subsets[s]) != optionsRow.end())
+                    {
+                        if (s2 == 10)
+                        {
+                            s2 = s;
+                            r2 = r;
+                            c2 = find(optionsRow.begin(), optionsRow.end(), subsets[s]) - optionsRow.begin();
+                            break;
+                        }
+                        else if (s2 != s)
+                        {
+                            s3 = s;
+                            r3 = r;
+                            c3 = find(optionsRow.begin(), optionsRow.end(), subsets[s]) - optionsRow.begin();
+                            break;
+                        }
+                        
+                    }
+                }
+                for (int s = 0; s < 3; s++)
+                {
+                    if (find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) != optionsBlock.end())
+                    {
+                        if (s2 == 10)
+                        {
+                            s2 = s;
+                            int b2 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
+                            r2 = r0 + b2/3;
+                            c3 = c0 + b2%3;
+                            break;
+                        }
+                        else if (s2 != s)
+                        {
+                            s3 = s;
+                            int b3 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
+                            r3 = r0 + b3/3;
+                            c3 = c0 + b3%3;
+                            break;
+                        }
+                        
+                    }
+                }
+                if (s3 != 10 and s2 != s3)
+                {
+                    std::unordered_set<int> intersection = unordered_set_intersection(subsets[s2],subsets[s3]);
+                    int n = *intersection.begin();
+                    for (int i = 0; i < 9; i++)
+                    {
+                        if (i != c1 and i != c2 and i != c3 and seen_by(r1,i,r2,c2) and seen_by(r1,i,r3,c3))
+                        {
+                            if (allOptionsCopy[r1][i].erase(n) == 1)
+                                found = true;
+                        }
+                        if (i != r1 and i != r2 and i != r3 and seen_by(i,c1,r2,c2) and seen_by(i,c1,r3,c3))
+                        {
+                            if (allOptionsCopy[i][c1].erase(n) == 1)
+                                found = true;
+                        }
+                    }
+                    for (int i = r0; i < r0+3; i++)
+                    {
+                        for (int j = c0; j < c0+3; j++)
+                        {
+                            if (!(i == r1 and j == c1) and !(i == r2 and j == c2) and !(i == r3 and j == c3) and seen_by(i,j,r2,c2) and seen_by(i,j,r3,c3))
+                            {
+                                if (allOptionsCopy[i][j].erase(n) == 1)
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
     return found;
 }
 
@@ -2188,6 +2426,12 @@ bool Sudoku::solve()
         if (swordfish())
         {
             //std::cout << "found swordfish" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (xyz_wing())
+        {
+            //std::cout << "found XYZ wing" << std::endl;
             changed = true;
             continue;
         }

@@ -10,7 +10,8 @@ class Sudoku
     std::vector<std::vector<int>> puzzle = {{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0}};
     std::vector<std::vector<std::unordered_set<int>>> allOptions;
     bool solved = false;
-
+    int block_number(int r, int c);
+    bool seen_by(int r1, int c1, int r2, int c2);
     std::vector<int> get_row(int r);
     std::vector<int> get_col(int c);
 
@@ -61,6 +62,7 @@ class Sudoku
     bool simple_colouring();
     bool y_wing();
     bool swordfish();
+    bool xyz_wing();
 
     public:
         std::vector<std::vector<int>> get_puzzle();
