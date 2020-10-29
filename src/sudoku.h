@@ -60,6 +60,7 @@ class Sudoku
     bool x_wing();
     bool simple_colouring();
     bool y_wing();
+    bool swordfish();
 
     public:
         std::vector<std::vector<int>> get_puzzle();

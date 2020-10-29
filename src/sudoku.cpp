@@ -1787,7 +1787,7 @@ bool Sudoku::y_wing()
                             c3 = std::find(row2.begin(), row2.end(), needle) - row2.begin();
                             remove = unordered_set_intersection(needle, row1[c]);
                         }
-                        if (r4 != 10 and !(r/3 == r2/3 and r2/3 == r3/3 and c/3 == c2/3 and c2/3 == c3/3))
+                        if (r4 != 10 and !(r / 3 == r2 / 3 and r2 / 3 == r3 / 3 and c / 3 == c2 / 3 and c2 / 3 == c3 / 3))
                         {
                             for (c4 = c3 / 3 * 3; c4 < c3 / 3 * 3 + 3; c4++)
                             {
@@ -1816,7 +1816,7 @@ bool Sudoku::y_wing()
                             r3 = std::find(col2.begin(), col2.end(), needle) - col2.begin();
                             remove = unordered_set_intersection(needle, col1[r]);
                         }
-                        if (c4 != 10 and !(r/3 == r2/3 and r2/3 == r3/3 and c/3 == c2/3 and c2/3 == c3/3)) //if they're all int the same block also do nothing
+                        if (c4 != 10 and !(r / 3 == r2 / 3 and r2 / 3 == r3 / 3 and c / 3 == c2 / 3 and c2 / 3 == c3 / 3)) //if they're all int the same block also do nothing
                         {
                             for (r4 = r3 / 3 * 3; r4 < r3 / 3 * 3 + 3; r4++)
                             {
@@ -1835,6 +1835,205 @@ bool Sudoku::y_wing()
         found = (allOptions != allOptionsCopy);
         allOptions = allOptionsCopy;
     }
+    return found;
+}
+
+bool Sudoku::swordfish()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+    for (int n = 1; n < 10; n++)
+    {
+        std::vector<std::vector<bool>> locations = get_possible_locations(n); //get the list of possible locations for number i
+
+        int r1, r2, r3;
+        int c1, c2, c3;
+        r1 = r2 = r3 = 10;
+        c1 = c2 = c3 = 10;
+        bool foundCase = false;
+        //let's first test rows.
+        for (int i = 0; i < 7 and !foundCase; i++)
+        {
+            if (count(locations[i].begin(), locations[i].end(), true) == 2 or count(locations[i].begin(), locations[i].end(), true) == 3)
+            {
+                r1 = i;
+                c1 = std::find(locations[i].begin(), locations[i].end(), true) - locations[i].begin();
+                c2 = std::find(locations[i].begin() + c1 + 1, locations[i].end(), true) - locations[i].begin();
+                if (count(locations[i].begin(), locations[i].end(), true) == 3)
+                    c3 = std::find(locations[i].begin() + c2 + 1, locations[i].end(), true) - locations[i].begin();
+                else
+                    c3 = 10; //just in case c3 was already set by a different case.
+                for (int j = i+1; j < 8 and !foundCase; j++)
+                {
+                    bool foundSecond = false;
+                    if (count(locations[j].begin(), locations[j].end(), true) == 2)
+                    {
+                        if (c3 != 10)
+                        {
+                            if ((locations[j][c1] and locations[j][c2]) or (locations[j][c1] and locations[j][c3]) or (locations[j][c2] and locations[j][c3]))
+                            {
+                                foundSecond = true;
+                            }
+                        }
+                        else
+                        {
+                            if ((locations[j][c1] and !locations[j][c2]) or (locations[j][c2] and !locations[j][c1]))
+                            {
+                                foundSecond = true;
+                                c3 = std::find(locations[j].begin(), locations[j].end(), true) - locations[j].begin();
+                                while (c3 == c1 or c3 == c2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
+                                    c3 = std::find(locations[j].begin()+c3+1, locations[j].end(), true) - locations[j].begin();
+                            }
+                        } 
+                    }
+                    else if (count(locations[j].begin(), locations[j].end(), true) == 3)
+                    {
+                        if (locations[j][c1] and locations[j][c2] and (c3 == 10 or locations[j][c3]))
+                        {
+                            foundSecond = true;
+                            if (c3 == 10)
+                            {
+                                c3 = std::find(locations[j].begin(), locations[j].end(), true) - locations[j].begin();
+                                while (c3 == c1 or c3 == c2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
+                                    c3 = std::find(locations[j].begin()+c3+1, locations[j].end(), true) - locations[j].begin();
+                            }
+                        }
+                    }
+                    if (foundSecond)
+                    {
+                        r2 = j;
+                        for (int k = j+1; k < 9 and !foundCase; k++)
+                        {
+                            if (count(locations[k].begin(),locations[k].end(),true) == 2)
+                            {
+                                if ((locations[k][c1] and locations[k][c2]) or (locations[k][c1] and locations[k][c3]) or (locations[k][c2] and locations[k][c3]))
+                                {
+                                    foundCase = true;
+                                    r3 = k;
+                                }
+                            }
+                            else if (count(locations[k].begin(),locations[k].end(),true) == 3)
+                            {
+                                if (locations[k][c1] and locations[k][c2] and locations[k][c3])
+                                {
+                                    foundCase = true;
+                                    r3 = k;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (foundCase)
+        {
+            //we've found a case. Let's deal with it.
+            for (int i = 0; i < 9; i++)
+            {
+                if (i != r1 and i != r2 and i != r3)
+                {
+                    if (allOptionsCopy[i][c1].erase(n) == 1 or allOptionsCopy[i][c2].erase(n) == 1 or allOptionsCopy[i][c3].erase(n) == 1)
+                        found = true;
+                }
+            }
+
+            continue; //no need to check cols for this number
+        }
+        //time to check cols
+        std::vector<std::vector<bool>> locationCols = locations;              //transposed version to save some calculations later on.
+        transpose_matrix(locationCols);
+        r1 = r2 = r3 = 10;
+        c1 = c2 = c3 = 10;
+        for (int i = 0; i < 7 and !foundCase; i++)
+        {
+            if (count(locationCols[i].begin(), locationCols[i].end(), true) == 2 or count(locationCols[i].begin(), locationCols[i].end(), true) == 3)
+            {
+                c1 = i;
+                r1 = std::find(locationCols[i].begin(), locationCols[i].end(), true) - locationCols[i].begin();
+                r2 = std::find(locationCols[i].begin() + r1 + 1, locationCols[i].end(), true) - locationCols[i].begin();
+                if (count(locationCols[i].begin(), locationCols[i].end(), true) == 3)
+                    r3 = std::find(locationCols[i].begin() + r2 + 1, locationCols[i].end(), true) - locationCols[i].begin();
+                else
+                    r3 = 10; //just in case r3 was already set by a different case.
+                for (int j = i+1; j < 8 and !foundCase; j++)
+                {
+                    bool foundSecond = false;
+                    if (count(locationCols[j].begin(), locationCols[j].end(), true) == 2)
+                    {
+                        if (r3 != 10)
+                        {
+                            if ((locationCols[j][r1] and locationCols[j][r2]) or (locationCols[j][r1] and locationCols[j][r3]) or (locationCols[j][r2] and locationCols[j][r3]))
+                            {
+                                foundSecond = true;
+                            }
+                        }
+                        else
+                        {
+                            if ((locationCols[j][r1] and !locationCols[j][r2]) or (locationCols[j][r2] and !locationCols[j][r1]))
+                            {
+                                foundSecond = true;
+                                r3 = std::find(locationCols[j].begin(), locationCols[j].end(), true) - locationCols[j].begin();
+                                while (r3 == r1 or r3 == r2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
+                                    r3 = std::find(locationCols[j].begin()+r3+1, locationCols[j].end(), true) - locationCols[j].begin();
+                            }
+                        } 
+                    }
+                    else if (count(locationCols[j].begin(), locationCols[j].end(), true) == 3)
+                    {
+                        if (locationCols[j][r1] and locationCols[j][r2] and (r3 == 10 or locationCols[j][r3]))
+                        {
+                            foundSecond = true;
+                            if (r3 == 10)
+                            {
+                                r3 = std::find(locationCols[j].begin(), locationCols[j].end(), true) - locationCols[j].begin();
+                                while (r3 == r1 or r3 == r2) //I don't want to do two seperate but exactly the same if statements, so I use a while.
+                                    r3 = std::find(locationCols[j].begin()+r3+1, locationCols[j].end(), true) - locationCols[j].begin();
+                            }
+                        }
+                    }
+                    if (foundSecond)
+                    {
+                        c2 = j;
+                        for (int k = j+1; k < 9 and !foundCase; k++)
+                        {
+                            if (count(locationCols[k].begin(),locationCols[k].end(),true) == 2)
+                            {
+                                if ((locationCols[k][r1] and locationCols[k][r2]) or (locationCols[k][r1] and locationCols[k][r3]) or (locationCols[k][r2] and locationCols[k][r3]))
+                                {
+                                    foundCase = true;
+                                    c3 = k;
+                                }
+                            }
+                            else if (count(locationCols[k].begin(),locationCols[k].end(),true) == 3)
+                            {
+                                if (locationCols[k][r1] and locationCols[k][r2] and locationCols[k][r3])
+                                {
+                                    foundCase = true;
+                                    c3 = k;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (foundCase)
+        {
+            //we've found a case. Let's deal with it.
+            for (int i = 0; i < 9; i++)
+            {
+                if (i != c1 and i != c2 and i != c3)
+                {
+                    if (allOptionsCopy[r1][i].erase(n) == 1 or allOptionsCopy[r2][i].erase(n) == 1 or allOptionsCopy[r3][i].erase(n) == 1)
+                        found = true;
+                }
+            }
+        }
+
+    }
+
+    if (found)
+        allOptions = allOptionsCopy;
     return found;
 }
 
@@ -1983,6 +2182,12 @@ bool Sudoku::solve()
         if (y_wing())
         {
             //std::cout << "found Y-wing" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (swordfish())
+        {
+            //std::cout << "found swordfish" << std::endl;
             changed = true;
             continue;
         }
