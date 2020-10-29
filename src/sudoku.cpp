@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "sudoku.h"
 #include <functional>
+#include <utility>
 
 //next to add: naked pairs/triples
 
@@ -17,6 +18,41 @@ int Sudoku::block_number(int r, int c)
 bool Sudoku::seen_by(int r1, int c1, int r2, int c2)
 {
     return (r1 == r2 or c1 == c2 or block_number(r1,c1) == block_number(r2,c2));
+}
+
+std::vector<std::pair<int,int>> Sudoku::list_seen_by(int r, int c) //returns a list of squares seen by both squares
+{
+    std::vector<std::pair<int,int>> output;
+    for (int i = 0; i < 9; i++)
+    {
+        if (i != r) output.push_back({i,c});
+        if (i != c) output.push_back({r,i});
+    }
+    int r0 = r/3*3;
+    int c0 = c/3*3;
+    for (int i = r0; i < r0+3; i++)
+    {
+        for (int j = c0; j < c0+3; j++)
+        {
+            if (i != r and j != c) output.push_back({i,j});
+        }
+    }
+    return output;
+}
+
+std::vector<std::pair<int,int>> Sudoku::list_seen_by(std::vector<std::pair<int,int>> checklist, int r, int c) //returns a list of squares within the given list the given square
+{
+    std::vector<std::pair<int,int>> output;
+    for (std::pair<int,int> rc:checklist)
+    {
+        if (seen_by(rc.first,rc.second,r,c)) output.push_back(rc);
+    }
+    return output;
+}
+
+std::vector<std::pair<int,int>> Sudoku::list_seen_by(int r1, int c1, int r2, int c2) //returns a list of squares seen by both squares
+{
+    return list_seen_by(list_seen_by(r1,c1),r2,c2);
 }
 
 std::vector<int> Sudoku::get_row(int r)

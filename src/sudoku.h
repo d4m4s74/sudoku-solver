@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
 #ifndef SUDOKU_H
 #define SUDOKU_H
@@ -12,6 +13,9 @@ class Sudoku
     bool solved = false;
     int block_number(int r, int c);
     bool seen_by(int r1, int c1, int r2, int c2);
+    std::vector<std::pair<int,int>> list_seen_by(int r, int c);
+    std::vector<std::pair<int,int>> list_seen_by(std::vector<std::pair<int,int>> list, int r2, int c2);
+    std::vector<std::pair<int,int>> list_seen_by(int r1, int c1, int r2, int c2);
     std::vector<int> get_row(int r);
     std::vector<int> get_col(int c);
 
