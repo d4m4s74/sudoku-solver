@@ -39,6 +39,7 @@ class Sudoku
     std::vector<std::unordered_set<int>> get_options_block_except(int r1, int c1, int r2, int c2);
     std::vector<std::unordered_set<int>> get_options_block_except(int r1, int c1, int r2, int c2, int r3, int c3);
     std::vector<std::vector<bool>> get_possible_locations(int n);
+    std::vector<std::vector<int>> get_options_count();
 
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::unordered_set<int> right);
     std::unordered_set<int> unordered_set_difference(std::unordered_set<int> left, std::vector<int> right);
@@ -68,6 +69,7 @@ class Sudoku
     bool swordfish();
     bool xyz_wing();
     bool x_cycles();
+    bool xy_chain();
 
     public:
         std::vector<std::vector<int>> get_puzzle();
