@@ -1,6 +1,11 @@
 # sudoku-solver
+<<<<<<< HEAD
 A c++ sudoku solver, trying to avoid backtracking  
 Currently implemented: hidden singles, naked pairs, naked triples, hidden pairs, hidden triples, pointing pairs, box/line reduction, X-wing, simple colouring, Y-wing, Swordfish, XYZ wing, X-Cycles and XY-Chain (and backtracking)  
+=======
+A c++ "human method" sudoku solver, trying to avoid backtracking  
+Currently implemented: hidden singles, naked pairs, naked triples, hidden pairs, hidden triples, pointing pairs, box/line reduction, X-wing, simple colouring, Y-wing, Swordfish and XYZ wing (and backtracking)  
+>>>>>>> 2e0dd01783271d1ba0ea59d675d3d08a09b962df
   
 Script currently accepts single strings representing the puzzle (ex: 800010000020600050037008400000007260070030009000805300010950000000000103406000000)  
 Script also accepts files containing multiple puzzles. (see testcases folder for examples)
