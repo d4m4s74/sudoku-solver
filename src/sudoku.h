@@ -67,6 +67,7 @@ class Sudoku
     bool y_wing();
     bool swordfish();
     bool xyz_wing();
+    bool x_cycles();
 
     public:
         std::vector<std::vector<int>> get_puzzle();

@@ -8,51 +8,53 @@
 #include <functional>
 #include <utility>
 
-//next to add: naked pairs/triples
-
 int Sudoku::block_number(int r, int c)
 {
-    return r/3*3+c/3;
+    return r / 3 * 3 + c / 3;
 }
 
 bool Sudoku::seen_by(int r1, int c1, int r2, int c2)
 {
-    return (r1 == r2 or c1 == c2 or block_number(r1,c1) == block_number(r2,c2));
+    return (r1 == r2 or c1 == c2 or block_number(r1, c1) == block_number(r2, c2));
 }
 
-std::vector<std::pair<int,int>> Sudoku::list_seen_by(int r, int c) //returns a list of squares seen by both squares
+std::vector<std::pair<int, int>> Sudoku::list_seen_by(int r, int c) //returns a list of squares seen by both squares
 {
-    std::vector<std::pair<int,int>> output;
+    std::vector<std::pair<int, int>> output;
     for (int i = 0; i < 9; i++)
     {
-        if (i != r) output.push_back({i,c});
-        if (i != c) output.push_back({r,i});
+        if (i != r)
+            output.push_back({i, c});
+        if (i != c)
+            output.push_back({r, i});
     }
-    int r0 = r/3*3;
-    int c0 = c/3*3;
-    for (int i = r0; i < r0+3; i++)
+    int r0 = r / 3 * 3;
+    int c0 = c / 3 * 3;
+    for (int i = r0; i < r0 + 3; i++)
     {
-        for (int j = c0; j < c0+3; j++)
+        for (int j = c0; j < c0 + 3; j++)
         {
-            if (i != r and j != c) output.push_back({i,j});
+            if (i != r and j != c)
+                output.push_back({i, j});
         }
     }
     return output;
 }
 
-std::vector<std::pair<int,int>> Sudoku::list_seen_by(std::vector<std::pair<int,int>> checklist, int r, int c) //returns a list of squares within the given list the given square
+std::vector<std::pair<int, int>> Sudoku::list_seen_by(std::vector<std::pair<int, int>> checklist, int r, int c) //returns a list of squares within the given list the given square
 {
-    std::vector<std::pair<int,int>> output;
-    for (std::pair<int,int> rc:checklist)
+    std::vector<std::pair<int, int>> output;
+    for (std::pair<int, int> rc : checklist)
     {
-        if (seen_by(rc.first,rc.second,r,c)) output.push_back(rc);
+        if (seen_by(rc.first, rc.second, r, c))
+            output.push_back(rc);
     }
     return output;
 }
 
-std::vector<std::pair<int,int>> Sudoku::list_seen_by(int r1, int c1, int r2, int c2) //returns a list of squares seen by both squares
+std::vector<std::pair<int, int>> Sudoku::list_seen_by(int r1, int c1, int r2, int c2) //returns a list of squares seen by both squares
 {
-    return list_seen_by(list_seen_by(r1,c1),r2,c2);
+    return list_seen_by(list_seen_by(r1, c1), r2, c2);
 }
 
 std::vector<int> Sudoku::get_row(int r)
@@ -2096,8 +2098,8 @@ bool Sudoku::xyz_wing()
             {
                 int r1 = r;
                 int c1 = c;
-                int r0 = r1/3*3;
-                int c0 = c/3*3;
+                int r0 = r1 / 3 * 3;
+                int c0 = c / 3 * 3;
                 int r2, r3, c2, c3;
                 r2 = r3 = c2 = c3 = 10;
                 int s2, s3;
@@ -2148,7 +2150,6 @@ bool Sudoku::xyz_wing()
                             r3 = find(optionsCol.begin(), optionsCol.end(), subsets[s]) - optionsCol.begin();
                             break;
                         }
-                        
                     }
                 }
                 for (int s = 0; s < 3; s++)
@@ -2159,46 +2160,45 @@ bool Sudoku::xyz_wing()
                         {
                             s2 = s;
                             int b2 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
-                            r2 = r0 + b2/3;
-                            c3 = c0 + b2%3;
+                            r2 = r0 + b2 / 3;
+                            c3 = c0 + b2 % 3;
                             break;
                         }
                         else if (s2 != s)
                         {
                             s3 = s;
                             int b3 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
-                            r3 = r0 + b3/3;
-                            c3 = c0 + b3%3;
+                            r3 = r0 + b3 / 3;
+                            c3 = c0 + b3 % 3;
                             break;
                         }
-                        
                     }
                 }
                 if (s3 != 10 and s2 != s3)
                 {
-                    std::unordered_set<int> intersection = unordered_set_intersection(subsets[s2],subsets[s3]);
+                    std::unordered_set<int> intersection = unordered_set_intersection(subsets[s2], subsets[s3]);
                     int n = *intersection.begin();
                     for (int i = 0; i < 9; i++)
                     {
-                        if (i != c1 and i != c2 and i != c3 and seen_by(r1,i,r2,c2) and seen_by(r1,i,r3,c3))
+                        if (i != c1 and i != c2 and i != c3 and seen_by(r1, i, r2, c2) and seen_by(r1, i, r3, c3))
                         {
                             if (allOptionsCopy[r1][i].erase(n) == 1)
                                 found = true;
                         }
-                        if (i != r1 and i != r2 and i != r3 and seen_by(i,c1,r2,c2) and seen_by(i,c1,r3,c3))
+                        if (i != r1 and i != r2 and i != r3 and seen_by(i, c1, r2, c2) and seen_by(i, c1, r3, c3))
                         {
                             if (allOptionsCopy[i][c1].erase(n) == 1)
                                 found = true;
                         }
                     }
-                    for (int i = r0; i < r0+3; i++)
+                    for (int i = r0; i < r0 + 3; i++)
                     {
-                        for (int j = c0; j < c0+3; j++)
+                        for (int j = c0; j < c0 + 3; j++)
                         {
-                            if (!(i == r1 and j == c1) and !(i == r2 and j == c2) and !(i == r3 and j == c3) and seen_by(i,j,r2,c2) and seen_by(i,j,r3,c3))
+                            if (!(i == r1 and j == c1) and !(i == r2 and j == c2) and !(i == r3 and j == c3) and seen_by(i, j, r2, c2) and seen_by(i, j, r3, c3))
                             {
                                 if (allOptionsCopy[i][j].erase(n) == 1)
-                                found = true;
+                                    found = true;
                             }
                         }
                     }
@@ -2216,14 +2216,13 @@ bool Sudoku::xyz_wing()
                             r2 = find(optionsCol.begin(), optionsCol.end(), subsets[s]) - optionsCol.begin();
                             break;
                         }
-                        else 
+                        else
                         {
                             s3 = s;
                             c3 = c;
                             r3 = find(optionsCol.begin(), optionsCol.end(), subsets[s]) - optionsCol.begin();
                             break;
                         }
-                        
                     }
                 }
                 for (int s = 0; s < 3; s++)
@@ -2244,7 +2243,6 @@ bool Sudoku::xyz_wing()
                             c3 = find(optionsRow.begin(), optionsRow.end(), subsets[s]) - optionsRow.begin();
                             break;
                         }
-                        
                     }
                 }
                 for (int s = 0; s < 3; s++)
@@ -2255,47 +2253,401 @@ bool Sudoku::xyz_wing()
                         {
                             s2 = s;
                             int b2 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
-                            r2 = r0 + b2/3;
-                            c3 = c0 + b2%3;
+                            r2 = r0 + b2 / 3;
+                            c3 = c0 + b2 % 3;
                             break;
                         }
                         else if (s2 != s)
                         {
                             s3 = s;
                             int b3 = find(optionsBlock.begin(), optionsBlock.end(), subsets[s]) - optionsBlock.begin();
-                            r3 = r0 + b3/3;
-                            c3 = c0 + b3%3;
+                            r3 = r0 + b3 / 3;
+                            c3 = c0 + b3 % 3;
                             break;
                         }
-                        
                     }
                 }
                 if (s3 != 10 and s2 != s3)
                 {
-                    std::unordered_set<int> intersection = unordered_set_intersection(subsets[s2],subsets[s3]);
+                    std::unordered_set<int> intersection = unordered_set_intersection(subsets[s2], subsets[s3]);
                     int n = *intersection.begin();
                     for (int i = 0; i < 9; i++)
                     {
-                        if (i != c1 and i != c2 and i != c3 and seen_by(r1,i,r2,c2) and seen_by(r1,i,r3,c3))
+                        if (i != c1 and i != c2 and i != c3 and seen_by(r1, i, r2, c2) and seen_by(r1, i, r3, c3))
                         {
                             if (allOptionsCopy[r1][i].erase(n) == 1)
                                 found = true;
                         }
-                        if (i != r1 and i != r2 and i != r3 and seen_by(i,c1,r2,c2) and seen_by(i,c1,r3,c3))
+                        if (i != r1 and i != r2 and i != r3 and seen_by(i, c1, r2, c2) and seen_by(i, c1, r3, c3))
                         {
                             if (allOptionsCopy[i][c1].erase(n) == 1)
                                 found = true;
                         }
                     }
-                    for (int i = r0; i < r0+3; i++)
+                    for (int i = r0; i < r0 + 3; i++)
                     {
-                        for (int j = c0; j < c0+3; j++)
+                        for (int j = c0; j < c0 + 3; j++)
                         {
-                            if (!(i == r1 and j == c1) and !(i == r2 and j == c2) and !(i == r3 and j == c3) and seen_by(i,j,r2,c2) and seen_by(i,j,r3,c3))
+                            if (!(i == r1 and j == c1) and !(i == r2 and j == c2) and !(i == r3 and j == c3) and seen_by(i, j, r2, c2) and seen_by(i, j, r3, c3))
                             {
                                 if (allOptionsCopy[i][j].erase(n) == 1)
-                                found = true;
+                                    found = true;
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
+bool Sudoku::x_cycles()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
+    std::vector<std::vector<int>> chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+    for (int n = 1; n < 10; n++)
+    {
+        std::vector<std::vector<bool>> locations = get_possible_locations(n);
+        std::vector<std::vector<bool>> locationCols = locations;
+        transpose_matrix(locationCols);
+        std::vector<std::pair<int, int>> tested;
+        int startr, startc, chainLength, dr, dc;
+        bool ds = false;
+        std::function<bool(int, int, int, bool, bool)> find_chain;
+        find_chain = [&](int r, int c, int colour, bool strong, bool allow_disc) {
+            chain[r][c] = colour;
+            tested.push_back({r, c});
+            chainLength += 1;
+            if (strong) //first try finding strong links. This is the easy part.
+            {
+                if (std::count(locations[r].begin(), locations[r].end(), true) == 2)
+                {
+                    int r2 = r;
+                    int c2 = std::find(locations[r].begin(), locations[r].end(), true) - locations[r].begin();
+                    if (c2 == c)
+                        c2 = std::find(locations[r].begin() + c + 1, locations[r].end(), true) - locations[r].begin();
+                    if ((chain[r2][c2] == 0 and find_chain(r2, c2, (colour == 1) ? 2 : 1, false, allow_disc)))
+                    {
+                        return true;
+                    }
+                }
+                if (std::count(locationCols[c].begin(), locationCols[c].end(), true) == 2)
+                {
+                    int c2 = c;
+                    int r2 = std::find(locationCols[c].begin(), locationCols[c].end(), true) - locationCols[c].begin();
+                    if (r2 == r)
+                        r2 = std::find(locationCols[c].begin() + r + 1, locationCols[c].end(), true) - locationCols[c].begin();
+                    if ((chain[r2][c2] == 0 and find_chain(r2, c2, (colour == 1) ? 2 : 1, false, allow_disc)))
+                    {
+                        return true;
+                    }
+                }
+                std::vector<bool> locationBlock = get_block(locations, r, c);
+                if (std::count(locationBlock.begin(), locationBlock.end(), true) == 2)
+                {
+                    int b = r % 3 * 3 + c % 3;
+                    int r0 = r / 3 * 3;
+                    int c0 = c / 3 * 3;
+                    int b2 = std::find(locationBlock.begin(), locationBlock.end(), true) - locationBlock.begin();
+                    if (b2 == b)
+                        b2 = std::find(locationBlock.begin() + b + 1, locationBlock.end(), true) - locationBlock.begin();
+                    int r2 = r0 + b2 / 3;
+                    int c2 = c0 + b2 % 3;
+                    if ((chain[r2][c2] == 0 and find_chain(r2, c2, (colour == 1) ? 2 : 1, false, allow_disc)))
+                    {
+                        return true;
+                    }
+                }
+                if (dr != 10 or allow_disc == false)
+                {
+                    chain[r][c] = 0;
+                    chainLength -= 1;
+                    return false;
+                }
+                else
+                {
+                    dr = r;
+                    dc = c;
+                    ds = false;
+                    chain[r][c] = 3;                //changing the color to something neutral
+                    colour = (colour == 1) ? 2 : 1; //flipping the color so the next color fits the chain.
+                }
+            }
+            //then we try weak links
+            if (strong == false and chainLength > 2 and (r == startr or c == startc or block_number(r,c) == block_number(startr,startc))) return true;
+            if (std::count(locations[r].begin(), locations[r].end(), true) > 2)
+            {
+                bool done = false;
+                int r2 = r;
+                int next = 0;
+                while (!done)
+                {
+                    int c2 = std::find(locations[r].begin() + next, locations[r].end(), true) - locations[r].begin();
+                    if (c2 == c)
+                        next = c2 + 1;
+                    else if (c2 == locations[r].end() - locations[r].begin())
+                        done = true;
+                    else
+                    {
+                        if ((c2 == startc and r2 == startr and chainLength > 2) or (chain[r2][c2] == 0 and find_chain(r2, c2, (colour == 1) ? 2 : 1, true, allow_disc)))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            next = c2 + 1;
+                            if (next == locations[r].end() - locations[r].begin())
+                                done = true;
+                        }
+                    }
+                }
+            }
+            if (std::count(locationCols[c].begin(), locationCols[c].end(), true) > 2)
+            {
+                bool done = false;
+                int c2 = c;
+                int next = 0;
+                while (!done)
+                {
+                    int r2 = std::find(locationCols[c].begin() + next, locationCols[c].end(), true) - locationCols[c].begin();
+                    if (r2 == r)
+                        next = r2 + 1;
+                    else if (r2 == locationCols[c].end() - locationCols[c].begin())
+                        done = true;
+                    else
+                    {
+                        if ((c2 == startc and r2 == startr and chainLength > 2) or (chain[r2][c2] == 0 and find_chain(r2, c2, (colour == 1) ? 2 : 1, true, allow_disc)))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            next = r2 + 1;
+                            if (next == locationCols[c].end() - locationCols[c].begin())
+                                done = true;
+                        }
+                    }
+                }
+            }
+            std::vector<bool> locationBlock = get_block(locations, r, c);
+            if (std::count(locationBlock.begin(), locationBlock.end(), true) > 2)
+            {
+                bool done = false;
+                int next = 0;
+                int b = r % 3 * 3 + c % 3;
+                int r0 = r / 3 * 3;
+                int c0 = c / 3 * 3;
+                while (!done)
+                {
+                    int b2 = std::find(locationBlock.begin() + next, locationBlock.end(), true) - locationBlock.begin();
+                    if (b2 == b)
+                        next = b2 + 1;
+                    else if (b2 == locationBlock.end() - locationBlock.begin())
+                        done = true;
+                    else
+                    {
+                        int r2 = r0 + b2 / 3;
+                        int c2 = c0 + b2 % 3;
+                        if ((c2 == startc and r2 == startr and chainLength > 2) or (chain[r2][c2] == 0 and find_chain(r2, c2, (colour == 1) ? 2 : 1, true, allow_disc)))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            next = b2 + 1;
+                            if (next == locationBlock.end() - locationBlock.begin())
+                                done = true;
+                        }
+                    }
+                }
+            }
+            if (dr == 10 and chainLength > 2 and allow_disc == true and (r == startr or c == startc or block_number(r, c) == block_number(startr, startc)))
+            {
+                dr = startr;
+                dc = startc;
+                ds = true;
+                return true;
+            }
+
+            chain[r][c] = 0;
+            chainLength--;
+            if (dr == r and dc == c)
+                dr = dc = 10;
+            return false;
+        };
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                if (locations[i][j] == true)
+                {
+                    tested.clear();
+                    bool foundCycle = false;
+                    if (std::count(locations[i].begin(), locations[i].end(), true) == 2)
+                    {
+                        chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                        chainLength = 0;
+                        dr = dc = 10;
+
+                        startr = i;
+                        startc = j;
+                        std::vector<std::pair<int, int>> testedBackup = tested;
+                        tested.clear();
+                        if (find_chain(startr, startc, 1, true, false))
+                        {
+                            foundCycle = true;
+                        }
+                    }
+                    if (!foundCycle and std::count(locationCols[j].begin(), locationCols[j].end(), true) == 2)
+                    {
+                        chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                        chainLength = 0;
+                        dr = dc = 10;
+                        startr = i;
+                        startc = j;
+                        std::vector<std::pair<int, int>> testedBackup = tested;
+                        tested.clear();
+                        if (find_chain(startr, startc, 1, true, false))
+                        {
+                            foundCycle = true;
+                        }
+                    }
+                    std::vector<bool> locationBlock = get_block(locations, i, j);
+                    if (!foundCycle and std::count(locationBlock.begin(), locationBlock.end(), true) == 2)
+                    {
+                        chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                        chainLength = 0;
+                        dr = dc = 10;
+                        startr = i;
+                        startc = j;
+                        tested.clear();
+                        std::vector<std::pair<int, int>> testedBackup = tested;
+                        if (find_chain(startr, startc, 1, true, false))
+                        {
+                            foundCycle = true;
+                        }
+                    }
+                    if (!foundCycle and std::count(locations[i].begin(), locations[i].end(), true) == 2)
+                    {
+                        chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                        chainLength = 0;
+                        dr = dc = 10;
+
+                        startr = i;
+                        startc = j;
+                        std::vector<std::pair<int, int>> testedBackup = tested;
+                        tested.clear();
+                        if (find_chain(startr, startc, 1, true, true))
+                        {
+                            foundCycle = true;
+                        }
+                    }
+                    if (!foundCycle and std::count(locationCols[j].begin(), locationCols[j].end(), true) == 2)
+                    {
+                        chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                        chainLength = 0;
+                        dr = dc = 10;
+                        startr = i;
+                        startc = j;
+                        std::vector<std::pair<int, int>> testedBackup = tested;
+                        tested.clear();
+                        if (find_chain(startr, startc, 1, true, true))
+                        {
+                            foundCycle = true;
+                        }
+                    }
+                    if (!foundCycle and std::count(locationBlock.begin(), locationBlock.end(), true) == 2)
+                    {
+                        chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                        chainLength = 0;
+                        dr = dc = 10;
+                        startr = i;
+                        startc = j;
+                        tested.clear();
+                        std::vector<std::pair<int, int>> testedBackup = tested;
+                        if (find_chain(startr, startc, 1, true, true))
+                        {
+                            foundCycle = true;
+                        }
+                    }
+                    if (foundCycle)
+                    {
+                        if (chainLength % 2 == 0) //we have a continous loop
+                        {
+                            std::vector<std::vector<int>> chainCols = chain;
+                            transpose_matrix(chainCols);
+                            for (int k = 0; k < 9; k++) //we check every row to see if it contains both a 1 and a 2
+                            {
+                                int c1 = std::find(chain[k].begin(), chain[k].end(), 1) - chain[k].begin();
+                                int c2 = std::find(chain[k].begin(), chain[k].end(), 2) - chain[k].begin();
+                                if (c1 != 9 and c2 != 9) //we found a row that contains both 1 and 2
+                                {
+                                    int r = k;
+                                    for (int c = 0; c < 9; c++)
+                                    {
+                                        if (c != c1 and c != c2)
+                                        {
+                                            if (allOptionsCopy[r][c].erase(n))
+                                                found = true;
+                                        }
+                                    }
+                                }
+                                int r1 = std::find(chainCols[k].begin(), chainCols[k].end(), 1) - chainCols[k].begin();
+                                int r2 = std::find(chainCols[k].begin(), chainCols[k].end(), 2) - chainCols[k].begin();
+                                if (r1 != 9 and r2 != 9) //we found a row that contains both 1 and 2
+                                {
+                                    int c = k;
+                                    for (int r = 0; r < 9; r++)
+                                    {
+                                        if (r != r1 and r != r2)
+                                        {
+                                            if (allOptionsCopy[r][c].erase(n))
+                                                found = true;
+                                        }
+                                    }
+                                }
+                                std::vector<int> chainBlock = get_block(chain, k);
+                                int b1 = std::find(chainBlock.begin(), chainBlock.end(), 1) - chainBlock.begin();
+                                int b2 = std::find(chainBlock.begin(), chainBlock.end(), 2) - chainBlock.begin();
+                                if (b1 != 9 and b2 != 9) //we found a row that contains both 1 and 2
+                                {
+                                    int r0 = k / 3 * 3;
+                                    int c0 = k % 3 * 3;
+                                    int r1 = r0 + b1 / 3;
+                                    int c1 = c0 + b1 % 3;
+                                    int r2 = r0 + b2 / 3;
+                                    int c2 = c0 + b2 % 3;
+                                    for (int r = r0; r < r0 + 3; r++)
+                                    {
+                                        for (int c = c0; c < c0 + 3; c++)
+                                        {
+                                            if (!(r == r1 and c == c1) and !(r == r2 and c == c2))
+                                            {
+                                                if (allOptionsCopy[r][c].erase(n))
+                                                    found = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (dr != 10 and ds == true) //we have case 2
+                        {
+                            allOptionsCopy[dr][dc] = {n};
+                            found = true;
+                        }
+                        else //we have case 3
+                        {
+                            allOptionsCopy[dr][dc].erase(n);
+                            found = true;
                         }
                     }
                 }
@@ -2468,6 +2820,12 @@ bool Sudoku::solve()
         if (xyz_wing())
         {
             //std::cout << "found XYZ wing" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (x_cycles())
+        {
+            //std::cout << "found X-Cycle" << std::endl;
             changed = true;
             continue;
         }
