@@ -35,6 +35,7 @@ int solve_puzzles(int t)
         if (cout.try_lock())
         {
             std::cout << std::min(cases, cur) << "/" << cases << "\r";
+            if (cur%100 == 0) std::cout.flush();
             cout.unlock();
         }
     }

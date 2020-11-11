@@ -333,6 +333,41 @@ std::vector<std::vector<bool>> Sudoku::get_possible_locations(int n)
     return output;
 }
 
+std::vector<bool> Sudoku::get_possible_locations_row(int n, int r)
+{
+    std::vector<bool> row;
+    for (int c = 0; c < 9; c++)
+    {
+        row.push_back((puzzle[r][c] == 0 and allOptions[r][c].count(n) == 1));
+    }
+    return row;
+}
+
+std::vector<bool> Sudoku::get_possible_locations_col(int n, int c)
+{
+    std::vector<bool> col;
+    for (int r = 0; r < 9; r++)
+    {
+        col.push_back((puzzle[r][c] == 0 and allOptions[r][c].count(n) == 1));
+    }
+    return col;
+}
+
+std::vector<bool> Sudoku::get_possible_locations_block(int n, int r, int c)
+{
+    std::vector<bool> block;
+    r = r / 3 * 3; //this gives the top row for the block of the given r. by abusing that int floors numbers ex 5/3 = 1 *3 = 3;
+    c = c / 3 * 3;
+    for (int y = r; y < r + 3; y++)
+    {
+        for (int x = c; x < c + 3; x++)
+        {
+            block.push_back((puzzle[y][x] == 0 and allOptions[y][x].count(n) == 1));
+        }
+    }
+    return block;
+}
+
 std::vector<std::vector<int>> Sudoku::get_options_count()
 {
     std::vector<std::vector<int>> output;
@@ -2712,10 +2747,11 @@ bool Sudoku::xy_chain()
             else if (chain[r][c2] == false and allOptions[r][c2].count(n) == 1)
             {
                 std::vector<int> options;
-                options.insert(options.end(),allOptions[r][c2].begin(),allOptions[r][c2].end());
-                int nextn = (options[0] == n)?options[1]:options[0];
-                std::pair<int,int> goal = find_chain(nextn,r,c2,gn);
-                if (goal.first != 10) return goal;
+                options.insert(options.end(), allOptions[r][c2].begin(), allOptions[r][c2].end());
+                int nextn = (options[0] == n) ? options[1] : options[0];
+                std::pair<int, int> goal = find_chain(nextn, r, c2, gn);
+                if (goal.first != 10)
+                    return goal;
             }
             next = c2 + 1;
             if (next > 8)
@@ -2737,16 +2773,17 @@ bool Sudoku::xy_chain()
             else if (chain[r2][c] == false and allOptions[r2][c].count(n) == 1)
             {
                 std::vector<int> options;
-                options.insert(options.end(),allOptions[r2][c].begin(),allOptions[r2][c].end());
-                int nextn = (options[0] == n)?options[1]:options[0];
-                std::pair<int,int> goal = find_chain(nextn,r2,c,gn);
-                if (goal.first != 10) return goal;
+                options.insert(options.end(), allOptions[r2][c].begin(), allOptions[r2][c].end());
+                int nextn = (options[0] == n) ? options[1] : options[0];
+                std::pair<int, int> goal = find_chain(nextn, r2, c, gn);
+                if (goal.first != 10)
+                    return goal;
             }
             next = r2 + 1;
-                if (next > 8)
-                    searching = false;
+            if (next > 8)
+                searching = false;
         }
-        std::vector<int> optionsCountBlock = get_block(optionsCount,r,c);
+        std::vector<int> optionsCountBlock = get_block(optionsCount, r, c);
         int b = r % 3 * 3 + c % 3;
         int r0 = r / 3 * 3;
         int c0 = c / 3 * 3;
@@ -2768,10 +2805,11 @@ bool Sudoku::xy_chain()
             else if (chain[r2][c2] == false and allOptions[r2][c2].count(n) == 1)
             {
                 std::vector<int> options;
-                options.insert(options.end(),allOptions[r2][c2].begin(),allOptions[r2][c2].end());
-                int nextn = (options[0] == n)?options[1]:options[0];
-                std::pair<int,int> goal = find_chain(nextn,r2,c2,gn);
-                if (goal.first != 10) return goal;
+                options.insert(options.end(), allOptions[r2][c2].begin(), allOptions[r2][c2].end());
+                int nextn = (options[0] == n) ? options[1] : options[0];
+                std::pair<int, int> goal = find_chain(nextn, r2, c2, gn);
+                if (goal.first != 10)
+                    return goal;
             }
             next = b2 + 1;
             if (next > 8)
@@ -2790,21 +2828,21 @@ bool Sudoku::xy_chain()
             if (optionsCount[r][c] == 2)
             {
                 std::vector<int> options;
-                options.insert(options.end(),allOptions[r][c].begin(),allOptions[r][c].end());
+                options.insert(options.end(), allOptions[r][c].begin(), allOptions[r][c].end());
                 int n1 = options[0];
                 int n2 = options[1];
-                std::vector<std::pair<int,int>> remove1, remove2;
+                std::vector<std::pair<int, int>> remove1, remove2;
                 chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
                 chainLength = 0;
-                std::pair<int,int> goal1 = find_chain(n2,r,c,n1);
+                std::pair<int, int> goal1 = find_chain(n2, r, c, n1);
                 if (goal1.first != 10 and chainLength >= 4)
-                    remove1 = list_seen_by(r,c,goal1.first,goal1.second);
+                    remove1 = list_seen_by(r, c, goal1.first, goal1.second);
                 chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
                 chainLength = 0;
-                std::pair<int,int> goal2 = find_chain(n1,r,c,n2);
+                std::pair<int, int> goal2 = find_chain(n1, r, c, n2);
                 if (goal2.first != 10 and chainLength >= 4)
-                    remove2 = list_seen_by(r,c,goal2.first,goal2.second);
-                for (std::pair<int,int> rm:remove1)
+                    remove2 = list_seen_by(r, c, goal2.first, goal2.second);
+                for (std::pair<int, int> rm : remove1)
                 {
                     if (!(rm.first == r and rm.second == c) and !(rm.first == goal1.first and rm.second == goal1.second))
                     {
@@ -2812,7 +2850,7 @@ bool Sudoku::xy_chain()
                             found = true;
                     }
                 }
-                for (std::pair<int,int> rm:remove2)
+                for (std::pair<int, int> rm : remove2)
                 {
                     if (!(rm.first == r and rm.second == c) and !(rm.first == goal2.first and rm.second == goal2.second))
                     {
@@ -2824,6 +2862,336 @@ bool Sudoku::xy_chain()
         }
     }
 
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
+bool Sudoku::three_d_medusa()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //we're working without a running copy this time.
+    std::vector<std::vector<std::vector<std::unordered_set<int>>>> chain; //in order chain[color][row][col]
+    std::vector<std::vector<std::pair<int, int>>> inChain = {{}, {}};
+    std::unordered_set<int> tested;
+    int remove = -1;
+    int chainLength = 0;
+    std::function<void(int, int, int, int)> find_chain;
+    find_chain = [&](int r, int c, int n, int colour) { //I don't want to make a function I only use once, but I need recursion so I'm making a lambda
+        chain[colour][r][c].insert(n);
+        if (chain[colour][r][c].size() > 1)
+            remove = colour; //if there is more than 1 item in the set, the colour is to be removed (rule1)
+        chainLength++;
+        inChain[colour].push_back(std::make_pair(r, c));
+        tested.insert(r*9+c);
+        int colour2 = (colour == 0) ? 1 : 0;
+        if (allOptions[r][c].size() == 2)
+        {
+            std::vector<int> options;
+            options.insert(options.end(), allOptions[r][c].begin(), allOptions[r][c].end());
+            int n2 = (options[0] == n) ? options[1] : options[0];
+            if (chain[colour2][r][c].count(n2) == 0 and chain[colour][r][c].count(n2) == 0)
+                find_chain(r, c, n2, colour2);
+        }
+        std::vector<bool> locationsRow = get_possible_locations_row(n, r);
+        
+        if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+        {
+            int c2 = find(locationsRow.begin(), locationsRow.end(), true) - locationsRow.begin();
+            if (c2 == c)
+                c2 = find(locationsRow.begin()+c+1, locationsRow.end(), true) - locationsRow.begin();
+            if (chain[colour2][r][c2].count(n) == 0 and chain[colour][r][c2].count(n) == 0)
+                find_chain(r, c2, n, colour2);
+        }
+        std::vector<bool> locationsCol = get_possible_locations_col(n, c);
+        if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+        {
+            int r2 = find(locationsCol.begin(), locationsCol.end(), true) - locationsCol.begin();
+            if (r2 == r)
+                r2 = find(locationsCol.begin()+r+1, locationsCol.end(), true) - locationsCol.begin();
+            if (chain[colour2][r2][c].count(n) == 0 and chain[colour][r2][c].count(n) == 0)
+                find_chain(r2, c, n, colour2);
+        }
+        std::vector<bool> locationsBlock = get_possible_locations_block(n, r, c);
+        if (count(locationsBlock.begin(), locationsBlock.end(), true) == 2)
+        {
+            int b1 = r / 3 * 3 + c % 3;
+            int b2 = find(locationsBlock.begin(), locationsBlock.end(), true) - locationsBlock.begin();
+            if (b2 == b1)
+                b2 = find(locationsBlock.begin()+b1+1, locationsBlock.end(), true) - locationsBlock.begin();
+            int r0 = r / 3 * 3;
+            int c0 = c / 3 * 3;
+            int r2 = r0 + b2 / 3;
+            int c2 = c0 + b2 % 3;
+            if (chain[colour2][r2][c2].count(n) == 0 and chain[colour][r2][c2].count(n) == 0)
+                find_chain(r2, c2, n, colour2);
+        }
+    };
+    for (int n = 1; n < 10; n++) //going from 1 through 9, because we're looking for numbers, not rows or cols
+    {
+        std::vector<std::vector<bool>> locations = get_possible_locations(n); //get the list of possible locations for number i
+        std::vector<std::vector<bool>> locationCols = locations;              //transposed version to save some calculations later on.
+        transpose_matrix(locationCols);
+        chain = {{{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}};
+        chainLength = 0;
+        remove = -1;
+        inChain[0].clear();
+        inChain[1].clear();
+        for (int i = 0; i < 9; i++)
+        {
+            bool foundPair = false;
+            std::vector<bool> locationsBlock = get_block(locations, i);
+            if (count(locations[i].begin(), locations[i].end(), true) == 2)
+            {
+                int r = i;
+                int c = find(locations[i].begin(), locations[i].end(), true) - locations[i].begin();
+                if (tested.count(r*9+c) == 0)
+                {
+                    chain = {{{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}};
+                    chainLength = 0;
+                    remove = -1;
+                    inChain[0].clear();
+                    inChain[1].clear();
+                    find_chain(r, c, n, 0);
+                    if (chainLength > 3)
+                        foundPair = true;
+                }
+            }
+            else if (count(locationCols[i].begin(), locationCols[i].end(), true) == 2)
+            {
+                int c = i;
+                int r = find(locationCols[i].begin(), locationCols[i].end(), true) - locationCols[i].begin();
+                if (tested.count(r*9+c) == 0)
+                {
+                    chain = {{{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}};
+                    chainLength = 0;
+                    remove = -1;
+                    inChain[0].clear();
+                    inChain[1].clear();
+                    find_chain(r, c, n, 0);
+                    if (chainLength > 3)
+                        foundPair = true;
+                }
+            }
+            else if (count(locationsBlock.begin(), locationsBlock.end(), true) == 2)
+            {
+                int bn = i;
+                int b = find(locationsBlock.begin(), locationsBlock.end(), true) - locationsBlock.begin();
+                int r0 = bn / 3 * 3;
+                int c0 = bn % 3 * 3;
+                int r = r0 + b / 3;
+                int c = c0 + b % 3;
+                if (tested.count(r*9+c) == 0)
+                {
+                    chain = {{{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}};
+                    chainLength = 0;
+                    remove = -1;
+                    inChain[0].clear();
+                    inChain[1].clear();
+                    find_chain(r, c, n, 0);
+                    if (chainLength > 3)
+                        foundPair = true;
+                }
+            }
+            if (foundPair)
+            {
+                if (remove != -1) //let's start with rule 1
+                {
+                    int keep = (remove == 0) ? 1 : 0;
+                    for (std::pair<int, int> rc : inChain[remove])
+                    {
+                        for (int rm : chain[remove][rc.first][rc.second])
+                        {
+                            if (allOptionsCopy[rc.first][rc.second].erase(rm))
+                                found = true;
+                        }
+                    }
+                    for (std::pair<int, int> rc : inChain[keep])
+                    {
+                        allOptions[rc.first][rc.second] = {*chain[keep][rc.first][rc.second].begin()};
+                    }
+                }
+                else //I can't test rule 2 in one if statement, so I have to do that with nested else if;
+                {
+                    //we now know every square has at most one number per color, so let's remove the sets;
+                    std::vector<std::vector<std::vector<bool>>> inChain2d = {{{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}}, {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+                    std::vector<std::vector<std::vector<int>>> chainNumbers = {{{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}}, {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+                    for (std::pair<int, int> rc : inChain[0])
+                    {
+                        inChain2d[0][rc.first][rc.second] = true;
+                        chainNumbers[0][rc.first][rc.second] = *chain[0][rc.first][rc.second].begin();
+                    }
+                    for (std::pair<int, int> rc : inChain[1])
+                    {
+                        inChain2d[1][rc.first][rc.second] = true;
+                        chainNumbers[1][rc.first][rc.second] = *chain[1][rc.first][rc.second].begin();
+                    }
+                    std::vector<std::vector<std::vector<bool>>> inChain2dCols = inChain2d;
+                    std::vector<std::vector<std::vector<int>>> chainNumbersCols = chainNumbers;
+                    transpose_matrix(inChain2dCols[0]);
+                    transpose_matrix(inChain2dCols[1]);
+                    transpose_matrix(chainNumbersCols[0]);
+                    transpose_matrix(chainNumbersCols[1]);
+                    for (std::pair<int,int>rc:inChain[0])
+                    {
+                        std::vector<std::vector<int>> chainNumbersBlock = {get_block(chainNumbers[0],rc.first,rc.second),get_block(chainNumbers[1],rc.first,rc.second)};
+                        int rn = chainNumbers[0][rc.first][rc.second];
+                        if (count(chainNumbers[0][rc.first].begin(),chainNumbers[0][rc.first].end(),rn) > 1 or count(chainNumbersCols[0][rc.second].begin(),chainNumbersCols[0][rc.second].end(),rn) > 1 or count(chainNumbersBlock[0].begin(),chainNumbersBlock[0].end(),rn) > 1)
+                        {
+                            remove = 0;
+                        }
+                    }
+                    for (std::pair<int,int>rc:inChain[1])
+                    {
+                        std::vector<std::vector<int>> chainNumbersBlock = {get_block(chainNumbers[0],rc.first,rc.second),get_block(chainNumbers[1],rc.first,rc.second)};
+                        int rn = chainNumbers[1][rc.first][rc.second];
+                        if (count(chainNumbers[1][rc.first].begin(),chainNumbers[1][rc.first].end(),rn) > 1 or count(chainNumbersCols[1][rc.second].begin(),chainNumbersCols[1][rc.second].end(),rn) > 1 or count(chainNumbersBlock[1].begin(),chainNumbersBlock[1].end(),rn) > 1)
+                        {
+                            remove = 1;
+                        }
+                    }
+                    if (remove != -1) //we found a colour to remove with rule 2
+                    {
+                        int keep = (remove == 0) ? 1 : 0;
+                        for (std::pair<int, int> rc : inChain[remove])
+                        {
+
+                            if (allOptionsCopy[rc.first][rc.second].erase(chainNumbers[remove][rc.first][rc.second]))
+                                found = true;
+                        }
+                        for (std::pair<int, int> rc : inChain[keep])
+                        {
+                            allOptionsCopy[rc.first][rc.second] = {chainNumbers[keep][rc.first][rc.second]};
+                        }
+                    }
+                    else // rule 3, 4, 5 and 6;
+                    {
+                        for (std::pair<int, int> rc : inChain[0]) //rule 3;
+                        {
+                            if (inChain2d[1][rc.first][rc.second] == true) //if a square is both in chain 1 and 2;
+                            {
+                                if (allOptions[rc.first][rc.second].size() > 2) //if there is a 3rd number it can be removed.
+                                {
+                                    allOptionsCopy[rc.first][rc.second] = {chainNumbers[0][rc.first][rc.second], chainNumbers[1][rc.first][rc.second]};
+                                    found = true;
+                                }
+                            }
+                        }
+                        for (int r = 0; r < 9; r++) //for rule 4 we go over every single square.
+                        {
+                            for (int c = 0; c < 9; c++)
+                            {
+                                if (puzzle[r][c] == 0 and inChain2d[0][r][c] == false and inChain2d[1][r][c] == false) //we're only checking numbers not in the chain
+                                {
+                                    std::vector<std::vector<int>> chainNumberBlocks = {get_block(chainNumbers[0], r, c), get_block(chainNumbers[1], r, c)};
+                                    for (int rn : allOptions[r][c]) //if one of the options is also seen in the same row, col or block, with both colors, remove it.
+                                    {
+                                        if ((find(chainNumbers[0][r].begin(), chainNumbers[0][r].end(), rn) != chainNumbers[0][r].end() or find(chainNumbersCols[0][c].begin(), chainNumbersCols[0][c].end(), rn) != chainNumbersCols[0][c].end() or find(chainNumberBlocks[0].begin(), chainNumberBlocks[0].end(), rn) != chainNumberBlocks[0].end()) and (find(chainNumbers[1][r].begin(), chainNumbers[1][r].end(), rn) != chainNumbers[1][r].end() or find(chainNumbersCols[1][c].begin(), chainNumbersCols[1][c].end(), rn) != chainNumbersCols[1][c].end() or find(chainNumberBlocks[1].begin(), chainNumberBlocks[1].end(), rn) != chainNumberBlocks[1].end()))
+                                        {
+                                            allOptionsCopy[r][c].erase(rn);
+                                            found = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        for (std::pair<int, int> rc : inChain[0]) //for rule 5 we go over every square that's in one color but not the other. Starting with color 0
+                        {
+                            if (inChain2d[1][rc.first][rc.second] == false)
+                            {
+                                std::vector<std::vector<int>> chainNumberBlocks = {get_block(chainNumbers[0], rc.first, rc.second), get_block(chainNumbers[1], rc.first, rc.second)};
+                                for (int rn : allOptions[rc.first][rc.second])
+                                {
+                                    if (chainNumbers[0][rc.first][rc.second] != rn)
+                                    {
+                                        if (find(chainNumbers[1][rc.first].begin(), chainNumbers[1][rc.first].end(), rn) != chainNumbers[1][rc.first].end() or find(chainNumbersCols[1][rc.second].begin(), chainNumbersCols[1][rc.second].end(), rn) != chainNumbersCols[1][rc.second].end() or find(chainNumberBlocks[1].begin(), chainNumberBlocks[1].end(), rn) != chainNumberBlocks[1].end())
+                                        {
+                                            allOptionsCopy[rc.first][rc.second].erase(rn);
+                                            found = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        for (std::pair<int, int> rc : inChain[1]) //for rule 5 we go over every square that's in one color but not the other. color 1 next
+                        {
+                            if (inChain2d[0][rc.first][rc.second] == false)
+                            {
+                                std::vector<std::vector<int>> chainNumberBlocks = {get_block(chainNumbers[0], rc.first, rc.second), get_block(chainNumbers[1], rc.first, rc.second)};
+                                for (int rn : allOptions[rc.first][rc.second])
+                                {
+                                    if (chainNumbers[1][rc.first][rc.second] != rn)
+                                    {
+                                        if (find(chainNumbers[0][rc.first].begin(), chainNumbers[0][rc.first].end(), rn) != chainNumbers[0][rc.first].end() or find(chainNumbersCols[0][rc.second].begin(), chainNumbersCols[0][rc.second].end(), rn) != chainNumbersCols[0][rc.second].end() or find(chainNumberBlocks[0].begin(), chainNumberBlocks[0].end(), rn) != chainNumberBlocks[0].end())
+                                        {
+                                            allOptionsCopy[rc.first][rc.second].erase(rn);
+                                            found = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        for (int r = 0; r < 9 and remove == -1; r++) //for rule 6 we go over every single square again. (todo, combine 4 and 6 to save time)
+                        {
+                            for (int c = 0; c < 9 and remove == -1; c++)
+                            {
+                                if (puzzle[r][c] == 0 and inChain2d[0][r][c] == false and inChain2d[1][r][c] == false) //we're only checking numbers not in the chain
+                                {
+                                    std::vector<std::vector<int>> chainNumberBlocks = {get_block(chainNumbers[0], r, c), get_block(chainNumbers[1], r, c)};
+                                    bool notEmpty = false;
+                                    for (int rn : allOptions[r][c])
+                                    {
+                                        if (find(chainNumbers[0][r].begin(), chainNumbers[0][r].end(), rn) == chainNumbers[0][r].end() and find(chainNumbersCols[0][c].begin(), chainNumbersCols[0][c].end(), rn) == chainNumbersCols[0][c].end() and find(chainNumberBlocks[0].begin(), chainNumberBlocks[0].end(), rn) == chainNumberBlocks[0].end())
+                                        {
+                                            notEmpty = true;
+                                            break;
+                                        }
+                                    }
+                                    if (notEmpty == false)
+                                    {
+                                        remove = 0;
+                                    }
+                                    else
+                                    {
+                                        notEmpty = false;
+                                        for (int rn : allOptions[r][c])
+                                        {
+                                            if (find(chainNumbers[1][r].begin(), chainNumbers[1][r].end(), rn) == chainNumbers[1][r].end() and find(chainNumbersCols[1][c].begin(), chainNumbersCols[1][c].end(), rn) == chainNumbersCols[1][c].end() and find(chainNumberBlocks[1].begin(), chainNumberBlocks[1].end(), rn) == chainNumberBlocks[1].end())
+                                            {
+                                                notEmpty = true;
+                                                break;
+                                            }
+                                        }
+                                        if (notEmpty == false)
+                                        {
+                                            remove = 1;
+                                        }
+                                    }
+                                    if (remove != -1)
+                                    {
+                                        int keep = (remove == 0) ? 1 : 0;
+                                        for (std::pair<int, int> rc : inChain[remove])
+                                        {
+
+                                            if (allOptionsCopy[rc.first][rc.second].erase(chainNumbers[remove][rc.first][rc.second]))
+                                                found = true;
+                                        }
+                                        for (std::pair<int, int> rc : inChain[keep])
+                                        {
+                                            allOptionsCopy[rc.first][rc.second] = {chainNumbers[keep][rc.first][rc.second]};
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     if (found)
     {
         found = (allOptions != allOptionsCopy);
@@ -3001,6 +3369,12 @@ bool Sudoku::solve()
         if (xy_chain())
         {
             //std::cout << "found XY-Chain" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (three_d_medusa())
+        {
+            //std::cout << "found 3d-medusa" << std::endl;
             changed = true;
             continue;
         }
