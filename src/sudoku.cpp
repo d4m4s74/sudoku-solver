@@ -2873,7 +2873,7 @@ bool Sudoku::xy_chain()
 bool Sudoku::three_d_medusa()
 {
     bool found = false;
-    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //we're working without a running copy this time.
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
     std::vector<std::vector<std::vector<std::unordered_set<int>>>> chain; //in order chain[color][row][col]
     std::vector<std::vector<std::pair<int, int>>> inChain = {{}, {}};
     std::unordered_set<int> tested;
@@ -2886,7 +2886,7 @@ bool Sudoku::three_d_medusa()
             remove = colour; //if there is more than 1 item in the set, the colour is to be removed (rule1)
         chainLength++;
         inChain[colour].push_back(std::make_pair(r, c));
-        tested.insert(r*9+c);
+        tested.insert(r * 9 + c);
         int colour2 = (colour == 0) ? 1 : 0;
         if (allOptions[r][c].size() == 2)
         {
@@ -2897,12 +2897,12 @@ bool Sudoku::three_d_medusa()
                 find_chain(r, c, n2, colour2);
         }
         std::vector<bool> locationsRow = get_possible_locations_row(n, r);
-        
+
         if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
         {
             int c2 = find(locationsRow.begin(), locationsRow.end(), true) - locationsRow.begin();
             if (c2 == c)
-                c2 = find(locationsRow.begin()+c+1, locationsRow.end(), true) - locationsRow.begin();
+                c2 = find(locationsRow.begin() + c + 1, locationsRow.end(), true) - locationsRow.begin();
             if (chain[colour2][r][c2].count(n) == 0 and chain[colour][r][c2].count(n) == 0)
                 find_chain(r, c2, n, colour2);
         }
@@ -2911,7 +2911,7 @@ bool Sudoku::three_d_medusa()
         {
             int r2 = find(locationsCol.begin(), locationsCol.end(), true) - locationsCol.begin();
             if (r2 == r)
-                r2 = find(locationsCol.begin()+r+1, locationsCol.end(), true) - locationsCol.begin();
+                r2 = find(locationsCol.begin() + r + 1, locationsCol.end(), true) - locationsCol.begin();
             if (chain[colour2][r2][c].count(n) == 0 and chain[colour][r2][c].count(n) == 0)
                 find_chain(r2, c, n, colour2);
         }
@@ -2921,7 +2921,7 @@ bool Sudoku::three_d_medusa()
             int b1 = r / 3 * 3 + c % 3;
             int b2 = find(locationsBlock.begin(), locationsBlock.end(), true) - locationsBlock.begin();
             if (b2 == b1)
-                b2 = find(locationsBlock.begin()+b1+1, locationsBlock.end(), true) - locationsBlock.begin();
+                b2 = find(locationsBlock.begin() + b1 + 1, locationsBlock.end(), true) - locationsBlock.begin();
             int r0 = r / 3 * 3;
             int c0 = c / 3 * 3;
             int r2 = r0 + b2 / 3;
@@ -2948,7 +2948,7 @@ bool Sudoku::three_d_medusa()
             {
                 int r = i;
                 int c = find(locations[i].begin(), locations[i].end(), true) - locations[i].begin();
-                if (tested.count(r*9+c) == 0)
+                if (tested.count(r * 9 + c) == 0)
                 {
                     chain = {{{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}};
                     chainLength = 0;
@@ -2964,7 +2964,7 @@ bool Sudoku::three_d_medusa()
             {
                 int c = i;
                 int r = find(locationCols[i].begin(), locationCols[i].end(), true) - locationCols[i].begin();
-                if (tested.count(r*9+c) == 0)
+                if (tested.count(r * 9 + c) == 0)
                 {
                     chain = {{{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}};
                     chainLength = 0;
@@ -2984,7 +2984,7 @@ bool Sudoku::three_d_medusa()
                 int c0 = bn % 3 * 3;
                 int r = r0 + b / 3;
                 int c = c0 + b % 3;
-                if (tested.count(r*9+c) == 0)
+                if (tested.count(r * 9 + c) == 0)
                 {
                     chain = {{{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {{{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, {}, {}, {}, {}, {}, {}, {}, {}}}};
                     chainLength = 0;
@@ -3035,20 +3035,20 @@ bool Sudoku::three_d_medusa()
                     transpose_matrix(inChain2dCols[1]);
                     transpose_matrix(chainNumbersCols[0]);
                     transpose_matrix(chainNumbersCols[1]);
-                    for (std::pair<int,int>rc:inChain[0])
+                    for (std::pair<int, int> rc : inChain[0])
                     {
-                        std::vector<std::vector<int>> chainNumbersBlock = {get_block(chainNumbers[0],rc.first,rc.second),get_block(chainNumbers[1],rc.first,rc.second)};
+                        std::vector<std::vector<int>> chainNumbersBlock = {get_block(chainNumbers[0], rc.first, rc.second), get_block(chainNumbers[1], rc.first, rc.second)};
                         int rn = chainNumbers[0][rc.first][rc.second];
-                        if (count(chainNumbers[0][rc.first].begin(),chainNumbers[0][rc.first].end(),rn) > 1 or count(chainNumbersCols[0][rc.second].begin(),chainNumbersCols[0][rc.second].end(),rn) > 1 or count(chainNumbersBlock[0].begin(),chainNumbersBlock[0].end(),rn) > 1)
+                        if (count(chainNumbers[0][rc.first].begin(), chainNumbers[0][rc.first].end(), rn) > 1 or count(chainNumbersCols[0][rc.second].begin(), chainNumbersCols[0][rc.second].end(), rn) > 1 or count(chainNumbersBlock[0].begin(), chainNumbersBlock[0].end(), rn) > 1)
                         {
                             remove = 0;
                         }
                     }
-                    for (std::pair<int,int>rc:inChain[1])
+                    for (std::pair<int, int> rc : inChain[1])
                     {
-                        std::vector<std::vector<int>> chainNumbersBlock = {get_block(chainNumbers[0],rc.first,rc.second),get_block(chainNumbers[1],rc.first,rc.second)};
+                        std::vector<std::vector<int>> chainNumbersBlock = {get_block(chainNumbers[0], rc.first, rc.second), get_block(chainNumbers[1], rc.first, rc.second)};
                         int rn = chainNumbers[1][rc.first][rc.second];
-                        if (count(chainNumbers[1][rc.first].begin(),chainNumbers[1][rc.first].end(),rn) > 1 or count(chainNumbersCols[1][rc.second].begin(),chainNumbersCols[1][rc.second].end(),rn) > 1 or count(chainNumbersBlock[1].begin(),chainNumbersBlock[1].end(),rn) > 1)
+                        if (count(chainNumbers[1][rc.first].begin(), chainNumbers[1][rc.first].end(), rn) > 1 or count(chainNumbersCols[1][rc.second].begin(), chainNumbersCols[1][rc.second].end(), rn) > 1 or count(chainNumbersBlock[1].begin(), chainNumbersBlock[1].end(), rn) > 1)
                         {
                             remove = 1;
                         }
@@ -3192,6 +3192,334 @@ bool Sudoku::three_d_medusa()
             }
         }
     }
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
+bool Sudoku::jellyfish()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
+
+    for (int n = 1; n < 10; n++)
+    {
+        std::vector<std::vector<bool>> locations = get_possible_locations(n);
+        int r1, r2, r3, r4, c1, c2, c3, c4;
+        r1 = r2 = r3 = r4 = c1 = c2 = c3 = c4 = 10;
+        std::vector<int> rs = {10, 10, 10, 10};
+        std::vector<int> cs = {10, 10, 10, 10};
+        for (int i = 0; i < 6 and r4 == 10; i++)
+        {
+            int numLocations = count(locations[i].begin(), locations[i].end(), true);
+            if (numLocations >= 2 and numLocations <= 4)
+            {
+                bool noJellyfish = false;
+                std::vector<int> csCopy1 = cs;
+                for (int m = 0; m < 9; m++)
+                {
+                    if (locations[i][m] == true)
+                    {
+                        if (csCopy1[0] == 10 or csCopy1[0] == m)
+                            csCopy1[0] = m;
+                        else if (csCopy1[1] == 10 or csCopy1[1] == m)
+                            csCopy1[1] = m;
+                        else if (csCopy1[2] == 10 or csCopy1[2] == m)
+                            csCopy1[2] = m;
+                        else if (csCopy1[3] == 10 or csCopy1[3] == m)
+                            csCopy1[3] = m;
+                        else
+                        {
+                            noJellyfish = true;
+                            break;
+                        }
+                    }
+                }
+                if (noJellyfish == false)
+                {
+                    r1 = i;
+                    for (int j = i+1; j < 7 and r4 == 10; j++)
+                    {
+                        numLocations = count(locations[j].begin(), locations[j].end(), true);
+                        if (numLocations >= 2 and numLocations <= 4)
+                        {
+                            noJellyfish = false;
+                            std::vector<int> csCopy2 = csCopy1;
+                            for (int m = 0; m < 9; m++)
+                            {
+                                if (locations[j][m] == true)
+                                {
+                                    if (csCopy2[0] == 10 or csCopy2[0] == m)
+                                        csCopy2[0] = m;
+                                    else if (csCopy2[1] == 10 or csCopy2[1] == m)
+                                        csCopy2[1] = m;
+                                    else if (csCopy2[2] == 10 or csCopy2[2] == m)
+                                        csCopy2[2] = m;
+                                    else if (csCopy2[3] == 10 or csCopy2[3] == m)
+                                        csCopy2[3] = m;
+                                    else
+                                    {
+                                        noJellyfish = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (noJellyfish == false)
+                            {
+                                r2 = j;
+                                for (int k = j+1; k < 8 and r4 == 10; k++)
+                                {
+                                    numLocations = count(locations[k].begin(), locations[k].end(), true);
+                                    if (numLocations >= 2 and numLocations <= 4)
+                                    {
+                                        noJellyfish = false;
+                                        std::vector<int> csCopy3 = csCopy2;
+                                        for (int m = 0; m < 9; m++)
+                                        {
+                                            if (locations[k][m] == true)
+                                            {
+                                                if (csCopy3[0] == 10 or csCopy3[0] == m)
+                                                    csCopy3[0] = m;
+                                                else if (csCopy3[1] == 10 or csCopy3[1] == m)
+                                                    csCopy3[1] = m;
+                                                else if (csCopy3[2] == 10 or csCopy3[2] == m)
+                                                    csCopy3[2] = m;
+                                                else if (csCopy3[3] == 10 or csCopy3[3] == m)
+                                                    csCopy3[3] = m;
+                                                else
+                                                {
+                                                    noJellyfish = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (noJellyfish == false and csCopy3[3] != 10)
+                                        {
+                                            r3 = k;
+                                            for (int l = k+1; l < 9 and r4 == 10; l++)
+                                            {
+                                                numLocations = count(locations[l].begin(), locations[l].end(), true);
+                                                if (numLocations >= 2 and numLocations <= 4)
+                                                {
+                                                    noJellyfish = false;
+                                                    std::vector<int> csCopy4 = csCopy3;
+                                                    for (int m = 0; m < 9; m++)
+                                                    {
+                                                        if (locations[l][m] == true)
+                                                        {
+                                                            if (csCopy4[0] == 10 or csCopy4[0] == m)
+                                                                csCopy4[0] = m;
+                                                            else if (csCopy4[1] == 10 or csCopy4[1] == m)
+                                                                csCopy4[1] = m;
+                                                            else if (csCopy4[2] == 10 or csCopy4[2] == m)
+                                                                csCopy4[2] = m;
+                                                            else if (csCopy4[3] == 10 or csCopy4[3] == m)
+                                                                csCopy4[3] = m;
+                                                            else
+                                                            {
+                                                                noJellyfish = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (noJellyfish == false)
+                                                    {
+                                                        r4 = l;
+                                                        c1 = csCopy4[0];
+                                                        c2 = csCopy4[1];
+                                                        c3 = csCopy4[2];
+                                                        c4 = csCopy4[3];
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (r4 != 10) //We found a jellyfish!
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                if (i != r1 and i != r2 and i != r3 and i != r4)
+                {
+                    if (allOptionsCopy[i][c1].erase(n) == 1)
+                        found = true;
+                    if (allOptionsCopy[i][c2].erase(n) == 1)
+                        found = true;
+                    if (allOptionsCopy[i][c3].erase(n) == 1)
+                        found = true;
+                    if (allOptionsCopy[i][c4].erase(n) == 1)
+                        found = true;
+                }
+            }
+        }
+        else
+        {
+            std::vector<std::vector<bool>> locationCols = locations;
+            transpose_matrix(locationCols); //todo, change everything to work with cols
+            r1 = r2 = r3 = r4 = c1 = c2 = c3 = c4 = 10;
+            rs = {10, 10, 10, 10};
+            cs = {10, 10, 10, 10};
+            for (int i = 0; i < 6 and c4 == 10; i++)
+            {
+                int numLocations = count(locationCols[i].begin(), locationCols[i].end(), true);
+                if (numLocations >= 2 and numLocations <= 4)
+                {
+                    bool noJellyfish = false;
+                    std::vector<int> rsCopy1 = rs;
+                    for (int m = 0; m < 9; m++)
+                    {
+                        if (locationCols[i][m] == true)
+                        {
+                            if (rsCopy1[0] == 10 or rsCopy1[0] == m)
+                                rsCopy1[0] = m;
+                            else if (rsCopy1[1] == 10 or rsCopy1[1] == m)
+                                rsCopy1[1] = m;
+                            else if (rsCopy1[2] == 10 or rsCopy1[2] == m)
+                                rsCopy1[2] = m;
+                            else if (rsCopy1[3] == 10 or rsCopy1[3] == m)
+                                rsCopy1[3] = m;
+                            else
+                            {
+                                noJellyfish = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (noJellyfish == false)
+                    {
+                        c1 = i;
+                        for (int j = i+1; j < 7 and c4 == 10; j++)
+                        {
+                            numLocations = count(locationCols[j].begin(), locationCols[j].end(), true);
+                            if (numLocations >= 2 and numLocations <= 4)
+                            {
+                                noJellyfish = false;
+                                std::vector<int> rsCopy2 = rsCopy1;
+                                for (int m = 0; m < 9; m++)
+                                {
+                                    if (locationCols[j][m] == true)
+                                    {
+                                        if (rsCopy2[0] == 10 or rsCopy2[0] == m)
+                                            rsCopy2[0] = m;
+                                        else if (rsCopy2[1] == 10 or rsCopy2[1] == m)
+                                            rsCopy2[1] = m;
+                                        else if (rsCopy2[2] == 10 or rsCopy2[2] == m)
+                                            rsCopy2[2] = m;
+                                        else if (rsCopy2[3] == 10 or rsCopy2[3] == m)
+                                            rsCopy2[3] = m;
+                                        else
+                                        {
+                                            noJellyfish = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (noJellyfish == false)
+                                {
+                                    c2 = j;
+                                    for (int k = j+1; k < 8 and c4 == 10; k++)
+                                    {
+                                        numLocations = count(locationCols[k].begin(), locationCols[k].end(), true);
+                                        if (numLocations >= 2 and numLocations <= 4)
+                                        {
+                                            noJellyfish = false;
+                                            std::vector<int> rsCopy3 = rsCopy2;
+                                            for (int m = 0; m < 9; m++)
+                                            {
+                                                if (locationCols[k][m] == true)
+                                                {
+                                                    if (rsCopy3[0] == 10 or rsCopy3[0] == m)
+                                                        rsCopy3[0] = m;
+                                                    else if (rsCopy3[1] == 10 or rsCopy3[1] == m)
+                                                        rsCopy3[1] = m;
+                                                    else if (rsCopy3[2] == 10 or rsCopy3[2] == m)
+                                                        rsCopy3[2] = m;
+                                                    else if (rsCopy3[3] == 10 or rsCopy3[3] == m)
+                                                        rsCopy3[3] = m;
+                                                    else
+                                                    {
+                                                        noJellyfish = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if (noJellyfish == false and rsCopy3[3] != 10)
+                                            {
+                                                c3 = k;
+                                                for (int l = k+1; l < 9 and c4 == 10; l++)
+                                                {
+                                                    numLocations = count(locationCols[l].begin(), locationCols[l].end(), true);
+                                                    if (numLocations >= 2 and numLocations <= 4)
+                                                    {
+                                                        noJellyfish = false;
+                                                        std::vector<int> rsCopy4 = rsCopy3;
+                                                        for (int m = 0; m < 9; m++)
+                                                        {
+                                                            if (locationCols[l][m] == true)
+                                                            {
+                                                                if (rsCopy4[0] == 10 or rsCopy4[0] == m)
+                                                                    rsCopy4[0] = m;
+                                                                else if (rsCopy4[1] == 10 or rsCopy4[1] == m)
+                                                                    rsCopy4[1] = m;
+                                                                else if (rsCopy4[2] == 10 or rsCopy4[2] == m)
+                                                                    rsCopy4[2] = m;
+                                                                else if (rsCopy4[3] == 10 or rsCopy4[3] == m)
+                                                                    rsCopy4[3] = m;
+                                                                else
+                                                                {
+                                                                    noJellyfish = true;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (noJellyfish == false)
+                                                        {
+                                                            c4 = l;
+                                                            r1 = rsCopy4[0];
+                                                            r2 = rsCopy4[1];
+                                                            r3 = rsCopy4[2];
+                                                            r4 = rsCopy4[3];
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (c4 != 10) //We found a jellyfish!
+            {
+                for (int i = 0; i < 9; i++)
+                {
+                    if (i != c1 and i != c2 and i != c3 and i != c4)
+                    {
+                        if (allOptionsCopy[r1][i].erase(n) == 1)
+                            found = true;
+                        if (allOptionsCopy[r2][i].erase(n) == 1)
+                            found = true;
+                        if (allOptionsCopy[r3][i].erase(n) == 1)
+                            found = true;
+                        if (allOptionsCopy[r4][i].erase(n) == 1)
+                            found = true;
+                    }
+                }
+            }
+        }
+    }
+
     if (found)
     {
         found = (allOptions != allOptionsCopy);
@@ -3375,6 +3703,12 @@ bool Sudoku::solve()
         if (three_d_medusa())
         {
             //std::cout << "found 3d-medusa" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (jellyfish())
+        {
+            //std::cout << "found jellyfish" << std::endl;
             changed = true;
             continue;
         }

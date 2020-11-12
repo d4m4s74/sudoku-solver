@@ -25,9 +25,9 @@ int solve_puzzles(int t)
         current.lock();
         solving = cur++;
         current.unlock();
-        puzzle = puzzles[solving];
         if (solving >= cases)
             return solved;
+        puzzle = puzzles[solving];
         sudoku.set_puzzle(puzzle);
         solved += sudoku.solve();
         if (sudoku.is_solved()) solutions[solving] = puzzle + "," + sudoku.toString();

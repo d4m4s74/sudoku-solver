@@ -74,6 +74,7 @@ class Sudoku
     bool x_cycles();
     bool xy_chain();
     bool three_d_medusa();
+    bool jellyfish();
 
     public:
         std::vector<std::vector<int>> get_puzzle();
