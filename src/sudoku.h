@@ -9,6 +9,7 @@ class Sudoku
 {
     friend class Sudoku_generator;
     std::vector<std::vector<int>> puzzle = {{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0}};
+    bool initialized = false;
     std::vector<std::vector<std::unordered_set<int>>> allOptions;
     bool solved = false;
     int block_number(int r, int c);
@@ -56,8 +57,7 @@ class Sudoku
     template <typename t>
     std::vector<t> get_block(const std::vector<std::vector<t>> &input, int r, int c);
         template <typename t>
-    std::vector<t> get_block(const std::vector<std::vector<t>> &input, int b);
-    bool backtrack();   
+    std::vector<t> get_block(const std::vector<std::vector<t>> &input, int b);  
     bool check_solved_cells();
     bool hidden_singles();
     bool naked_pairs();
@@ -75,8 +75,10 @@ class Sudoku
     bool xy_chain();
     bool three_d_medusa();
     bool jellyfish();
+    bool unique_rectangles();
 
     public:
+        bool backtrack();
         std::vector<std::vector<int>> get_puzzle();
         void set_puzzle(std::vector<std::vector<int>> puzzle);
         void set_puzzle(std::string puzzleString);
@@ -84,6 +86,7 @@ class Sudoku
         std::string toString();
         bool is_solved();
         bool solve();
+        
         Sudoku();
         Sudoku(std::vector<std::vector<int>> puzzle);
         Sudoku(std::string puzzleString);

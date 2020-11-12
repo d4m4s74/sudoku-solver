@@ -6,13 +6,14 @@ Script currently accepts single strings representing the puzzle (ex: 80001000002
 Script also accepts files containing multiple puzzles. (see testcases folder for examples)
 
 ```
-usage:  
-        sudoku.exe [options] inputfile [outputfile]  
-        sudoku.exe [options] puzzle  
-options:  
-        -h,--help       Display this information  
-        -v,--verbose    In case of file, show counter for every puzzle instead of every 100  
-        -t,--timed      In case of file,times individual puzzles, or sets of 100 depending on if -v is set  
-        -s              In case of puzzle string, only returns solved string  
-        -p <threads>    Solve puzzles in parallel
+usage: 
+        sudoku.exe [options] inputfile [outputfile]
+        sudoku.exe [options] puzzle
+options:
+        -h,--help        Display this information
+        -v,--verbose     In case of file, show counter for every puzzle instead of every 100
+        -b,--backtrack   Only use backtracking, no human solvers (Sometimes faster for sudokus with many clues.)
+        -t,--timed       Times individual puzzles, or sets of 100 depending on option -v
+        -s               In case of puzzle string, only returns solved string
+        -p <threads>     Solve puzzles in parallel
 ```

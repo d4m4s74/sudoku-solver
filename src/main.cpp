@@ -10,6 +10,7 @@
 
 int cases;
 int cur = 0;
+bool backtrack = false;
 std::vector<std::string> puzzles;
 std::vector<std::string> solutions;
 std::mutex current;
@@ -29,7 +30,8 @@ int solve_puzzles(int t)
             return solved;
         puzzle = puzzles[solving];
         sudoku.set_puzzle(puzzle);
-        solved += sudoku.solve();
+        if (!backtrack) solved += sudoku.solve();
+        else sudoku.backtrack();
         if (sudoku.is_solved()) solutions[solving] = puzzle + "," + sudoku.toString();
         else solutions[solving] = puzzle + ",error                                                                            ";
         if (cout.try_lock())
@@ -88,6 +90,7 @@ int solve_file_parallel(std::string inputfile, std::string outputfile, int threa
         std::cout << std::endl
                   << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
         std::cout << solved << " cases required backtracking" << std::endl;
+        output.flush();
     }
     else
     {
@@ -117,9 +120,11 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
             input >> puzzleString;
             output << puzzleString << ",";
             sudoku.set_puzzle(puzzleString);
-            solved += sudoku.solve();
+            if (!backtrack) solved += sudoku.solve();
+            else sudoku.backtrack();
             if (sudoku.is_solved()) output << sudoku << "\n";
             else output << "error" << "\n";
+            output.flush();
             if (verbose and timed)
             {
                 std::cout << "Solved case " << i + 1 << "/" << cases << " in " << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last).count() * 1e-9 << " seconds \n";
@@ -144,6 +149,7 @@ int solve_file(std::string inputfile, std::string outputfile, bool verbose = fal
         std::cout << std::endl
                   << "Solved " << cases << " puzzles in " << elapsed.count() * 1e-9 << " seconds." << std::endl;
         std::cout << cases - solved << " cases required backtracking" << std::endl;
+        
     }
     else
     {
@@ -167,7 +173,8 @@ int solve_file(std::string inputfile)
         {
             input >> sudoku;
             std::cout << sudoku << ",";
-            solved += sudoku.solve();
+            if (!backtrack) solved += sudoku.solve();
+            else sudoku.backtrack();
             if (sudoku.is_solved()) std::cout << sudoku << std::endl;
             else std::cout << "error" << std::endl;
         }
@@ -196,7 +203,8 @@ int solve_cin()
         if (puzzleString.length() == 81)
         {
             sudoku.set_puzzle(puzzleString);
-            sudoku.solve();
+            if (!backtrack) sudoku.solve();
+            else sudoku.backtrack();
             std::cout << puzzleString << ",";
             if (sudoku.is_solved()) std::cout << sudoku << std::endl;
             else std::cout << "error" << std::endl;
@@ -221,7 +229,8 @@ void solve_string(std::string puzzleString, bool showPuzzle = true, bool timed =
     {
         sudoku.print_puzzle();
         std::cout << std::endl;
-        sudoku.solve();
+        if (!backtrack) sudoku.solve();
+        else sudoku.backtrack();
         std::cout << "solved:" << std::endl
                   << std::endl;
         sudoku.print_puzzle();
@@ -264,6 +273,7 @@ void helptext(char **argv)
     std::cout << "options:" << std::endl;
     std::cout << "\t-h,--help\t Display this information" << std::endl;
     std::cout << "\t-v,--verbose\t In case of file, show counter for every puzzle instead of every 100" << std::endl;
+    std::cout << "\t-b,--backtrack\t Only use backtracking, no human solvers (Sometimes faster for sudokus with many clues.)" << std::endl;
     std::cout << "\t-t,--timed\t Times individual puzzles, or sets of 100 depending on option -v" << std::endl;
     std::cout << "\t-s\t\t In case of puzzle string, only returns solved string" << std::endl;
     std::cout << "\t-p <threads>\t Solve puzzles in parallel" << std::endl;
@@ -316,6 +326,10 @@ int main(int argc, char **argv)
             else if (std::string(argv[i]) == "-t" or std::string(argv[i]) == "--timed")
             {
                 timed = true;
+            }
+            else if (std::string(argv[i]) == "-b" or std::string(argv[i]) == "--backtrack")
+            {
+                backtrack = true;
             }
             else if (std::string(argv[i]) == "-s")
             {

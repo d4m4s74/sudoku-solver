@@ -126,6 +126,7 @@ std::unordered_set<int> Sudoku::get_options(int r, int c)
 
 void Sudoku::update_options() //updates all options
 {
+    initialized = true;
     for (int r = 0; r < 9; r++)
     {
         for (int c = 0; c < 9; c++)
@@ -385,6 +386,7 @@ std::vector<std::vector<int>> Sudoku::get_options_count()
 
 bool Sudoku::backtrack()
 {
+    if (!initialized) update_options();
     int r = 10; //default values the loop can never reach
     int c = 10; //default values the loop can never reach
     int minsize = 10;
@@ -3528,6 +3530,11 @@ bool Sudoku::jellyfish()
     return found;
 }
 
+bool Sudoku::unique_rectangles()
+{
+
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -3535,12 +3542,14 @@ std::vector<std::vector<int>> Sudoku::get_puzzle()
 
 void Sudoku::set_puzzle(std::vector<std::vector<int>> puzzle)
 {
+    initialized = false;
     solved = false; //because we don't know if the new puzzle is solved, set it to false.
     this->puzzle = puzzle;
 }
 
 void Sudoku::set_puzzle(std::string puzzleString)
 {
+    initialized = false;
     solved = false; //because we don't know if the new puzzle is solved, set it to false.
     for (int r = 0; r < 9; r++)
     {
