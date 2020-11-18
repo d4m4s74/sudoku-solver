@@ -46,7 +46,7 @@ std::vector<std::pair<int, int>> Sudoku::list_seen_by(std::vector<std::pair<int,
     std::vector<std::pair<int, int>> output;
     for (std::pair<int, int> rc : checklist)
     {
-        if (seen_by(rc.first, rc.second, r, c))
+        if (seen_by(rc.first, rc.second, r, c) and !(rc.first == r and rc.second == c))
             output.push_back(rc);
     }
     return output;
@@ -386,7 +386,8 @@ std::vector<std::vector<int>> Sudoku::get_options_count()
 
 bool Sudoku::backtrack()
 {
-    if (!initialized) update_options();
+    if (!initialized)
+        update_options();
     int r = 10; //default values the loop can never reach
     int c = 10; //default values the loop can never reach
     int minsize = 10;
@@ -3243,7 +3244,7 @@ bool Sudoku::jellyfish()
                 if (noJellyfish == false)
                 {
                     r1 = i;
-                    for (int j = i+1; j < 7 and r4 == 10; j++)
+                    for (int j = i + 1; j < 7 and r4 == 10; j++)
                     {
                         numLocations = count(locations[j].begin(), locations[j].end(), true);
                         if (numLocations >= 2 and numLocations <= 4)
@@ -3272,7 +3273,7 @@ bool Sudoku::jellyfish()
                             if (noJellyfish == false)
                             {
                                 r2 = j;
-                                for (int k = j+1; k < 8 and r4 == 10; k++)
+                                for (int k = j + 1; k < 8 and r4 == 10; k++)
                                 {
                                     numLocations = count(locations[k].begin(), locations[k].end(), true);
                                     if (numLocations >= 2 and numLocations <= 4)
@@ -3301,7 +3302,7 @@ bool Sudoku::jellyfish()
                                         if (noJellyfish == false and csCopy3[3] != 10)
                                         {
                                             r3 = k;
-                                            for (int l = k+1; l < 9 and r4 == 10; l++)
+                                            for (int l = k + 1; l < 9 and r4 == 10; l++)
                                             {
                                                 numLocations = count(locations[l].begin(), locations[l].end(), true);
                                                 if (numLocations >= 2 and numLocations <= 4)
@@ -3399,7 +3400,7 @@ bool Sudoku::jellyfish()
                     if (noJellyfish == false)
                     {
                         c1 = i;
-                        for (int j = i+1; j < 7 and c4 == 10; j++)
+                        for (int j = i + 1; j < 7 and c4 == 10; j++)
                         {
                             numLocations = count(locationCols[j].begin(), locationCols[j].end(), true);
                             if (numLocations >= 2 and numLocations <= 4)
@@ -3428,7 +3429,7 @@ bool Sudoku::jellyfish()
                                 if (noJellyfish == false)
                                 {
                                     c2 = j;
-                                    for (int k = j+1; k < 8 and c4 == 10; k++)
+                                    for (int k = j + 1; k < 8 and c4 == 10; k++)
                                     {
                                         numLocations = count(locationCols[k].begin(), locationCols[k].end(), true);
                                         if (numLocations >= 2 and numLocations <= 4)
@@ -3457,7 +3458,7 @@ bool Sudoku::jellyfish()
                                             if (noJellyfish == false and rsCopy3[3] != 10)
                                             {
                                                 c3 = k;
-                                                for (int l = k+1; l < 9 and c4 == 10; l++)
+                                                for (int l = k + 1; l < 9 and c4 == 10; l++)
                                                 {
                                                     numLocations = count(locationCols[l].begin(), locationCols[l].end(), true);
                                                     if (numLocations >= 2 and numLocations <= 4)
@@ -3532,7 +3533,478 @@ bool Sudoku::jellyfish()
 
 bool Sudoku::unique_rectangles()
 {
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
+    std::vector<std::vector<int>> optionsCount = get_options_count();
+    for (int r = 0; r < 9; r++)
+    {
+        for (int c = 0; c < 9; c++)
+        {
+            if (optionsCount[r][c] == 2)
+            {
+                int r1, r2, r3, r4, c1, c2, c3, c4, n1, n2;
+                r2 = r3 = r4 = c2 = c3 = c4 = 10;
+                n1 = n2 = 0;
+                r1 = r;
+                c1 = c;
+                std::vector<std::unordered_set<int>> optionsRow = get_options_row(r);
+                std::vector<std::unordered_set<int>> optionsCol = get_options_col(c);
+                bool diagonal = false;
+                if (count(optionsRow.begin(), optionsRow.end(), allOptions[r][c]) == 2) //Let's check in the rows first. This should find any version except 2c
+                {
+                    std::vector<int> options;
+                    options.insert(options.end(), allOptions[r][c].begin(), allOptions[r][c].end());
+                    n1 = options[0];
+                    n2 = options[1];
+                    r2 = r1;
+                    c2 = find(optionsRow.begin(), optionsRow.end(), allOptions[r][c]) - optionsRow.begin();
+                    if (c2 == c1)
+                        c2 = find(optionsRow.begin() + c1 + 1, optionsRow.end(), allOptions[r][c]) - optionsRow.begin();
+                    
+                        for (int i = 0; i < 9 and c4 == 10; i++)
+                        {
+                            if (i != r1)
+                            {
+                                if (allOptions[i][c1].count(n1) == 1 and allOptions[i][c1].count(n2) == 1 and allOptions[i][c2].count(n1) == 1 and allOptions[i][c2].count(n2) == 1)
+                                {
+                                    if (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(i, c1))
+                                    {
+                                        r3 = r4 = i;
+                                        c3 = c1;
+                                        c4 = c2;
+                                    }
+                                }
+                            }
+                        }
+                    
+                }
+                if (r4 == 10) //we haven't found a square yet. Let's check collums
+                {
+                    if (count(optionsCol.begin(), optionsCol.end(), allOptions[r][c]) == 2) //Let's check in the rows first. This should find any version except 2c
+                    {
+                        std::vector<int> options;
+                        options.insert(options.end(), allOptions[r][c].begin(), allOptions[r][c].end());
+                        n1 = options[0];
+                        n2 = options[1];
+                        c2 = c1;
+                        r2 = find(optionsCol.begin(), optionsCol.end(), allOptions[r][c]) - optionsCol.begin();
+                        if (r2 == r1)
+                            r2 = find(optionsCol.begin() + r1 + 1, optionsCol.end(), allOptions[r][c]) - optionsCol.begin();
+                        
+                            for (int i = 0; i < 9 and c4 == 10; i++)
+                            {
+                                if (i != c1)
+                                {
+                                    if (allOptions[r1][i].count(n1) == 1 and allOptions[r1][i].count(n2) == 1 and allOptions[r2][1].count(n1) == 1 and allOptions[r2][i].count(n2) == 1)
+                                    {
+                                        if (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(r1, i))
+                                        {
+                                            c3 = c4 = i;
+                                            r3 = r1;
+                                            r4 = r2;
+                                        }
+                                    }
+                                }
+                            }
+                        
+                    }
+                }
+                if (r4 == 10) //we haven't found a square yet. We have to check diagonals
+                {
+                    int r0 = r1 / 3 * 3;
+                    int c0 = c1 / 3 * 3;
+                    int tr1, tr2, tc1, tc2;
+                    if (r1 == r0)
+                    {
+                        tr1 = r0 + 1;
+                        tr2 = r0 + 2;
+                    }
+                    else if (r1 == r0 + 1)
+                    {
+                        tr1 = r0;
+                        tr2 = r0 + 2;
+                    }
+                    else if (r1 == r0 + 2)
+                    {
+                        tr1 = r0;
+                        tr2 = r0 + 1;
+                    }
+                    if (c1 == c0)
+                    {
+                        tc1 = c0 + 1;
+                        tc2 = c0 + 2;
+                    }
+                    else if (c1 == c0 + 1)
+                    {
+                        tc1 = c0;
+                        tc2 = c0 + 2;
+                    }
+                    else if (c1 == c0 + 2)
+                    {
+                        tc1 = c0;
+                        tc2 = c0 + 1;
+                    }
+                    std::vector<std::unordered_set<int>> tOptionsRow1 = get_options_row(tr1);
+                    std::vector<std::unordered_set<int>> tOptionsRow2 = get_options_row(tr2);
+                    std::vector<std::unordered_set<int>> tOptionsCol1 = get_options_col(tc1);
+                    std::vector<std::unordered_set<int>> tOptionsCol2 = get_options_col(tc2);
+                    if (find(tOptionsRow1.begin(), tOptionsRow1.end(), allOptions[r1][c1]) != tOptionsRow1.end())
+                    {
+                        int tc = find(tOptionsRow1.begin(), tOptionsRow1.end(), allOptions[r1][c1]) - tOptionsRow1.begin();
+                        if (tc == c1) tc = find(tOptionsRow1.begin()+tc+1, tOptionsRow1.end(), allOptions[r1][c1]) - tOptionsRow1.begin();
+                        if (tc < 9 and allOptions[r1][tc].count(n1) == 1 and allOptions[r1][tc].count(n2) == 1 and allOptions[tr1][c1].count(n1) == 1 and allOptions[tr1][c1].count(n2) == 1)
+                        {
+                            r4 = tr1;
+                            c4 = tc;
+                            r2 = r1;
+                            c2 = c4;
+                            r3 = r4;
+                            c3 = c1;
+                            diagonal = true;
+                        }
+                    }
+                    if (r4 == 10 and find(tOptionsRow2.begin(), tOptionsRow2.end(), allOptions[r1][c1]) != tOptionsRow2.end())
+                    {
+                        int tc = find(tOptionsRow2.begin(), tOptionsRow2.end(), allOptions[r1][c1]) - tOptionsRow2.begin();
+                        if (tc == c1) tc = find(tOptionsRow2.begin()+tc+1, tOptionsRow2.end(), allOptions[r1][c1]) - tOptionsRow2.begin();
+                        if (tc < 9 and allOptions[r1][tc].count(n1) == 1 and allOptions[r1][tc].count(n2) == 1 and allOptions[tr2][c1].count(n1) == 1 and allOptions[tr2][c1].count(n2) == 1)
+                        {
+                            r4 = tr2;
+                            c4 = tc;
+                            r2 = r1;
+                            c2 = c4;
+                            r3 = r4;
+                            c3 = c1;
+                            diagonal = true;
+                        }
+                    }
+                    if (r4 == 10 and find(tOptionsCol1.begin(), tOptionsCol1.end(), allOptions[r1][c1]) != tOptionsCol1.end())
+                    {
+                        int tr = find(tOptionsCol1.begin(), tOptionsCol1.end(), allOptions[r1][c1]) - tOptionsCol1.begin();
+                        if (tr == r1) tr = find(tOptionsCol1.begin()+tr+1, tOptionsCol1.end(), allOptions[r1][c1]) - tOptionsCol1.begin();
+                        if (tr < 9 and allOptions[tr][c1].count(n1) == 1 and allOptions[tr][c1].count(n2) == 1 and allOptions[r1][tc1].count(n1) == 1 and allOptions[r1][tc1].count(n2) == 1)
+                        {
+                            r4 = tr;
+                            c4 = tc1;
+                            r2 = r1;
+                            c2 = c4;
+                            r3 = r4;
+                            c3 = c1;
+                            diagonal = true;
+                        }
+                    }
+                    if (r4 == 10 and find(tOptionsCol2.begin(), tOptionsCol2.end(), allOptions[r1][c1]) != tOptionsCol2.end())
+                    {
+                        int tr = find(tOptionsCol2.begin(), tOptionsCol2.end(), allOptions[r1][c1]) - tOptionsCol2.begin();
+                        if (tr == r1) tr = find(tOptionsCol2.begin()+tr+1, tOptionsCol2.end(), allOptions[r1][c1]) - tOptionsCol2.begin();
+                        if (tr < 9 and allOptions[tr][c1].count(n1) == 1 and allOptions[tr][c1].count(n2) == 1 and allOptions[r1][tc2].count(n1) == 1 and allOptions[r1][tc2].count(n2) == 1)
+                        {
+                            r4 = tr;
+                            c4 = tc2;
+                            r2 = r1;
+                            c2 = c4;
+                            r3 = r4;
+                            c3 = c1;
+                            diagonal = true;
+                        }
+                    }
+                }
+                if (r4 != 10) //We found one!
+                {
+                    if ((allOptions[r1][c1] == allOptions[r2][c2]) and (allOptions[r1][c1] == allOptions[r3][c3] xor allOptions[r1][c1] == allOptions[r4][c4]))
+                    { //We found type 1
+                        if (allOptions[r3][c3] != allOptions[r1][c1])
+                        {
+                            allOptionsCopy[r3][c3].erase(n1);
+                            allOptionsCopy[r3][c3].erase(n2);
+                            found = true;
+                        }
+                        else
+                        {
+                            allOptionsCopy[r4][c4].erase(n1);
+                            allOptionsCopy[r4][c4].erase(n2);
+                            found = true;
+                        }
+                    }
+                    else if (allOptions[r1][c1] == allOptions[r2][c2] and allOptions[r3][c3] == allOptions[r4][c4] and allOptions[r1][c1] != allOptions[r3][c3] and allOptions[r3][c3].size() == 3)
+                    { //we found type 2 a or b
+                        std::unordered_set<int> remove = unordered_set_difference(allOptions[r3][c3], allOptions[r1][c1]);
+                        int rm = *remove.begin();
+                        std::vector<std::pair<int, int>> seen = list_seen_by(r3, c3, r4, c4);
+                        for (std::pair<int, int> rc : seen)
+                        {
+                            if (allOptionsCopy[rc.first][rc.second].erase(rm))
+                                found = true;
+                        }
+                    }
+                    else if (diagonal and allOptions[r2][c2] == allOptions[r3][c3] and allOptions[r3][c3].size() == 3)
+                    { //type 2 c
+                        std::unordered_set<int> remove = unordered_set_difference(allOptions[r3][c3], allOptions[r1][c1]);
+                        int rm = *remove.begin();
+                        std::vector<std::pair<int, int>> seen = list_seen_by(r2, c2, r3, c3);
+                        for (std::pair<int, int> rc : seen)
+                        {
+                            if (allOptionsCopy[rc.first][rc.second].erase(rm))
+                                found = true;
+                        }
+                    }
+                    else if (allOptions[r4][c4] != allOptions[r3][c3] and allOptions[r4][c4].size() == 3 and allOptions[r3][c3].size() == 3 and block_number(r4, c4) != block_number(r3, c3))
+                    { //type 3a
+                        std::unordered_set<int> rm1 = unordered_set_difference(allOptions[r3][c3], allOptions[r1][c1]);
+                        std::unordered_set<int> rm2 = unordered_set_difference(allOptions[r4][c4], allOptions[r1][c1]);
+                        int n3 = *rm1.begin();
+                        int n4 = *rm2.begin();
+                        std::unordered_set<int> needle = {n3, n4};
+                        int nc1 = 10;
+                        int nr1 = 10;
+                        if (r3 == r4)
+                        {
+                            nc1 == find(allOptions[r3].begin(), allOptions[r3].end(), needle) - allOptions[r3].begin();
+                            if (nc1 < 9)
+                                nr1 = r3;
+                        }
+                        else if (c3 == c4)
+                        {
+                            optionsCol = get_options_col(c3);
+                            nr1 == find(optionsCol.begin(), optionsCol.end(), needle) - optionsCol.begin();
+                            if (nr1 < 9)
+                                nc1 = r3;
+                        }
+                        if (nr1 < 9 and nc1 < 9)
+                        {
+                            std::vector<std::pair<int, int>> seen = list_seen_by(list_seen_by(r2, c2, r3, c3), nr1, nc1);
+                            for (std::pair<int, int> rc : seen)
+                            {
+                                if (allOptionsCopy[rc.first][rc.second].erase(n3))
+                                    found = true;
+                                if (allOptionsCopy[rc.first][rc.second].erase(n4))
+                                    found = true;
+                            }
+                        }
+                    }
+                    else if (allOptions[r4][c4] != allOptions[r3][c3] and allOptions[r4][c4].size() == 3 and allOptions[r3][c3].size() == 3 and block_number(r4, c4) == block_number(r3, c3))
+                    { //type 3a
+                        std::unordered_set<int> rm1 = unordered_set_difference(allOptions[r3][c3], allOptions[r1][c1]);
+                        std::unordered_set<int> rm2 = unordered_set_difference(allOptions[r4][c4], allOptions[r1][c1]);
+                        int n3 = *rm1.begin();
+                        int n4 = *rm2.begin();
+                        std::unordered_set<int> needle = {n3, n4};
+                        int nc1 = 10;
+                        int nr1 = 10;
+                        int nr2 = 10;
+                        int nc2 = 10;
+                        if (r3 == r4)
+                        {
+                            nc1 == find(allOptions[r3].begin(), allOptions[r3].end(), needle) - allOptions[r3].begin();
+                            if (nc1 < 9)
+                                nr1 = r3;
+                        }
+                        else if (c3 == c4)
+                        {
+                            optionsCol = get_options_col(c3);
+                            nr1 == find(optionsCol.begin(), optionsCol.end(), needle) - optionsCol.begin();
+                            if (nr1 < 9)
+                                nc1 = r3;
+                        }
+                        std::vector<std::unordered_set<int>> optionsBlock = get_options_block(r3, c3);
+                        int b2 = find(optionsBlock.begin(), optionsBlock.end(), needle) - optionsBlock.begin();
+                        if (b2 < 9)
+                        {
+                            int r0 = r3 / 3 * 3;
+                            int c0 = c3 / 3 * 3;
+                            int nr2 = r0 + b2 / 3;
+                            int nc2 = c0 + b2 % 3;
+                        }
+                        if (nr1 < 9 and nc1 < 9)
+                        {
+                            std::vector<std::pair<int, int>> seen = list_seen_by(list_seen_by(r2, c2, r3, c3), nr1, nc1);
+                            for (std::pair<int, int> rc : seen)
+                            {
+                                if (allOptionsCopy[rc.first][rc.second].erase(n3))
+                                    found = true;
+                                if (allOptionsCopy[rc.first][rc.second].erase(n4))
+                                    found = true;
+                            }
+                        }
+                        if (nr2 < 9 and nc2 < 9)
+                        {
+                            std::vector<std::pair<int, int>> seen = list_seen_by(list_seen_by(r2, c2, r3, c3), nr2, nc2);
+                            for (std::pair<int, int> rc : seen)
+                            {
+                                if (allOptionsCopy[rc.first][rc.second].erase(n3))
+                                    found = true;
+                                if (allOptionsCopy[rc.first][rc.second].erase(n4))
+                                    found = true;
+                            }
+                        }
+                    }
+                    else if ((allOptions[r4][c4].size() == 4 and allOptions[r3][c3].size() == 3) or (allOptions[r4][c4].size() == 4 and allOptions[r3][c3].size() == 4) or allOptions[r4][c4].size() == 3 and allOptions[r3][c3].size() == 4) //Todo: Type 3/3b with Triple Pseudo-Cells
+                    {
+                        std::unordered_set<int> merged = allOptions[r4][c4];
+                        merged.insert(allOptions[r3][c3].begin(), allOptions[r3][c3].end());
+                        if (merged.size() == 4)
+                        {
+                            std::unordered_set<int> needle = unordered_set_intersection(merged, allOptions[r1][c1]);
+                            int n3 = *needle.begin();
+                            needle.erase(n3);
+                            int n4 = *needle.begin();
+                            needle = {n3, n4};
+                            int n5 = 0;
+                            int r5, r6, c5, c6;
+                            r5 = r6 = c5 = c6 = 10;
+                            if (r3 == r4) //they're on the same row
+                            {
+                                std::vector<bool> locationsRowN3 = get_possible_locations_row(n3, r3);
+                                std::vector<bool> locationsRowN4 = get_possible_locations_row(n4, r3);
+                                for (int pc5 = 0; pc5 < 9 and n5 == 0; pc5++)
+                                {
+                                    if (pc5 != c4 and pc5 != c3 and (locationsRowN3[pc5] == true or locationsRowN4[pc5] == true))
+                                    {
+                                        if (unordered_set_difference(allOptions[r3][pc5], needle).size() == 1)
+                                        {
+                                            std::unordered_set<int> pn5s = unordered_set_difference(allOptions[r3][pc5], needle);
+                                            int pn5 = *pn5s.begin();
+                                            std::vector<bool> locationsRowN5 = get_possible_locations_row(pn5, r4);
+                                            if (count(locationsRowN5.begin(), locationsRowN5.end(), true) == 2)
+                                            {
+                                                int pc6 = find(locationsRowN5.begin() + pc5 + 1, locationsRowN5.end(), true) - locationsRowN5.begin();
+                                                if (pc6 < 9 and unordered_set_difference(allOptions[r3][pc6], needle).size() == 1)
+                                                {
+                                                    r5 = r6 = r4;
+                                                    c5 = pc5;
+                                                    c6 = pc6;
+                                                    n5 = pn5;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (c5 != 10) //I think we found something
+                                {
+                                    for (int c7 = 0; c7++; c7 < 9)
+                                    {
+                                        if (c7 != c3 and c7 != c4 and c7 != c5 and c7 != c6)
+                                        {
+                                            if (allOptionsCopy[r4][c7].erase(n3))
+                                                found = true;
+                                            if (allOptionsCopy[r4][c7].erase(n4))
+                                                found = true;
+                                        }
+                                    }
+                                }
+                            }
+                            else //they're on the same col
+                            {
+                                std::vector<bool> locationsColN3 = get_possible_locations_col(n3, c3);
+                                std::vector<bool> locationsColN4 = get_possible_locations_col(n4, c3);
+                                for (int pr5 = 0; pr5 < 9 and n5 == 0; pr5++)
+                                {
+                                    if (pr5 != r4 and pr5 != r3 and (locationsColN3[pr5] == true or locationsColN4[pr5] == true))
+                                    {
+                                        if (unordered_set_difference(allOptions[pr5][c3], needle).size() == 1)
+                                        {
+                                            std::unordered_set<int> pn5s = unordered_set_difference(allOptions[pr5][c3], needle);
+                                            int pn5 = *pn5s.begin();
+                                            std::vector<bool> locationsColN5 = get_possible_locations_col(pn5, c4);
+                                            if (count(locationsColN5.begin(), locationsColN5.end(), true) == 2)
+                                            {
+                                                int pr6 = find(locationsColN5.begin() + pr5 + 1, locationsColN5.end(), true) - locationsColN5.begin();
+                                                if (pr6 < 9 and unordered_set_difference(allOptions[pr6][c4], needle).size() == 1)
+                                                {
+                                                    c5 = c6 = c4;
+                                                    r5 = pr5;
+                                                    r6 = pr6;
+                                                    n5 = pn5;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (r5 != 10) //I think we found something
+                                {
+                                    for (int r7 = 0; r7++; r7 < 9)
+                                    {
+                                        if (r7 != r3 and r7 != r4 and r7 != r5 and r7 != r6)
+                                        {
+                                            if (allOptionsCopy[r7][c4].erase(n3))
+                                                found = true;
+                                            if (allOptionsCopy[r7][c4].erase(n4))
+                                                found = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //finally the variations of case 4.
+                    if (block_number(r3, c3) == block_number(r4, c4) and allOptions[r3][c3].size() > 2 and allOptions[r4][c3].size() > 2)
+                    {
+                        std::vector<bool> locationsBlockn1 = get_possible_locations_block(n1, r3, c3);
+                        std::vector<bool> locationsBlockn2 = get_possible_locations_block(n2, r3, c3);
+                        if (count(locationsBlockn1.begin(), locationsBlockn1.end(), true) == 2)
+                        { //n1 has to be in the two squares, therefore n2 can be removed
+                            if (allOptionsCopy[r3][c3].erase(n2))
+                                found = true;
+                            if (allOptionsCopy[r4][c4].erase(n2))
+                                found = true;
+                        }
+                        else if (count(locationsBlockn2.begin(), locationsBlockn2.end(), true) == 2)
+                        { //n2 has to be in the two squares, therefore n1 can be removed
+                            if (allOptionsCopy[r3][c3].erase(n1))
+                                found = true;
+                            if (allOptionsCopy[r4][c4].erase(n1))
+                                found = true;
+                        }
+                    }
+                    if (r3 == r4 and allOptions[r3][c3].size() > 2 and allOptions[r4][c3].size() > 2)
+                    {
+                        std::vector<bool> locationsRown1 = get_possible_locations_row(n1, r3);
+                        std::vector<bool> locationsRown2 = get_possible_locations_row(n2, r3);
+                        if (count(locationsRown1.begin(), locationsRown1.end(), true) == 2)
+                        { //n1 has to be in the two squares, therefore n2 can be removed
+                            if (allOptionsCopy[r3][c3].erase(n2))
+                                found = true;
+                            if (allOptionsCopy[r4][c4].erase(n2))
+                                found = true;
+                        }
+                        else if (count(locationsRown2.begin(), locationsRown2.end(), true) == 2)
+                        { //n2 has to be in the two squares, therefore n1 can be removed
+                            if (allOptionsCopy[r3][c3].erase(n1))
+                                found = true;
+                            if (allOptionsCopy[r4][c4].erase(n1))
+                                found = true;
+                        }
+                    }
+                    else if (c3 == c4 and allOptions[r3][c3].size() > 2 and allOptions[r4][c3].size() > 2)
+                    {
+                        std::vector<bool> locationsColn1 = get_possible_locations_col(n1, c3);
+                        std::vector<bool> locationsColn2 = get_possible_locations_col(n2, c3);
+                        if (count(locationsColn1.begin(), locationsColn1.end(), true) == 2)
+                        { //n1 has to be in the two squares, therefore n2 can be removed
+                            if (allOptionsCopy[r3][c3].erase(n2))
+                                found = true;
+                            if (allOptionsCopy[r4][c4].erase(n2))
+                                found = true;
+                        }
+                        else if (count(locationsColn2.begin(), locationsColn2.end(), true) == 2)
+                        { //n2 has to be in the two squares, therefore n1 can be removed
+                            if (allOptionsCopy[r3][c3].erase(n1))
+                                found = true;
+                            if (allOptionsCopy[r4][c4].erase(n1))
+                                found = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
 }
 
 std::vector<std::vector<int>> Sudoku::get_puzzle()
@@ -3718,6 +4190,12 @@ bool Sudoku::solve()
         if (jellyfish())
         {
             //std::cout << "found jellyfish" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (unique_rectangles())
+        {
+            //std::cout << "found unique rectangles" << std::endl;
             changed = true;
             continue;
         }
