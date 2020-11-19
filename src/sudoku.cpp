@@ -1438,7 +1438,7 @@ bool Sudoku::box_line_reduction()
     bool found = false;
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions; //first make working copies of all options
 
-    for (int i = 0; i < 9; i++) //iterate(i) from 0 to 9 (all rows and columns)
+    for (int i = 0; i < 9 and found == false; i++) //iterate(i) from 0 to 9 (all rows and columns)
     {
         //first rows
         std::vector<std::unordered_set<int>> optionsRow = get_options_row(i); //get the row
@@ -1476,7 +1476,7 @@ bool Sudoku::box_line_reduction()
         }
         //next up: cols
         std::vector<std::unordered_set<int>> optionsCol = get_options_col(i); //get the col
-        for (int j = 0; j < 9; j++)                                           //iterate(j) from 0 to 9 (all squares)
+        for (int j = 0; j < 9 and found == false; j++)                                           //iterate(j) from 0 to 9 (all squares)
         {
             if (puzzle[j][i] == 0) //if the square is not solved
             {
@@ -2725,108 +2725,37 @@ bool Sudoku::xy_chain()
     std::vector<std::vector<int>> optionsCount = get_options_count();
     std::vector<std::vector<int>> optionsCountCols = optionsCount;
     transpose_matrix(optionsCountCols);
-    std::vector<std::vector<bool>> chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
-    int chainLength = 0;
-    std::function<std::pair<int, int>(int, int, int, int)> find_chain;
-    find_chain = [&](int n, int r, int c, int gn) {
-        chain[r][c] = true;
-        chainLength++;
-        if (chainLength > 2 and allOptions[r][c].count(gn) == 1)
-            return std::make_pair(r, c);
+    std::function<std::vector<std::pair<int, int>>(int, int, int, int, std::vector<std::pair<int,int>>)> find_chain;
+    find_chain = [&](int n, int r, int c, int gn, std::vector<std::pair<int,int>> onchain) {
+        std::vector<std::pair<int,int>> goals;
+        onchain.push_back(std::make_pair(r, c));
+        if (onchain.size() > 4 and n == gn)
+        {
+            goals.push_back(std::make_pair(r, c));
+        }
         //we're looking for a different pair that shares n. starting with rows;
         bool searching = true;
         int next = 0;
-        while (searching)
+        std::vector<std::pair<int, int>> seen = list_seen_by(r,c);
+        for (std::pair<int,int> rc:seen)
         {
-            int c2 = std::find(optionsCount[r].begin() + next, optionsCount[r].end(), 2) - optionsCount[r].begin();
-            if (c2 > 8)
-                searching = false;
-            else if (c2 == c)
-            {
-                next = c2 + 1;
-                if (next > 8)
-                    searching = false;
-            }
-            else if (chain[r][c2] == false and allOptions[r][c2].count(n) == 1)
+            if (optionsCount[rc.first][rc.second] == 2 and find(onchain.begin(),onchain.end(),rc) == onchain.end() and allOptions[rc.first][rc.second].count(n) == 1)
             {
                 std::vector<int> options;
-                options.insert(options.end(), allOptions[r][c2].begin(), allOptions[r][c2].end());
-                int nextn = (options[0] == n) ? options[1] : options[0];
-                std::pair<int, int> goal = find_chain(nextn, r, c2, gn);
-                if (goal.first != 10)
-                    return goal;
+                options.insert(options.end(),allOptions[rc.first][rc.second].begin(),allOptions[rc.first][rc.second].end());
+                int nextN = (options[0] == n)?options[1]:options[0];
+                std::vector<std::pair<int,int>> exits = find_chain(nextN,rc.first,rc.second,gn,onchain);
+                if (exits.size() > 0)
+                    goals.insert(goals.end(),exits.begin(),exits.end());
             }
-            next = c2 + 1;
-            if (next > 8)
-                searching = false;
-        }
-        searching = true;
-        next = 0;
-        while (searching)
-        {
-            int r2 = std::find(optionsCountCols[c].begin() + next, optionsCountCols[c].end(), 2) - optionsCountCols[c].begin();
-            if (r2 > 8)
-                searching = false;
-            else if (r2 == r)
-            {
-                next = r2 + 1;
-                if (next > 8)
-                    searching = false;
-            }
-            else if (chain[r2][c] == false and allOptions[r2][c].count(n) == 1)
-            {
-                std::vector<int> options;
-                options.insert(options.end(), allOptions[r2][c].begin(), allOptions[r2][c].end());
-                int nextn = (options[0] == n) ? options[1] : options[0];
-                std::pair<int, int> goal = find_chain(nextn, r2, c, gn);
-                if (goal.first != 10)
-                    return goal;
-            }
-            next = r2 + 1;
-            if (next > 8)
-                searching = false;
-        }
-        std::vector<int> optionsCountBlock = get_block(optionsCount, r, c);
-        int b = r % 3 * 3 + c % 3;
-        int r0 = r / 3 * 3;
-        int c0 = c / 3 * 3;
-        searching = true;
-        next = 0;
-        while (searching)
-        {
-            int b2 = std::find(optionsCountBlock.begin() + next, optionsCountBlock.end(), 2) - optionsCountBlock.begin();
-            int r2 = r0 + b2 / 3;
-            int c2 = c0 + b2 % 3;
-            if (b2 > 8)
-                searching = false;
-            else if (b2 == b)
-            {
-                next = b2 + 1;
-                if (next > 8)
-                    searching = false;
-            }
-            else if (chain[r2][c2] == false and allOptions[r2][c2].count(n) == 1)
-            {
-                std::vector<int> options;
-                options.insert(options.end(), allOptions[r2][c2].begin(), allOptions[r2][c2].end());
-                int nextn = (options[0] == n) ? options[1] : options[0];
-                std::pair<int, int> goal = find_chain(nextn, r2, c2, gn);
-                if (goal.first != 10)
-                    return goal;
-            }
-            next = b2 + 1;
-            if (next > 8)
-                searching = false;
         }
 
-        chain[r][c] = false;
-        chainLength--;
-        return std::make_pair(10, 10);
+        return goals;
     };
 
-    for (int r = 0; r < 9; r++)
+    for (int r = 0; r < 9 and found == false; r++)
     {
-        for (int c = 0; c < 9; c++)
+        for (int c = 0; c < 9 and found == false; c++)
         {
             if (optionsCount[r][c] == 2)
             {
@@ -2835,19 +2764,35 @@ bool Sudoku::xy_chain()
                 int n1 = options[0];
                 int n2 = options[1];
                 std::vector<std::pair<int, int>> remove1, remove2;
-                chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
-                chainLength = 0;
-                std::pair<int, int> goal1 = find_chain(n2, r, c, n1);
-                if (goal1.first != 10 and chainLength >= 4)
-                    remove1 = list_seen_by(r, c, goal1.first, goal1.second);
-                chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
-                chainLength = 0;
-                std::pair<int, int> goal2 = find_chain(n1, r, c, n2);
-                if (goal2.first != 10 and chainLength >= 4)
-                    remove2 = list_seen_by(r, c, goal2.first, goal2.second);
+                std::vector<std::pair<int, int>> goals1 = find_chain(n2, r, c, n1, {});
+                sort( goals1.begin(), goals1.end() );
+                goals1.erase( unique( goals1.begin(), goals1.end() ), goals1.end() );
+                if (goals1.size() > 0)
+                {
+                    for (std::pair<int,int> rc : goals1)
+                    {
+                        std::vector<std::pair<int,int>> remove = list_seen_by(r, c, rc.first, rc.second);
+                        remove1.insert(remove1.end(),remove.begin(),remove.end());
+                    }
+                    sort( remove1.begin(), remove1.end() );
+                    remove1.erase( unique( remove1.begin(), remove1.end() ), remove1.end() );
+                }
+                std::vector<std::pair<int, int>> goals2 = find_chain(n1, r, c, n2, {});
+                sort( goals2.begin(), goals2.end() );
+                goals2.erase( unique( goals2.begin(), goals2.end() ), goals2.end() );
+                if (goals2.size() > 0)
+                {
+                    for (std::pair<int,int> rc : goals2)
+                    {
+                        std::vector<std::pair<int,int>> remove = list_seen_by(r, c, rc.first, rc.second);
+                        remove2.insert(remove2.end(),remove.begin(),remove.end());
+                    }
+                    sort( remove2.begin(), remove2.end() );
+                    remove2.erase( unique( remove2.begin(), remove2.end() ), remove2.end() );
+                }
                 for (std::pair<int, int> rm : remove1)
                 {
-                    if (!(rm.first == r and rm.second == c) and !(rm.first == goal1.first and rm.second == goal1.second))
+                    if (!(rm.first == r and rm.second == c) and (find(goals1.begin(),goals1.end(),rm) == goals1.end()))
                     {
                         if (allOptionsCopy[rm.first][rm.second].erase(n1))
                             found = true;
@@ -2855,7 +2800,7 @@ bool Sudoku::xy_chain()
                 }
                 for (std::pair<int, int> rm : remove2)
                 {
-                    if (!(rm.first == r and rm.second == c) and !(rm.first == goal2.first and rm.second == goal2.second))
+                    if (!(rm.first == r and rm.second == c) and (find(goals2.begin(),goals2.end(),rm) == goals2.end()))
                     {
                         if (allOptionsCopy[rm.first][rm.second].erase(n2))
                             found = true;
