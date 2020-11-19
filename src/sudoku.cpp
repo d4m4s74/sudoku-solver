@@ -1476,7 +1476,7 @@ bool Sudoku::box_line_reduction()
         }
         //next up: cols
         std::vector<std::unordered_set<int>> optionsCol = get_options_col(i); //get the col
-        for (int j = 0; j < 9 and found == false; j++)                                           //iterate(j) from 0 to 9 (all squares)
+        for (int j = 0; j < 9 and found == false; j++)                        //iterate(j) from 0 to 9 (all squares)
         {
             if (puzzle[j][i] == 0) //if the square is not solved
             {
@@ -2725,31 +2725,32 @@ bool Sudoku::xy_chain()
     std::vector<std::vector<int>> optionsCount = get_options_count();
     std::vector<std::vector<int>> optionsCountCols = optionsCount;
     transpose_matrix(optionsCountCols);
-    std::function<std::vector<std::pair<int, int>>(int, int, int, int, std::vector<std::pair<int,int>>)> find_chain;
-    find_chain = [&](int n, int r, int c, int gn, std::vector<std::pair<int,int>> onchain) {
-        std::vector<std::pair<int,int>> goals;
+    std::vector<std::vector<bool>> chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+    int chainLength = 0;
+    std::function<std::vector<std::pair<int, int>>(int, int, int, int, std::vector<std::pair<int, int>>)> find_chain;
+    find_chain = [&](int n, int r, int c, int gn, std::vector<std::pair<int, int>> onchain) {
+        std::vector<std::pair<int, int>> goals;
+        chain[r][c] = true;
         onchain.push_back(std::make_pair(r, c));
         if (onchain.size() > 4 and n == gn)
         {
             goals.push_back(std::make_pair(r, c));
         }
-        //we're looking for a different pair that shares n. starting with rows;
-        bool searching = true;
-        int next = 0;
-        std::vector<std::pair<int, int>> seen = list_seen_by(r,c);
-        for (std::pair<int,int> rc:seen)
+        std::vector<std::pair<int, int>> seen = list_seen_by(r, c);
+        for (std::pair<int, int> rc : seen)
         {
-            if (optionsCount[rc.first][rc.second] == 2 and find(onchain.begin(),onchain.end(),rc) == onchain.end() and allOptions[rc.first][rc.second].count(n) == 1)
+            if (optionsCount[rc.first][rc.second] == 2 and chain[rc.first][rc.second] == 0 and find(onchain.begin(), onchain.end(), rc) == onchain.end() and allOptions[rc.first][rc.second].count(n) == 1)
             {
                 std::vector<int> options;
-                options.insert(options.end(),allOptions[rc.first][rc.second].begin(),allOptions[rc.first][rc.second].end());
-                int nextN = (options[0] == n)?options[1]:options[0];
-                std::vector<std::pair<int,int>> exits = find_chain(nextN,rc.first,rc.second,gn,onchain);
+                options.insert(options.end(), allOptions[rc.first][rc.second].begin(), allOptions[rc.first][rc.second].end());
+                int nextN = (options[0] == n) ? options[1] : options[0];
+                std::vector<std::pair<int, int>> exits = find_chain(nextN, rc.first, rc.second, gn, onchain);
                 if (exits.size() > 0)
-                    goals.insert(goals.end(),exits.begin(),exits.end());
+                    goals.insert(goals.end(), exits.begin(), exits.end());
             }
         }
 
+        //chain[r][c] = false;
         return goals;
     };
 
@@ -2764,46 +2765,53 @@ bool Sudoku::xy_chain()
                 int n1 = options[0];
                 int n2 = options[1];
                 std::vector<std::pair<int, int>> remove1, remove2;
+                chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                chainLength = 0;
                 std::vector<std::pair<int, int>> goals1 = find_chain(n2, r, c, n1, {});
-                sort( goals1.begin(), goals1.end() );
-                goals1.erase( unique( goals1.begin(), goals1.end() ), goals1.end() );
+                sort(goals1.begin(), goals1.end());
+                goals1.erase(unique(goals1.begin(), goals1.end()), goals1.end());
                 if (goals1.size() > 0)
                 {
-                    for (std::pair<int,int> rc : goals1)
+                    for (std::pair<int, int> rc : goals1)
                     {
-                        std::vector<std::pair<int,int>> remove = list_seen_by(r, c, rc.first, rc.second);
-                        remove1.insert(remove1.end(),remove.begin(),remove.end());
+                        std::vector<std::pair<int, int>> remove = list_seen_by(r, c, rc.first, rc.second);
+                        remove1.insert(remove1.end(), remove.begin(), remove.end());
                     }
-                    sort( remove1.begin(), remove1.end() );
-                    remove1.erase( unique( remove1.begin(), remove1.end() ), remove1.end() );
+                    sort(remove1.begin(), remove1.end());
+                    remove1.erase(unique(remove1.begin(), remove1.end()), remove1.end());
                 }
+                chain = {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                chainLength = 0;
                 std::vector<std::pair<int, int>> goals2 = find_chain(n1, r, c, n2, {});
-                sort( goals2.begin(), goals2.end() );
-                goals2.erase( unique( goals2.begin(), goals2.end() ), goals2.end() );
+                sort(goals2.begin(), goals2.end());
+                goals2.erase(unique(goals2.begin(), goals2.end()), goals2.end());
                 if (goals2.size() > 0)
                 {
-                    for (std::pair<int,int> rc : goals2)
+                    for (std::pair<int, int> rc : goals2)
                     {
-                        std::vector<std::pair<int,int>> remove = list_seen_by(r, c, rc.first, rc.second);
-                        remove2.insert(remove2.end(),remove.begin(),remove.end());
+                        std::vector<std::pair<int, int>> remove = list_seen_by(r, c, rc.first, rc.second);
+                        remove2.insert(remove2.end(), remove.begin(), remove.end());
                     }
-                    sort( remove2.begin(), remove2.end() );
-                    remove2.erase( unique( remove2.begin(), remove2.end() ), remove2.end() );
+                    sort(remove2.begin(), remove2.end());
+                    remove2.erase(unique(remove2.begin(), remove2.end()), remove2.end());
                 }
                 for (std::pair<int, int> rm : remove1)
                 {
-                    if (!(rm.first == r and rm.second == c) and (find(goals1.begin(),goals1.end(),rm) == goals1.end()))
+                    if (!(rm.first == r and rm.second == c) and (find(goals1.begin(), goals1.end(), rm) == goals1.end()))
                     {
                         if (allOptionsCopy[rm.first][rm.second].erase(n1))
                             found = true;
                     }
                 }
-                for (std::pair<int, int> rm : remove2)
+                if (!found)
                 {
-                    if (!(rm.first == r and rm.second == c) and (find(goals2.begin(),goals2.end(),rm) == goals2.end()))
+                    for (std::pair<int, int> rm : remove2)
                     {
-                        if (allOptionsCopy[rm.first][rm.second].erase(n2))
-                            found = true;
+                        if (!(rm.first == r and rm.second == c) and (find(goals2.begin(), goals2.end(), rm) == goals2.end()))
+                        {
+                            if (allOptionsCopy[rm.first][rm.second].erase(n2))
+                                found = true;
+                        }
                     }
                 }
             }
@@ -3505,23 +3513,22 @@ bool Sudoku::unique_rectangles()
                     c2 = find(optionsRow.begin(), optionsRow.end(), allOptions[r][c]) - optionsRow.begin();
                     if (c2 == c1)
                         c2 = find(optionsRow.begin() + c1 + 1, optionsRow.end(), allOptions[r][c]) - optionsRow.begin();
-                    
-                        for (int i = 0; i < 9 and c4 == 10; i++)
+
+                    for (int i = 0; i < 9 and c4 == 10; i++)
+                    {
+                        if (i != r1)
                         {
-                            if (i != r1)
+                            if (allOptions[i][c1].count(n1) == 1 and allOptions[i][c1].count(n2) == 1 and allOptions[i][c2].count(n1) == 1 and allOptions[i][c2].count(n2) == 1)
                             {
-                                if (allOptions[i][c1].count(n1) == 1 and allOptions[i][c1].count(n2) == 1 and allOptions[i][c2].count(n1) == 1 and allOptions[i][c2].count(n2) == 1)
+                                if (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(i, c1))
                                 {
-                                    if (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(i, c1))
-                                    {
-                                        r3 = r4 = i;
-                                        c3 = c1;
-                                        c4 = c2;
-                                    }
+                                    r3 = r4 = i;
+                                    c3 = c1;
+                                    c4 = c2;
                                 }
                             }
                         }
-                    
+                    }
                 }
                 if (r4 == 10) //we haven't found a square yet. Let's check collums
                 {
@@ -3535,23 +3542,22 @@ bool Sudoku::unique_rectangles()
                         r2 = find(optionsCol.begin(), optionsCol.end(), allOptions[r][c]) - optionsCol.begin();
                         if (r2 == r1)
                             r2 = find(optionsCol.begin() + r1 + 1, optionsCol.end(), allOptions[r][c]) - optionsCol.begin();
-                        
-                            for (int i = 0; i < 9 and c4 == 10; i++)
+
+                        for (int i = 0; i < 9 and c4 == 10; i++)
+                        {
+                            if (i != c1)
                             {
-                                if (i != c1)
+                                if (allOptions[r1][i].count(n1) == 1 and allOptions[r1][i].count(n2) == 1 and allOptions[r2][i].count(n1) == 1 and allOptions[r2][i].count(n2) == 1)
                                 {
-                                    if (allOptions[r1][i].count(n1) == 1 and allOptions[r1][i].count(n2) == 1 and allOptions[r2][1].count(n1) == 1 and allOptions[r2][i].count(n2) == 1)
+                                    if (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(r1, i))
                                     {
-                                        if (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(r1, i))
-                                        {
-                                            c3 = c4 = i;
-                                            r3 = r1;
-                                            r4 = r2;
-                                        }
+                                        c3 = c4 = i;
+                                        r3 = r1;
+                                        r4 = r2;
                                     }
                                 }
                             }
-                        
+                        }
                     }
                 }
                 if (r4 == 10) //we haven't found a square yet. We have to check diagonals
@@ -3596,7 +3602,8 @@ bool Sudoku::unique_rectangles()
                     if (find(tOptionsRow1.begin(), tOptionsRow1.end(), allOptions[r1][c1]) != tOptionsRow1.end())
                     {
                         int tc = find(tOptionsRow1.begin(), tOptionsRow1.end(), allOptions[r1][c1]) - tOptionsRow1.begin();
-                        if (tc == c1) tc = find(tOptionsRow1.begin()+tc+1, tOptionsRow1.end(), allOptions[r1][c1]) - tOptionsRow1.begin();
+                        if (tc == c1)
+                            tc = find(tOptionsRow1.begin() + tc + 1, tOptionsRow1.end(), allOptions[r1][c1]) - tOptionsRow1.begin();
                         if (tc < 9 and allOptions[r1][tc].count(n1) == 1 and allOptions[r1][tc].count(n2) == 1 and allOptions[tr1][c1].count(n1) == 1 and allOptions[tr1][c1].count(n2) == 1)
                         {
                             r4 = tr1;
@@ -3611,7 +3618,8 @@ bool Sudoku::unique_rectangles()
                     if (r4 == 10 and find(tOptionsRow2.begin(), tOptionsRow2.end(), allOptions[r1][c1]) != tOptionsRow2.end())
                     {
                         int tc = find(tOptionsRow2.begin(), tOptionsRow2.end(), allOptions[r1][c1]) - tOptionsRow2.begin();
-                        if (tc == c1) tc = find(tOptionsRow2.begin()+tc+1, tOptionsRow2.end(), allOptions[r1][c1]) - tOptionsRow2.begin();
+                        if (tc == c1)
+                            tc = find(tOptionsRow2.begin() + tc + 1, tOptionsRow2.end(), allOptions[r1][c1]) - tOptionsRow2.begin();
                         if (tc < 9 and allOptions[r1][tc].count(n1) == 1 and allOptions[r1][tc].count(n2) == 1 and allOptions[tr2][c1].count(n1) == 1 and allOptions[tr2][c1].count(n2) == 1)
                         {
                             r4 = tr2;
@@ -3626,7 +3634,8 @@ bool Sudoku::unique_rectangles()
                     if (r4 == 10 and find(tOptionsCol1.begin(), tOptionsCol1.end(), allOptions[r1][c1]) != tOptionsCol1.end())
                     {
                         int tr = find(tOptionsCol1.begin(), tOptionsCol1.end(), allOptions[r1][c1]) - tOptionsCol1.begin();
-                        if (tr == r1) tr = find(tOptionsCol1.begin()+tr+1, tOptionsCol1.end(), allOptions[r1][c1]) - tOptionsCol1.begin();
+                        if (tr == r1)
+                            tr = find(tOptionsCol1.begin() + tr + 1, tOptionsCol1.end(), allOptions[r1][c1]) - tOptionsCol1.begin();
                         if (tr < 9 and allOptions[tr][c1].count(n1) == 1 and allOptions[tr][c1].count(n2) == 1 and allOptions[r1][tc1].count(n1) == 1 and allOptions[r1][tc1].count(n2) == 1)
                         {
                             r4 = tr;
@@ -3641,7 +3650,8 @@ bool Sudoku::unique_rectangles()
                     if (r4 == 10 and find(tOptionsCol2.begin(), tOptionsCol2.end(), allOptions[r1][c1]) != tOptionsCol2.end())
                     {
                         int tr = find(tOptionsCol2.begin(), tOptionsCol2.end(), allOptions[r1][c1]) - tOptionsCol2.begin();
-                        if (tr == r1) tr = find(tOptionsCol2.begin()+tr+1, tOptionsCol2.end(), allOptions[r1][c1]) - tOptionsCol2.begin();
+                        if (tr == r1)
+                            tr = find(tOptionsCol2.begin() + tr + 1, tOptionsCol2.end(), allOptions[r1][c1]) - tOptionsCol2.begin();
                         if (tr < 9 and allOptions[tr][c1].count(n1) == 1 and allOptions[tr][c1].count(n2) == 1 and allOptions[r1][tc2].count(n1) == 1 and allOptions[r1][tc2].count(n2) == 1)
                         {
                             r4 = tr;
