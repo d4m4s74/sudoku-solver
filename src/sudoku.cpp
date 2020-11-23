@@ -2803,15 +2803,13 @@ bool Sudoku::xy_chain()
                             found = true;
                     }
                 }
-                if (!found)
+
+                for (std::pair<int, int> rm : remove2)
                 {
-                    for (std::pair<int, int> rm : remove2)
+                    if (!(rm.first == r and rm.second == c) and (find(goals2.begin(), goals2.end(), rm) == goals2.end()))
                     {
-                        if (!(rm.first == r and rm.second == c) and (find(goals2.begin(), goals2.end(), rm) == goals2.end()))
-                        {
-                            if (allOptionsCopy[rm.first][rm.second].erase(n2))
-                                found = true;
-                        }
+                        if (allOptionsCopy[rm.first][rm.second].erase(n2))
+                            found = true;
                     }
                 }
             }
