@@ -3988,7 +3988,7 @@ bool Sudoku::hidden_unique_rectangles()
                         c2 = i;
                         for (int j = 0; j < 9 and r4 == 10; j++)
                         {
-                            if (j != r and allOptions[j][r1].count(n1) == 1 and allOptions[j][r1].count(n2) == 1 and allOptions[j][r2].count(n1) == 1 and allOptions[j][r2].count(n2) == 1)
+                            if (j != r and (block_number(r1,c1) == block_number(r2,c2) or block_number(r1,c1) == block_number(j,c1)) and allOptions[j][c1].count(n1) == 1 and allOptions[j][c1].count(n2) == 1 and allOptions[j][c2].count(n1) == 1 and allOptions[j][c2].count(n2) == 1)
                             { //we found a square
                                 r3 = j;
                                 r4 = j;
@@ -3998,7 +3998,7 @@ bool Sudoku::hidden_unique_rectangles()
                         }
                     }
                 }
-                if (r4 != 10)
+                if (r4 != 10 and (block_number(r1,c1) == block_number(r2,c2) or block_number(r1,c1) == block_number(r3,c3)))
                 {
                     if (allOptions[r2][c2] != allOptions[r1][c1] and allOptions[r3][c3] != allOptions[r1][c1] and allOptions[r4][c4] != allOptions[r1][c1])
                     { //r1,c1 is the only pair. Type 1.
