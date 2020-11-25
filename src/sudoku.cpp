@@ -3960,6 +3960,151 @@ bool Sudoku::unique_rectangles()
     return found;
 }
 
+bool Sudoku::hidden_unique_rectangles()
+{
+    bool found = false;
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
+
+    for (int r = 0; r < 9 and found == false; r++)
+    {
+        for (int c = 0; c < 9 and found == false; c++)
+        {
+            if (allOptions[r][c].size() == 2)
+            {
+                std::vector<int> options;
+                options.insert(options.end(), allOptions[r][c].begin(), allOptions[r][c].end());
+                int n1 = options[0];
+                int n2 = options[1];
+                int r1 = r;
+                int c1 = c;
+                int r2, r3, r4, c2, c3, c4;
+                r2 = r3 = r4 = c2 = c3 = c4 = 10;
+                for (int i = 0; i < 9 and r4 == 10; i++)
+                {
+
+                    if (i != c and allOptions[r][i].count(n1) == 1 and allOptions[r][i].count(n2) == 1) // we found another square that has both n1 and n2
+                    {
+                        r2 = r;
+                        c2 = i;
+                        for (int j = 0; j < 9 and r4 == 10; j++)
+                        {
+                            if (j != r and allOptions[j][r1].count(n1) == 1 and allOptions[j][r1].count(n2) == 1 and allOptions[j][r2].count(n1) == 1 and allOptions[j][r2].count(n2) == 1)
+                            { //we found a square
+                                r3 = j;
+                                r4 = j;
+                                c3 = c1;
+                                c4 = c2;
+                            }
+                        }
+                    }
+                }
+                if (r4 != 10)
+                {
+                    if (allOptions[r2][c2] != allOptions[r1][c1] and allOptions[r3][c3] != allOptions[r1][c1] and allOptions[r4][c4] != allOptions[r1][c1])
+                    { //r1,c1 is the only pair. Type 1.
+                        std::vector<bool> locationsRow = get_possible_locations_row(n1, r4);
+                        std::vector<bool> locationsCol = get_possible_locations_col(n1, c4);
+                        if (count(locationsRow.begin(), locationsRow.end(), true) == 2 and count(locationsCol.begin(), locationsCol.end(), true) == 2)
+                        { //there is a strong link for N1. N2 can be removed.
+                            allOptionsCopy[r4][c4].erase(n2);
+                            found = true;
+                        }
+                        else
+                        {
+                            locationsRow = get_possible_locations_row(n2, r4);
+                            locationsCol = get_possible_locations_col(n2, c4);
+                            if (count(locationsRow.begin(), locationsRow.end(), true) == 2 and count(locationsCol.begin(), locationsCol.end(), true) == 2)
+                            { //there is a strong link for N2. N1 can be removed.
+                                allOptionsCopy[r4][c4].erase(n1);
+                                found = true;
+                            }
+                        }
+                    }
+                    else if (allOptions[r1][c1] == allOptions[r2][c2])
+                    { //if the "floor pair" is in the same column.
+                        std::vector<bool> locationsCol = get_possible_locations_col(n1, c1);
+                        if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+                        { //hard link between r1,c1 and r3,c3 on n1. remove n2 from r4,c4
+                            allOptionsCopy[r4][c4].erase(n2);
+                            found = true;
+                        }
+                        else
+                        {
+                            locationsCol = get_possible_locations_col(n2, c1);
+                            if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+                            { //hard link between r1,c1 and r3,c3 on n2. remove n2 from r4,c4
+                                allOptionsCopy[r4][c4].erase(n1);
+                                found = true;
+                            }
+                            else
+                            {
+                                locationsCol = get_possible_locations_col(n1, c2);
+                                if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+                                { //hard link between r2,c2 and r4,c4 on n1. remove n2 from r3,c3
+                                    allOptionsCopy[r3][c3].erase(n2);
+                                    found = true;
+                                }
+                                else
+                                {
+                                    locationsCol = get_possible_locations_col(n2, c2);
+                                    if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+                                    { //hard link between r2,c2 and r4,c4 on n2. remove n2 from r4,c4
+                                        allOptionsCopy[r3][c3].erase(n1);
+                                        found = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (allOptions[r1][c1] == allOptions[r3][c3])
+                    { //if the "floor pair" is in the same row.
+                        std::vector<bool> locationsRow = get_possible_locations_row(n1, r1);
+                        if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+                        { //hard link between r1,c1 and r2,c2 on n1. remove n2 from r4,c4
+                            allOptionsCopy[r4][c4].erase(n2);
+                            found = true;
+                        }
+                        else
+                        {
+                            locationsRow = get_possible_locations_row(n2, r1);
+                            if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+                            { //hard link between r1,c1 and r2,c2 on n2. remove n1 from r4,c4
+                                allOptionsCopy[r4][c4].erase(n1);
+                                found = true;
+                            }
+                            else
+                            {
+                                locationsRow = get_possible_locations_row(n1, r2);
+                                if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+                                { //hard link between r3,c3 and r4,c4 on n1. remove n2 from r2,c2
+                                    allOptionsCopy[r2][c2].erase(n2);
+                                    found = true;
+                                }
+                                else
+                                {
+                                    locationsRow = get_possible_locations_row(n2, r2);
+                                    if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+                                    { //hard link between r3,c3 and r4,c4 on n2. remove n2 from r2,c2
+                                        allOptionsCopy[r2][c2].erase(n1);
+                                        found = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
 std::vector<std::vector<int>> Sudoku::get_puzzle()
 {
     return puzzle;
@@ -4149,6 +4294,12 @@ bool Sudoku::solve()
         if (unique_rectangles())
         {
             //std::cout << "found unique rectangles" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (hidden_unique_rectangles())
+        {
+            //std::cout << "found hidden unique rectangles" << std::endl;
             changed = true;
             continue;
         }

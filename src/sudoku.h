@@ -76,6 +76,7 @@ class Sudoku
     bool three_d_medusa();
     bool jellyfish();
     bool unique_rectangles();
+    bool hidden_unique_rectangles();
 
     public:
         bool backtrack();
