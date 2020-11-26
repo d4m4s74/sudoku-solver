@@ -3988,7 +3988,7 @@ bool Sudoku::hidden_unique_rectangles()
                         c2 = i;
                         for (int j = 0; j < 9 and r4 == 10; j++)
                         {
-                            if (j != r and (block_number(r1,c1) == block_number(r2,c2) or block_number(r1,c1) == block_number(j,c1)) and allOptions[j][c1].count(n1) == 1 and allOptions[j][c1].count(n2) == 1 and allOptions[j][c2].count(n1) == 1 and allOptions[j][c2].count(n2) == 1)
+                            if (j != r and (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(j, c1)) and allOptions[j][c1].count(n1) == 1 and allOptions[j][c1].count(n2) == 1 and allOptions[j][c2].count(n1) == 1 and allOptions[j][c2].count(n2) == 1)
                             { //we found a square
                                 r3 = j;
                                 r4 = j;
@@ -3998,7 +3998,7 @@ bool Sudoku::hidden_unique_rectangles()
                         }
                     }
                 }
-                if (r4 != 10 and (block_number(r1,c1) == block_number(r2,c2) or block_number(r1,c1) == block_number(r3,c3)))
+                if (r4 != 10 and (block_number(r1, c1) == block_number(r2, c2) or block_number(r1, c1) == block_number(r3, c3)))
                 {
                     if (allOptions[r2][c2] != allOptions[r1][c1] and allOptions[r3][c3] != allOptions[r1][c1] and allOptions[r4][c4] != allOptions[r1][c1])
                     { //r1,c1 is the only pair. Type 1.
@@ -4091,6 +4091,501 @@ bool Sudoku::hidden_unique_rectangles()
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    if (found)
+    {
+        found = (allOptions != allOptionsCopy);
+        allOptions = allOptionsCopy;
+    }
+    return found;
+}
+
+bool Sudoku::alternating_inference_chains()
+{//todo: implement groups
+    bool found = false;
+
+    std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
+    std::vector<std::vector<std::vector<int>>> chains;
+    int chainLength;
+    bool strongStart;
+    bool strongEnd;
+    std::function<bool(int, int, int, int, int, int, int)> find_chain; //r, c == coordinates currently tested, n is the number used to get there. gr, gc, gn is the starting place and number. n and gn can be 0 if not yet decided colour is 0 or 1, or 2 if not yet decided.
+    find_chain = [&](int r, int c, int n, int gr, int gc, int gn, int colour) {
+        std::vector<int> options;
+        options.insert(options.end(), allOptions[r][c].begin(), allOptions[r][c].end());
+        int optionSize = options.size();
+        if (colour == 2 and optionSize == 2)
+        { //if this is the first square in the chain and there are only two options
+            chains[0][r][c] = options[0];
+            chainLength++;
+            strongStart = true;
+            strongEnd = false;
+            if (find_chain(r, c, options[1], gr, gc, options[0], 1))
+                return true;
+            else
+            {
+                chains[0][r][c] = options[1];
+                if (find_chain(r, c, options[0], gr, gc, options[1], 1))
+                    return true;
+                else
+                {
+                    chains[0][r][c] = 0;
+                    chainLength--;
+                    strongStart = false;
+                    strongEnd = true;
+                }
+            }
+        }
+
+        if (colour == 2)
+        {
+            for (int curn : options)
+            {
+                std::vector<bool> locationsRow = get_possible_locations_row(curn, r);
+                if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+                {
+                    int nextr = r;
+                    int nextc = find(locationsRow.begin(), locationsRow.end(), true) - locationsRow.begin();
+                    if (nextc == c)
+                        nextc = find(locationsRow.begin() + nextc + 1, locationsRow.end(), true) - locationsRow.begin();
+                    if (nextc < 9 and chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                    {
+                        chains[0][r][c] = curn;
+                        strongStart = true;
+                        strongEnd = false;
+                        chainLength++;
+                        if (find_chain(nextr, nextc, curn, gr, gc, curn, 1))
+                            return true;
+                        else
+                        {
+                            chains[0][r][c] = 0;
+                            strongStart = false;
+                            strongEnd = true;
+                            chainLength--;
+                        }
+                    }
+                }
+                std::vector<bool> locationsCol = get_possible_locations_col(curn, c);
+                if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+                {
+                    int nextc = c;
+                    int nextr = find(locationsCol.begin(), locationsCol.end(), true) - locationsCol.begin();
+                    if (nextr == r)
+                        nextr = find(locationsCol.begin() + r + 1, locationsCol.end(), true) - locationsCol.begin();
+                    if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                    {
+                        chains[0][r][c] = curn;
+                        chainLength++;
+                        strongStart = true;
+                        if (find_chain(nextr, nextc, curn, gr, gc, curn, 1))
+                            return true;
+                        else
+                        {
+                            chains[0][r][c] = 0;
+                            strongStart = false;
+                            strongEnd = true;
+                            chainLength--;
+                        }
+                    }
+                }
+                std::vector<bool> locationsBlock = get_possible_locations_block(curn, r, c);
+                if (count(locationsBlock.begin(), locationsBlock.end(), true) == 2)
+                {
+                    int b = r % 3 * 3 + c % 3;
+                    int nextb = find(locationsBlock.begin(), locationsBlock.end(), true) - locationsBlock.begin();
+                    if (nextb == b)
+                        nextb = find(locationsBlock.begin() + b + 1, locationsBlock.end(), true) - locationsBlock.begin();
+                    int r0 = r / 3 * 3;
+                    int c0 = c / 3 * 3;
+                    int nextr = r0 + nextb / 3;
+                    int nextc = c0 + nextb % 3;
+                    if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                    {
+                        chains[0][r][c] = curn;
+                        strongStart = true;
+                        chainLength++;
+                        if (find_chain(nextr, nextc, curn, gr, gc, curn, 1))
+                            return true;
+                        else
+                        {
+                            chains[0][r][c] = 0;
+                            strongStart = false;
+                            strongEnd = true;
+                            chainLength--;
+                        }
+                    }
+                }
+            }
+            for (int curn : options)
+            {
+                std::vector<bool> locationsRow = get_possible_locations_row(curn, r);
+                if (count(locationsRow.begin(), locationsRow.end(), true) > 2)
+                {
+                    for (int nextc = 0; nextc < 9; nextc++)
+                    {
+                        if (nextc != c and locationsRow[nextc] == true)
+                        {
+                            chains[1][r][c] = curn;
+                            chainLength++;
+                            if (find_chain(r, nextc, curn, gr, gc, curn, 0))
+                                return true;
+                            else
+                            {
+                                chains[1][r][c] = 0;
+                                chainLength--;
+                            }
+                        }
+                    }
+                }
+                std::vector<bool> locationsCol = get_possible_locations_col(curn, c);
+                if (count(locationsCol.begin(), locationsCol.end(), true) > 2)
+                {
+                    for (int nextr = 0; nextr < 9; nextr++)
+                    {
+                        if (nextr != r and locationsCol[nextr] == true)
+                        {
+                            chains[1][r][c] = curn;
+                            chainLength++;
+                            if (find_chain(nextr, c, curn, gr, gc, curn, 0))
+                                return true;
+                            else
+                            {
+                                chains[1][r][c] = 0;
+                                chainLength--;
+                            }
+                        }
+                    }
+                }
+                std::vector<bool> locationsBlock = get_possible_locations_block(curn, r, c);
+                if (count(locationsBlock.begin(), locationsBlock.end(), true) > 2)
+                {
+                    int b = r % 3 * 3 + c % 3;
+                    int r0 = r / 3 * 3;
+                    int c0 = c / 3 * 3;
+                    for (int nextb = 0; nextb < 9; nextb++)
+                    {
+                        if (nextb != b and locationsBlock[nextb] == true)
+                        {
+                            int nextr = r0 + nextb / 3;
+                            int nextc = c0 + nextb % 3;
+                            chains[1][r][c] = curn;
+                            chainLength++;
+                            if ((r != nextr and c != nextc) and find_chain(nextr, nextc, curn, gr, gc, curn, 0))
+                                return true;
+                            else
+                            {
+                                chains[1][r][c] = 0;
+                                chainLength--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (colour == 0 and options.size() == 2 and chains[1][r][c] == 0)
+        { //if this is a strong link and there are only two options
+            chains[0][r][c] = n;
+            chainLength++;
+            int nextN = (options[0] == n) ? options[1] : options[0];
+            if (find_chain(r, c, nextN, gr, gc, gn, 1))
+                return true;
+            else
+            {
+                chains[0][r][c] = 0;
+                chainLength--;
+            }
+        }
+
+        if (colour == 0)
+        { //strong link
+            std::vector<bool> locationsRow = get_possible_locations_row(n, r);
+            if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+            {
+                int nextr = r;
+                int nextc = find(locationsRow.begin(), locationsRow.end(), true) - locationsRow.begin();
+                if (nextc == c)
+                    nextc = find(locationsRow.begin() + c + 1, locationsRow.end(), true) - locationsRow.begin();
+                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                {
+                    chains[0][r][c] = n;
+                    chainLength++;
+                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
+                        return true;
+                    else
+                    {
+                        chains[0][r][c] = 0;
+                        chainLength--;
+                    }
+                }
+            }
+            std::vector<bool> locationsCol = get_possible_locations_col(n, c);
+            if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+            {
+                int nextc = c;
+                int nextr = find(locationsCol.begin(), locationsCol.end(), true) - locationsCol.begin();
+                if (nextr == r)
+                    nextr = find(locationsCol.begin() + r + 1, locationsCol.end(), true) - locationsCol.begin();
+                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                {
+                    chains[0][r][c] = n;
+                    chainLength++;
+                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
+                        return true;
+                    else
+                    {
+                        chains[0][r][c] = 0;
+                        chainLength--;
+                    }
+                }
+            }
+            std::vector<bool> locationsBlock = get_possible_locations_block(n, r, c);
+            if (count(locationsBlock.begin(), locationsBlock.end(), true) == 2)
+            {
+                int b = r % 3 * 3 + c % 3;
+                int nextb = find(locationsBlock.begin(), locationsBlock.end(), true) - locationsBlock.begin();
+                if (nextb == b)
+                    nextb = find(locationsBlock.begin() + b + 1, locationsBlock.end(), true) - locationsBlock.begin();
+                int r0 = r / 3 * 3;
+                int c0 = c / 3 * 3;
+                int nextr = r0 + nextb / 3;
+                int nextc = c0 + nextb % 3;
+                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                {
+                    chains[0][r][c] = n;
+                    chainLength++;
+                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
+                        return true;
+                    else
+                    {
+                        chains[0][r][c] = 0;
+                        chainLength--;
+                    }
+                }
+            }
+        }
+
+        if (colour == 1 and chains[0][r][c] == 0)
+        { //weak link, looking for other numbers in the same square
+            for (int nextn : options)
+            {
+                if (nextn != n)
+                {
+                    chains[1][r][c] = n;
+                    chainLength++;
+                    if (find_chain(r, c, nextn, gr, gc, gn, 0))
+                        return true;
+                    else
+                    {
+                        chains[1][r][c] = 0;
+                        chainLength--;
+                    }
+                }
+            }
+        }
+        if (colour == 1)
+        { //weak link
+            std::vector<bool> locationsRow = get_possible_locations_row(n, r);
+            if (count(locationsRow.begin(), locationsRow.end(), true) > 2)
+            {
+                for (int nextc = 0; nextc < 9; nextc++)
+                {
+                    if (nextc != c and locationsRow[nextc] == true and chains[0][r][nextc] == 0 and chains[1][r][nextc] == 0)
+                    {
+                        chains[1][r][c] = n;
+                        chainLength++;
+                        if (find_chain(r, nextc, n, gr, gc, gn, 0))
+                            return true;
+                        else
+                        {
+                            chains[1][r][c] = 0;
+                            chainLength--;
+                        }
+                    }
+                }
+            }
+            std::vector<bool> locationsCol = get_possible_locations_col(n, c);
+            if (count(locationsCol.begin(), locationsCol.end(), true) > 2)
+            {
+                for (int nextr = 0; nextr < 9; nextr++)
+                {
+                    if (nextr != r and locationsCol[nextr] == true and chains[0][nextr][c] == 0 and chains[1][nextr][c] == 0)
+                    {
+                        chains[1][r][c] = n;
+                        chainLength++;
+                        if (find_chain(nextr, c, n, gr, gc, gn, 0))
+                            return true;
+                        else
+                        {
+                            chains[1][r][c] = 0;
+                            chainLength--;
+                        }
+                    }
+                }
+            }
+            std::vector<bool> locationsBlock = get_possible_locations_block(n, r, c);
+            if (count(locationsBlock.begin(), locationsBlock.end(), true) > 2)
+            {
+                int b = r % 3 * 3 + c % 3;
+                int r0 = r / 3 * 3;
+                int c0 = c / 3 * 3;
+                for (int nextb = 0; nextb < 9; nextb++)
+                {
+                    if (nextb != b and locationsBlock[nextb] == true)
+                    {
+                        int nextr = r0 + nextb / 3;
+                        int nextc = c0 + nextb % 3;
+                        chains[1][r][c] = n;
+                        chainLength++;
+                        if ((r != nextr and c != nextc) and chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0 and find_chain(nextr, nextc, n, gr, gc, gn, 0))
+                            return true;
+                        else
+                        {
+                            chains[1][r][c] = 0;
+                            chainLength--;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ((chainLength > 4 and (r == gr or c == gc or block_number(r, c) == block_number(gr, gc)) and n == gn))
+        {
+            if (r == gr)
+            {
+                std::vector<bool> locationsRow = get_possible_locations_row(n, r);
+                if (count(locationsRow.begin(), locationsRow.end(), true) == 2 and colour == 0)
+                {
+                    chainLength++;
+                    chains[colour][r][c] = n;
+                    return true;
+                }
+                else if (count(locationsRow.begin(), locationsRow.end(), true) > 2 and colour == 1)
+                {
+                    chainLength++;
+                    chains[colour][r][c] = n;
+                    return true;
+                }
+            }
+            if (c == gc)
+            {
+                std::vector<bool> locationsCol = get_possible_locations_col(n, c);
+                if (count(locationsCol.begin(), locationsCol.end(), true) == 2 and colour == 0)
+                {
+                    chainLength++;
+                    chains[colour][r][c] = n;
+                    return true;
+                }
+                else if (count(locationsCol.begin(), locationsCol.end(), true) > 2 and colour == 1)
+                {
+                    chainLength++;
+                    chains[colour][r][c] = n;
+                    return true;
+                }
+            }
+            if (block_number(r, c) == block_number(gr, gc))
+            {
+                std::vector<bool> locationsBlock = get_possible_locations_block(n, r, c);
+                if (count(locationsBlock.begin(), locationsBlock.end(), true) == 2 and colour == 0)
+                {
+                    chainLength++;
+                    chains[colour][r][c] = n;
+                    return true;
+                }
+                else if (count(locationsBlock.begin(), locationsBlock.end(), true) > 2 and colour == 1)
+                {
+                    chainLength++;
+                    chains[colour][r][c] = n;
+                    return true;
+                }
+            }
+
+        }
+        //if ((chainLength > 4 and (r == gr or c == gc or (block_number(r, c) == block_number(gr, gc))) and allOptions[gr][gc].count(n) == 1 and chains[(colour==0)?1:0][gr][gc]==0))
+        //{
+        //    chainLength += 2;
+        //    chains[colour][r][c] = n;
+        //    chains[(colour==0)?1:0][gr][gc] = n;
+        //    return true;
+        //}
+
+        return false;
+    };
+
+    for (int r = 0; r < 9 and found == false; r++)
+    {
+        for (int c = 0; c < 9 and found == false; c++)
+        {
+            if (puzzle[r][c] == 0)
+            {
+                chains = {{{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}}, {{0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+                chainLength = 0;
+                strongStart = false;
+                if (find_chain(r, c, 0, r, c, 0, 2))
+                {
+                    if (chainLength % 2 == 0) //if it's a nice loop
+                    {
+                        for (int n = 1; n < 10; n++) //checking every number separately
+                        {
+                            std::vector<std::pair<int, int>> rclist0;
+                            std::vector<std::pair<int, int>> rclist1;
+                            for (int y = 0; y < 9; y++)
+                            {
+                                for (int x = 0; x < 9; x++)
+                                {
+                                    if (chains[0][y][x] == n)
+                                    {
+                                        rclist0.push_back(std::make_pair(y, x));
+                                    }
+                                    else if (chains[1][y][x] == n)
+                                    {
+                                        rclist1.push_back(std::make_pair(y, x));
+                                    }
+                                }
+                            }
+                            for (std::pair<int, int> rc0 : rclist0)
+                            {
+                                for (std::pair<int, int> rc1 : rclist1)
+                                {
+                                    std::vector<std::pair<int, int>> rmlist = list_seen_by(rc0.first, rc0.second, rc1.first, rc1.second);
+                                    for (std::pair<int, int> rm : rmlist)
+                                    {
+                                        if (chains[0][rm.first][rm.second] == 0 and chains[1][rm.first][rm.second] == 0)
+                                        {
+                                            if (allOptionsCopy[rm.first][rm.second].erase(n))
+                                                found = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        for (int y = 0; y < 9; y++)
+                        {
+                            for (int x = 0; x < 9; x++)
+                            {
+                                if (chains[0][y][x] != 0 and chains[1][y][x] != 0)
+                                {
+                                    allOptionsCopy[y][x] = {chains[0][y][x], chains[1][y][x]};
+                                    if (allOptions[y][x] != allOptionsCopy[y][x])
+                                        found = true;
+                                }
+                            }
+                        }
+                    }
+                    else if (strongStart)
+                    {
+                        allOptionsCopy[r][c] = {chains[0][r][c]};
+                        found = true;
+                    }
+                    else if (!strongStart)
+                    {
+                        allOptionsCopy[r][c].erase(chains[1][r][c]);
+                        found = true;
                     }
                 }
             }
@@ -4300,6 +4795,12 @@ bool Sudoku::solve()
         if (hidden_unique_rectangles())
         {
             //std::cout << "found hidden unique rectangles" << std::endl;
+            changed = true;
+            continue;
+        }
+        if (alternating_inference_chains())
+        {
+            //std::cout << "found alternating inference chains" << std::endl;
             changed = true;
             continue;
         }

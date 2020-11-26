@@ -77,6 +77,7 @@ class Sudoku
     bool jellyfish();
     bool unique_rectangles();
     bool hidden_unique_rectangles();
+    bool alternating_inference_chains();
 
     public:
         bool backtrack();
