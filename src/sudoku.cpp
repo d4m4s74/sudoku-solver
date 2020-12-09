@@ -4106,7 +4106,7 @@ bool Sudoku::hidden_unique_rectangles()
 }
 
 bool Sudoku::alternating_inference_chains()
-{//todo: implement groups
+{ //todo: implement groups
     bool found = false;
 
     std::vector<std::vector<std::unordered_set<int>>> allOptionsCopy = allOptions;
@@ -4302,6 +4302,116 @@ bool Sudoku::alternating_inference_chains()
             }
         }
 
+        /*if (colour == 0 and options.size() == 3 and chains[1][r][c] == 0)
+        { //if this is a strong link and there are 3 options: look for almost locked set.
+
+            std::unordered_set<int> needle = allOptions[r][c];
+            needle.erase(n);
+            options.clear();
+            options.insert(options.end(), needle.begin(), needle.end());
+            int c2 = find(allOptions[r].begin(), allOptions[r].end(), needle) - allOptions[r].begin();
+            if (c2 <= 8 and chains[0][r][c2] == 0 and chains[1][r][c2] == 0) //we found an als in the row
+            {
+                std::vector<bool> locationsRow = get_possible_locations_row(options[0], r);
+                if (count(locationsRow.begin(), locationsRow.end(), true) > 2)
+                {
+                    for (int i = 0; i < 9; i++)
+                    {
+                        if (locationsRow[i] == true and i != c and i != c2 and chains[0][r][i] == 0 and chains[1][r][i] == 0)
+                        {
+                            chains[0][r][c] = n;
+                            chains[1][r][c] = 10 + options[0];
+                            chains[1][r][c2] = 10 + options[0];
+                            chainLength += 2;
+                            if (find_chain(r, i, options[0], gr, gc, gn, 0))
+                                return true;
+                            else
+                            {
+                                chains[0][r][c] = 0;
+                                chains[1][r][c] = 0;
+                                chains[1][r][c2] = 0;
+                                chainLength -= 2;
+                            }
+                        }
+                    }
+                }
+                locationsRow = get_possible_locations_row(options[1], r);
+                if (count(locationsRow.begin(), locationsRow.end(), true) > 2)
+                {
+                    for (int i = 0; i < 9; i++)
+                    {
+                        if (locationsRow[i] == true and i != c and i != c2 and chains[0][r][i] == 0 and chains[1][r][i] == 0)
+                        {
+                            chains[0][r][c] = n;
+                            chains[1][r][c] = 10 + options[1];
+                            chains[1][r][c2] = 10 + options[1];
+                            chainLength += 2;
+                            if (find_chain(r, i, options[1], gr, gc, gn, 0))
+                                return true;
+                            else
+                            {
+                                chains[0][r][c] = 0;
+                                chains[1][r][c] = 0;
+                                chains[1][r][c2] = 0;
+                                chainLength -= 2;
+                            }
+                        }
+                    }
+                }
+            }
+            std::vector<std::unordered_set<int>> optionsCol = get_options_col(c);
+            int r2 = find(optionsCol.begin(), optionsCol.end(), needle) - optionsCol.begin();
+            if (r2 <= 8 and chains[0][r2][c] == 0 and chains[1][r2][c] == 0)
+            {
+                std::vector<bool> locationsCol = get_possible_locations_col(options[0], c);
+                if (count(locationsCol.begin(), locationsCol.end(), true) > 2)
+                {
+                    for (int i = 0; i < 9; i++)
+                    {
+                        if (locationsCol[i] == true and i != r and i != r2 and chains[0][i][c] == 0 and chains[1][i][c] == 0)
+                        {
+                            chains[0][r][c] = n;
+                            chains[1][r][c] = 10 + options[0];
+                            chains[1][r2][c] = 10 + options[0];
+                            chainLength += 2;
+                            if (find_chain(i, c, options[0], gr, gc, gn, 0))
+                                return true;
+                            else
+                            {
+                                chains[0][r][c] = 0;
+                                chains[1][r][c] = 0;
+                                chains[1][r2][c] = 0;
+                                chainLength -= 2;
+                            }
+                        }
+                    }
+                }
+                locationsCol = get_possible_locations_col(options[1], c);
+                if (count(locationsCol.begin(), locationsCol.end(), true) > 2)
+                {
+                    for (int i = 0; i < 9; i++)
+                    {
+                        if (locationsCol[i] == true and i != r and i != r2 and chains[0][i][c] == 0 and chains[1][i][c] == 0)
+                        {
+                            chains[0][r][c] = n;
+                            chains[1][r][c] = 10 + options[1];
+                            chains[1][r2][c] = 10 + options[1];
+                            chainLength += 2;
+                            if (find_chain(i, c, options[1], gr, gc, gn, 0))
+                                return true;
+                            else
+                            {
+                                chains[0][r][c] = 0;
+                                chains[1][r][c] = 0;
+                                chains[1][r2][c] = 0;
+                                chainLength -= 2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+*/
         if (colour == 0)
         { //strong link
             std::vector<bool> locationsRow = get_possible_locations_row(n, r);
@@ -4504,7 +4614,6 @@ bool Sudoku::alternating_inference_chains()
                     return true;
                 }
             }
-
         }
         //if ((chainLength > 4 and (r == gr or c == gc or (block_number(r, c) == block_number(gr, gc))) and allOptions[gr][gc].count(n) == 1 and chains[(colour==0)?1:0][gr][gc]==0))
         //{
@@ -4570,7 +4679,7 @@ bool Sudoku::alternating_inference_chains()
                             {
                                 if (chains[0][y][x] != 0 and chains[1][y][x] != 0)
                                 {
-                                    allOptionsCopy[y][x] = {chains[0][y][x], chains[1][y][x]};
+                                    allOptionsCopy[y][x] = {chains[0][y][x]%10, chains[1][y][x]%10};
                                     if (allOptions[y][x] != allOptionsCopy[y][x])
                                         found = true;
                                 }
