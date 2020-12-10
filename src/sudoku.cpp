@@ -4302,7 +4302,77 @@ bool Sudoku::alternating_inference_chains()
             }
         }
 
-        /*if (colour == 0 and options.size() == 3 and chains[1][r][c] == 0)
+        
+
+        if (colour == 0)
+        { //strong link
+            std::vector<bool> locationsRow = get_possible_locations_row(n, r);
+            if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
+            {
+                int nextr = r;
+                int nextc = find(locationsRow.begin(), locationsRow.end(), true) - locationsRow.begin();
+                if (nextc == c)
+                    nextc = find(locationsRow.begin() + c + 1, locationsRow.end(), true) - locationsRow.begin();
+                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                {
+                    chains[0][r][c] = n;
+                    chainLength++;
+                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
+                        return true;
+                    else
+                    {
+                        chains[0][r][c] = 0;
+                        chainLength--;
+                    }
+                }
+            }
+            std::vector<bool> locationsCol = get_possible_locations_col(n, c);
+            if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
+            {
+                int nextc = c;
+                int nextr = find(locationsCol.begin(), locationsCol.end(), true) - locationsCol.begin();
+                if (nextr == r)
+                    nextr = find(locationsCol.begin() + r + 1, locationsCol.end(), true) - locationsCol.begin();
+                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                {
+                    chains[0][r][c] = n;
+                    chainLength++;
+                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
+                        return true;
+                    else
+                    {
+                        chains[0][r][c] = 0;
+                        chainLength--;
+                    }
+                }
+            }
+            std::vector<bool> locationsBlock = get_possible_locations_block(n, r, c);
+            if (count(locationsBlock.begin(), locationsBlock.end(), true) == 2)
+            {
+                int b = r % 3 * 3 + c % 3;
+                int nextb = find(locationsBlock.begin(), locationsBlock.end(), true) - locationsBlock.begin();
+                if (nextb == b)
+                    nextb = find(locationsBlock.begin() + b + 1, locationsBlock.end(), true) - locationsBlock.begin();
+                int r0 = r / 3 * 3;
+                int c0 = c / 3 * 3;
+                int nextr = r0 + nextb / 3;
+                int nextc = c0 + nextb % 3;
+                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
+                {
+                    chains[0][r][c] = n;
+                    chainLength++;
+                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
+                        return true;
+                    else
+                    {
+                        chains[0][r][c] = 0;
+                        chainLength--;
+                    }
+                }
+            }
+        }
+
+        if (colour == 0 and options.size() == 3 and chains[1][r][c] == 0)
         { //if this is a strong link and there are 3 options: look for almost locked set.
 
             std::unordered_set<int> needle = allOptions[r][c];
@@ -4407,74 +4477,6 @@ bool Sudoku::alternating_inference_chains()
                                 chainLength -= 2;
                             }
                         }
-                    }
-                }
-            }
-        }
-*/
-        if (colour == 0)
-        { //strong link
-            std::vector<bool> locationsRow = get_possible_locations_row(n, r);
-            if (count(locationsRow.begin(), locationsRow.end(), true) == 2)
-            {
-                int nextr = r;
-                int nextc = find(locationsRow.begin(), locationsRow.end(), true) - locationsRow.begin();
-                if (nextc == c)
-                    nextc = find(locationsRow.begin() + c + 1, locationsRow.end(), true) - locationsRow.begin();
-                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
-                {
-                    chains[0][r][c] = n;
-                    chainLength++;
-                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
-                        return true;
-                    else
-                    {
-                        chains[0][r][c] = 0;
-                        chainLength--;
-                    }
-                }
-            }
-            std::vector<bool> locationsCol = get_possible_locations_col(n, c);
-            if (count(locationsCol.begin(), locationsCol.end(), true) == 2)
-            {
-                int nextc = c;
-                int nextr = find(locationsCol.begin(), locationsCol.end(), true) - locationsCol.begin();
-                if (nextr == r)
-                    nextr = find(locationsCol.begin() + r + 1, locationsCol.end(), true) - locationsCol.begin();
-                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
-                {
-                    chains[0][r][c] = n;
-                    chainLength++;
-                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
-                        return true;
-                    else
-                    {
-                        chains[0][r][c] = 0;
-                        chainLength--;
-                    }
-                }
-            }
-            std::vector<bool> locationsBlock = get_possible_locations_block(n, r, c);
-            if (count(locationsBlock.begin(), locationsBlock.end(), true) == 2)
-            {
-                int b = r % 3 * 3 + c % 3;
-                int nextb = find(locationsBlock.begin(), locationsBlock.end(), true) - locationsBlock.begin();
-                if (nextb == b)
-                    nextb = find(locationsBlock.begin() + b + 1, locationsBlock.end(), true) - locationsBlock.begin();
-                int r0 = r / 3 * 3;
-                int c0 = c / 3 * 3;
-                int nextr = r0 + nextb / 3;
-                int nextc = c0 + nextb % 3;
-                if (chains[0][nextr][nextc] == 0 and chains[1][nextr][nextc] == 0)
-                {
-                    chains[0][r][c] = n;
-                    chainLength++;
-                    if (find_chain(nextr, nextc, n, gr, gc, gn, 1))
-                        return true;
-                    else
-                    {
-                        chains[0][r][c] = 0;
-                        chainLength--;
                     }
                 }
             }
@@ -4677,9 +4679,9 @@ bool Sudoku::alternating_inference_chains()
                         {
                             for (int x = 0; x < 9; x++)
                             {
-                                if (chains[0][y][x] != 0 and chains[1][y][x] != 0)
+                                if (chains[0][y][x] != 0 and chains[0][y][x] < 9 and chains[1][y][x] != 0 and chains[1][y][x] < 9)
                                 {
-                                    allOptionsCopy[y][x] = {chains[0][y][x]%10, chains[1][y][x]%10};
+                                    allOptionsCopy[y][x] = {chains[0][y][x], chains[1][y][x]};
                                     if (allOptions[y][x] != allOptionsCopy[y][x])
                                         found = true;
                                 }
