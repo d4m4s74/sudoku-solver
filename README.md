@@ -1,4 +1,6 @@
 # sudoku-solver
+I found out adding more functions at this points make the solver take longer than simply backtracking, so at least functionality wise you can see this solver as completed.
+
 A c++ sudoku solver, trying to avoid backtracking  
 Currently implemented: hidden singles, naked pairs, naked triples, hidden pairs, hidden triples, pointing pairs, box/line reduction, X-wing, simple colouring, Y-wing, Swordfish, XYZ wing, X-Cycle, XY-Chain, 3d-Medusa, Jellyfish, (hidden) Unique Rectangles, Alternating Inference Chains (with almost locked sets) and backtracking  
   
